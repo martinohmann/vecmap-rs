@@ -1,11 +1,14 @@
 //! `VecMap` is a vector-based map implementation which retains the order inserted entries.
 
+mod entry;
 mod impls;
 
 use super::Slot;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::mem;
+
+pub use self::entry::{Entry, OccupiedEntry, VacantEntry};
 
 /// A vector-based map implementation which retains the order of inserted entries.
 ///
@@ -587,6 +590,32 @@ where
                 self.entries.push(Slot { key, value });
                 None
             }
+        }
+    }
+
+    /// Get the given key's corresponding entry in the map for insertion and/or in-place
+    /// manipulation.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut letters = VecMap::new();
+    ///
+    /// for ch in "a short treatise on fungi".chars() {
+    ///     letters.entry(ch).and_modify(|counter| *counter += 1).or_insert(1);
+    /// }
+    ///
+    /// assert_eq!(letters[&'s'], 2);
+    /// assert_eq!(letters[&'t'], 3);
+    /// assert_eq!(letters[&'u'], 1);
+    /// assert_eq!(letters.get(&'y'), None);
+    /// ```
+    pub fn entry(&mut self, key: K) -> Entry<K, V> {
+        match self.get_index_of(&key) {
+            Some(index) => Entry::Occupied(OccupiedEntry::new(self, key, index)),
+            None => Entry::Vacant(VacantEntry::new(self, key)),
         }
     }
 }
