@@ -1,0 +1,18 @@
+[package]
+name = "vecmap-rs"
+version = "0.1.0"
+authors = ["Martin Ohmann <martinohmann@gmail.com>"]
+license = "MIT"
+description = "A vector-based map"
+repository = "https://github.com/martinohmann/vecmap-rs"
+keywords = ["vector", "map", "vec"]
+categories = ["collections"]
+readme = "README.md"
+edition = "2021"
+exclude = [
+    ".github/",
+]
+
+[lib]
+name = "vecmap"
+path = "src/lib.rs"
