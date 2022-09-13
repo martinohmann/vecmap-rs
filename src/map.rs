@@ -2,6 +2,7 @@
 
 mod impls;
 
+use super::Slot;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::mem;
@@ -12,7 +13,7 @@ use core::mem;
 /// `Ord`.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct VecMap<K, V> {
-    base: Vec<(K, V)>,
+    entries: Vec<Slot<K, V>>,
 }
 
 impl<K, V> VecMap<K, V> {
@@ -26,7 +27,9 @@ impl<K, V> VecMap<K, V> {
     /// let mut map: VecMap<i32, &str> = VecMap::new();
     /// ```
     pub const fn new() -> Self {
-        VecMap { base: Vec::new() }
+        VecMap {
+            entries: Vec::new(),
+        }
     }
 
     /// Create a new map with capacity for `capacity` key-value pairs. (Does not allocate if
@@ -43,7 +46,7 @@ impl<K, V> VecMap<K, V> {
     /// ```
     pub fn with_capacity(capacity: usize) -> Self {
         VecMap {
-            base: Vec::with_capacity(capacity),
+            entries: Vec::with_capacity(capacity),
         }
     }
 
@@ -58,7 +61,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(map.capacity(), 10);
     /// ```
     pub fn capacity(&self) -> usize {
-        self.base.capacity()
+        self.entries.capacity()
     }
 
     /// Returns the number of entries in the map, also referred to as its 'length'.
@@ -74,7 +77,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(a.len(), 1);
     /// ```
     pub fn len(&self) -> usize {
-        self.base.len()
+        self.entries.len()
     }
 
     /// Returns `true` if the map contains no entries.
@@ -90,7 +93,7 @@ impl<K, V> VecMap<K, V> {
     /// assert!(!a.is_empty());
     /// ```
     pub fn is_empty(&self) -> bool {
-        self.base.is_empty()
+        self.entries.is_empty()
     }
 
     /// Clears the map, removing all entries.
@@ -106,7 +109,7 @@ impl<K, V> VecMap<K, V> {
     /// assert!(a.is_empty());
     /// ```
     pub fn clear(&mut self) {
-        self.base.clear();
+        self.entries.clear();
     }
 
     /// Reverses the order of entries in the map, in place.
@@ -121,7 +124,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(map, VecMap::from_iter([("c", 3), ("b", 2), ("a", 1)]));
     /// ```
     pub fn reverse(&mut self) {
-        self.base.reverse();
+        self.entries.reverse();
     }
 
     /// Get the first key-value pair.
@@ -133,7 +136,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(map.first(), Some((&"a", &1)));
     /// ```
     pub fn first(&self) -> Option<(&K, &V)> {
-        self.base.first().map(|e| (&e.0, &e.1))
+        self.entries.first().map(Slot::refs)
     }
 
     /// Get the first key-value pair, with mutable access to the value.
@@ -151,7 +154,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(map.first(), Some((&"a", &11)));
     /// ```
     pub fn first_mut(&mut self) -> Option<(&K, &mut V)> {
-        self.base.first_mut().map(|e| (&e.0, &mut e.1))
+        self.entries.first_mut().map(Slot::ref_mut)
     }
 
     /// Get the last key-value pair.
@@ -168,7 +171,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(map.last(), None);
     /// ```
     pub fn last(&self) -> Option<(&K, &V)> {
-        self.base.last().map(|e| (&e.0, &e.1))
+        self.entries.last().map(Slot::refs)
     }
 
     /// Get the last key-value pair, with mutable access to the value.
@@ -186,7 +189,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(map.last(), Some((&"b", &12)));
     /// ```
     pub fn last_mut(&mut self) -> Option<(&K, &mut V)> {
-        self.base.last_mut().map(|e| (&e.0, &mut e.1))
+        self.entries.last_mut().map(Slot::ref_mut)
     }
 
     /// Removes the last element from the map and returns it, or [`None`] if it
@@ -204,7 +207,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(map.pop(), None);
     /// ```
     pub fn pop(&mut self) -> Option<(K, V)> {
-        self.base.pop()
+        self.entries.pop().map(Slot::key_value)
     }
 
     /// Reserves capacity for at least `additional` more elements to be inserted in the given
@@ -226,7 +229,7 @@ impl<K, V> VecMap<K, V> {
     /// assert!(map.capacity() >= 11);
     /// ```
     pub fn reserve(&mut self, additional: usize) {
-        self.base.reserve(additional);
+        self.entries.reserve(additional);
     }
 }
 
@@ -269,7 +272,7 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        self.get_key_value(key).map(|(_, v)| v)
+        self.get_slot(key).map(Slot::value_ref)
     }
 
     /// Return a mutable reference to the value stored for `key`, if it is present, else `None`.
@@ -291,10 +294,7 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        match self.get_index_of(key) {
-            Some(index) => Some(&mut self.base[index].1),
-            None => None,
-        }
+        self.get_slot_mut(key).map(Slot::value_mut)
     }
 
     /// Return references to the key-value pair stored at `index`, if it is present, else `None`.
@@ -310,7 +310,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(map.get_index(1), None);
     /// ```
     pub fn get_index(&self, index: usize) -> Option<(&K, &V)> {
-        self.base.get(index).map(|e| (&e.0, &e.1))
+        self.entries.get(index).map(Slot::refs)
     }
 
     /// Return a reference to the key and a mutable reference to the value stored at `index`, if it
@@ -329,7 +329,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(map[0], "b");
     /// ```
     pub fn get_index_mut(&mut self, index: usize) -> Option<(&K, &mut V)> {
-        self.base.get_mut(index).map(|e| (&e.0, &mut e.1))
+        self.entries.get_mut(index).map(Slot::ref_mut)
     }
 
     /// Return the index and references to the key-value pair stored for `key`, if it is present,
@@ -350,13 +350,10 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        match self.get_index_of(key) {
-            Some(index) => {
-                let (k, v) = &self.base[index];
-                Some((index, k, v))
-            }
-            None => None,
-        }
+        self.get_index_of(key).map(|index| {
+            let slot = &self.entries[index];
+            (index, &slot.key, &slot.value)
+        })
     }
 
     /// Return the index, a reference to the key and a mutable reference to the value stored for
@@ -380,13 +377,10 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        match self.get_index_of(key) {
-            Some(index) => {
-                let (k, v) = &mut self.base[index];
-                Some((index, k, v))
-            }
-            None => None,
-        }
+        self.get_index_of(key).map(|index| {
+            let slot = &mut self.entries[index];
+            (index, &slot.key, &mut slot.value)
+        })
     }
 
     /// Return references to the key-value pair stored for `key`, if it is present, else `None`.
@@ -406,13 +400,7 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        match self.get_index_of(key) {
-            Some(index) => {
-                let (k, v) = &self.base[index];
-                Some((k, v))
-            }
-            None => None,
-        }
+        self.get_slot(key).map(Slot::refs)
     }
 
     /// Return item index, if it exists in the map.
@@ -434,11 +422,29 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        if self.base.is_empty() {
+        if self.entries.is_empty() {
             return None;
         }
 
-        self.base.iter().position(|(k, _)| k.borrow() == key)
+        self.entries
+            .iter()
+            .position(|slot| slot.key.borrow() == key)
+    }
+
+    fn get_slot<Q>(&self, key: &Q) -> Option<&Slot<K, V>>
+    where
+        K: Borrow<Q>,
+        Q: Eq + ?Sized,
+    {
+        self.get_index_of(key).map(|index| &self.entries[index])
+    }
+
+    fn get_slot_mut<Q>(&mut self, key: &Q) -> Option<&mut Slot<K, V>>
+    where
+        K: Borrow<Q>,
+        Q: Eq + ?Sized,
+    {
+        self.get_index_of(key).map(|index| &mut self.entries[index])
     }
 }
 
@@ -464,7 +470,8 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        self.remove_entry(key).map(|(_, v)| v)
+        self.get_index_of(key)
+            .map(|index| self.entries.remove(index).value)
     }
 
     /// Remove and return the key-value pair equivalent to `key`.
@@ -487,10 +494,8 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        match self.get_index_of(key) {
-            Some(index) => Some(self.base.remove(index)),
-            None => None,
-        }
+        self.get_index_of(key)
+            .map(|index| self.entries.remove(index).key_value())
     }
 
     /// Remove the key-value pair equivalent to `key` and return its value.
@@ -513,7 +518,8 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        self.swap_remove_entry(key).map(|(_, v)| v)
+        self.get_index_of(key)
+            .map(|index| self.entries.swap_remove(index).value)
     }
 
     /// Remove and return the key-value pair equivalent to `key`.
@@ -536,10 +542,8 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        match self.get_index_of(key) {
-            Some(index) => Some(self.base.swap_remove(index)),
-            None => None,
-        }
+        self.get_index_of(key)
+            .map(|index| self.entries.swap_remove(index).key_value())
     }
 }
 
@@ -576,11 +580,11 @@ where
     pub fn insert(&mut self, key: K, value: V) -> Option<V> {
         match self.get_index_of(&key) {
             Some(index) => {
-                let old_value = mem::replace(&mut self.base[index], (key, value)).1;
-                Some(old_value)
+                let old_slot = mem::replace(&mut self.entries[index], Slot { key, value });
+                Some(old_slot.value)
             }
             None => {
-                self.base.push((key, value));
+                self.entries.push(Slot { key, value });
                 None
             }
         }
