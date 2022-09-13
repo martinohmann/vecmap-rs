@@ -127,6 +127,51 @@ impl<K, V> VecMap<K, V> {
         self.entries.reverse();
     }
 
+    /// Reserves capacity for at least `additional` more elements to be inserted in the given
+    /// `VecMap<K, V>`. The collection may reserve more space to speculatively avoid frequent
+    /// reallocations. After calling `reserve`, capacity will be greater than or equal to
+    /// `self.len() + additional`. Does nothing if capacity is already sufficient.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the new capacity exceeds `isize::MAX` bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from_iter([("a", 1)]);
+    /// map.reserve(10);
+    /// assert!(map.capacity() >= 11);
+    /// ```
+    pub fn reserve(&mut self, additional: usize) {
+        self.entries.reserve(additional);
+    }
+}
+
+// Lookup operations.
+impl<K, V> VecMap<K, V> {
+    /// Return `true` if an equivalent to `key` exists in the map.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert(1, "a");
+    /// assert_eq!(map.contains_key(&1), true);
+    /// assert_eq!(map.contains_key(&2), false);
+    /// ```
+    pub fn contains_key<Q>(&self, key: &Q) -> bool
+    where
+        K: Borrow<Q>,
+        Q: Eq + ?Sized,
+    {
+        self.get_index_of(key).is_some()
+    }
+
     /// Get the first key-value pair.
     ///
     /// ```
@@ -190,69 +235,6 @@ impl<K, V> VecMap<K, V> {
     /// ```
     pub fn last_mut(&mut self) -> Option<(&K, &mut V)> {
         self.entries.last_mut().map(Slot::ref_mut)
-    }
-
-    /// Removes the last element from the map and returns it, or [`None`] if it
-    /// is empty.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
-    /// assert_eq!(map.pop(), Some(("b", 2)));
-    /// assert_eq!(map.pop(), Some(("a", 1)));
-    /// assert!(map.is_empty());
-    /// assert_eq!(map.pop(), None);
-    /// ```
-    pub fn pop(&mut self) -> Option<(K, V)> {
-        self.entries.pop().map(Slot::key_value)
-    }
-
-    /// Reserves capacity for at least `additional` more elements to be inserted in the given
-    /// `VecMap<K, V>`. The collection may reserve more space to speculatively avoid frequent
-    /// reallocations. After calling `reserve`, capacity will be greater than or equal to
-    /// `self.len() + additional`. Does nothing if capacity is already sufficient.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the new capacity exceeds `isize::MAX` bytes.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::from_iter([("a", 1)]);
-    /// map.reserve(10);
-    /// assert!(map.capacity() >= 11);
-    /// ```
-    pub fn reserve(&mut self, additional: usize) {
-        self.entries.reserve(additional);
-    }
-}
-
-// Lookup operations.
-impl<K, V> VecMap<K, V> {
-    /// Return `true` if an equivalent to `key` exists in the map.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::new();
-    /// map.insert(1, "a");
-    /// assert_eq!(map.contains_key(&1), true);
-    /// assert_eq!(map.contains_key(&2), false);
-    /// ```
-    pub fn contains_key<Q>(&self, key: &Q) -> bool
-    where
-        K: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.get_index_of(key).is_some()
     }
 
     /// Return a reference to the value stored for `key`, if it is present, else `None`.
@@ -450,6 +432,24 @@ impl<K, V> VecMap<K, V> {
 
 // Removal operations.
 impl<K, V> VecMap<K, V> {
+    /// Removes the last element from the map and returns it, or [`None`] if it
+    /// is empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
+    /// assert_eq!(map.pop(), Some(("b", 2)));
+    /// assert_eq!(map.pop(), Some(("a", 1)));
+    /// assert!(map.is_empty());
+    /// assert_eq!(map.pop(), None);
+    /// ```
+    pub fn pop(&mut self) -> Option<(K, V)> {
+        self.entries.pop().map(Slot::key_value)
+    }
+
     /// Remove the key-value pair equivalent to `key` and return its value.
     ///
     /// Like `Vec::remove`, the pair is removed by shifting all of the elements that follow it,
