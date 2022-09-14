@@ -3,6 +3,8 @@
 mod entry;
 mod impls;
 mod iter;
+#[cfg(feature = "serde")]
+mod serde;
 
 use super::{Entries, Slot};
 use alloc::vec::Vec;

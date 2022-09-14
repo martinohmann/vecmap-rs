@@ -16,3 +16,20 @@ exclude = [
 [lib]
 name = "vecmap"
 path = "src/lib.rs"
+
+[features]
+default = []
+serde = ["dep:serde"]
+
+[dependencies.serde]
+default-features = false
+optional = true
+version = "1.0"
+
+[dev-dependencies.serde_json]
+default-features = false
+features = ["alloc"]
+version = "1.0.85"
+
+[package.metadata.docs.rs]
+features = ["serde"]

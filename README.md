@@ -2,7 +2,8 @@
 
 [![Build Status](https://github.com/martinohmann/vecmap-rs/workflows/ci/badge.svg)](https://github.com/martinohmann/vecmap-rs/actions?query=workflow%3Aci)
 
-A vector-based ordered map implementation with support for `#![no_std]`.
+A vector-based ordered map implementation with zero dependencies and support
+for `#![no_std]`.
 
 Map keys are not required to be hashable and do not need to form a total order.
 Therefore, `VecMap<K, V>` can be used with key types which neither implement
@@ -15,6 +16,14 @@ Thus, its main use case are small collections with unhashable keys.
 For key types that implement `Hash` and `Ord` consider using a map implementation with better performance such as
 [`HashMap`](https://doc.rust-lang.org/std/collections/struct.HashMap.html) and
 [`BTreeMap`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html) from the standard library or popular alternatives like [`IndexMap`](https://docs.rs/indexmap/latest/indexmap/).
+
+## Cargo features
+
+The following features are available:
+
+* `serde`: Provides `Serialize` and `Deserialize` implementations for `VecMap`.
+  This feature is disabled by default. Enabling it will pull in `serde` as a
+  dependency.
 
 ## License
 
