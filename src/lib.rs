@@ -1,9 +1,11 @@
 #![doc = include_str!("../README.md")]
-#![no_std]
 #![warn(missing_docs)]
+#![no_std]
 
 extern crate alloc;
 
+#[macro_use]
+mod macros;
 pub mod map;
 
 #[doc(inline)]
