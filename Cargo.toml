@@ -2,7 +2,7 @@
 name = "vecmap-rs"
 version = "0.1.0"
 authors = ["Martin Ohmann <martinohmann@gmail.com>"]
-license = "MIT"
+license = "MIT or Apache-2.0"
 description = "A vector-based map"
 repository = "https://github.com/martinohmann/vecmap-rs"
 keywords = ["vector", "map", "vec"]
