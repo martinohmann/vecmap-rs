@@ -5,6 +5,7 @@ authors = ["Martin Ohmann <martinohmann@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "A vector-based map"
 repository = "https://github.com/martinohmann/vecmap-rs"
+documentation = "https://docs.rs/vecmap-rs/"
 keywords = ["vector", "map", "vec", "no-std"]
 categories = ["data-structures", "no-std"]
 readme = "README.md"
