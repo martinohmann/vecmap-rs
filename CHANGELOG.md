@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.1](https://github.com/martinohmann/vecmap-rs/compare/v0.1.0...v0.1.1) (2022-09-14)
+
+
+### Features
+
+* add `vecmap!` macro ([0d188cf](https://github.com/martinohmann/vecmap-rs/commit/0d188cfc114eb9fba123fbbcb261a48ee717c908))
+
+
+### Miscellaneous
+
+* fix crate categories ([d22090d](https://github.com/martinohmann/vecmap-rs/commit/d22090db7a10bfe9233b7ba97c47752777ffbfaa))
+* fix license identifier ([4f07cb3](https://github.com/martinohmann/vecmap-rs/commit/4f07cb30dc567153fa3ef71039273f01d4003194))
+
 ## 0.1.0 (2022-09-14)
 
 
