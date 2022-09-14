@@ -478,7 +478,8 @@ impl<K, V> VecMap<K, V> {
         Q: Eq + ?Sized,
     {
         self.get_index_of(key)
-            .map(|index| self.entries.remove(index).value)
+            .map(|index| self.entries.remove(index))
+            .map(Slot::value)
     }
 
     /// Remove and return the key-value pair equivalent to `key`.
@@ -502,7 +503,8 @@ impl<K, V> VecMap<K, V> {
         Q: Eq + ?Sized,
     {
         self.get_index_of(key)
-            .map(|index| self.entries.remove(index).key_value())
+            .map(|index| self.entries.remove(index))
+            .map(Slot::key_value)
     }
 
     /// Remove the key-value pair equivalent to `key` and return its value.
@@ -526,7 +528,8 @@ impl<K, V> VecMap<K, V> {
         Q: Eq + ?Sized,
     {
         self.get_index_of(key)
-            .map(|index| self.entries.swap_remove(index).value)
+            .map(|index| self.entries.swap_remove(index))
+            .map(Slot::value)
     }
 
     /// Remove and return the key-value pair equivalent to `key`.
@@ -550,7 +553,8 @@ impl<K, V> VecMap<K, V> {
         Q: Eq + ?Sized,
     {
         self.get_index_of(key)
-            .map(|index| self.entries.swap_remove(index).key_value())
+            .map(|index| self.entries.swap_remove(index))
+            .map(Slot::key_value)
     }
 }
 
@@ -585,14 +589,44 @@ where
     /// assert_eq!(map[&37], "c");
     /// ```
     pub fn insert(&mut self, key: K, value: V) -> Option<V> {
+        self.insert_full(key, value).1
+    }
+
+    /// Insert a key-value pair in the map, and get their index.
+    ///
+    /// If an equivalent key already exists in the map: the key remains and
+    /// retains in its place in the order, its corresponding value is updated
+    /// with `value` and the older value is returned inside `(index, Some(_))`.
+    ///
+    /// If no equivalent key existed in the map: the new key-value pair is
+    /// inserted, last in order, and `(index, None)` is returned.
+    ///
+    /// Computes in **O(1)** time (amortized average).
+    ///
+    /// See also [`entry`](#method.entry) if you you want to insert *or* modify
+    /// or if you need to get the index of the corresponding key-value pair.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// assert_eq!(map.insert_full("a", 1), (0, None));
+    /// assert_eq!(map.insert_full("b", 2), (1, None));
+    /// assert_eq!(map.insert_full("b", 3), (1, Some(2)));
+    /// assert_eq!(map["b"], 3);
+    /// ```
+    pub fn insert_full(&mut self, key: K, value: V) -> (usize, Option<V>) {
         match self.get_index_of(&key) {
             Some(index) => {
                 let old_slot = mem::replace(&mut self.entries[index], Slot { key, value });
-                Some(old_slot.value)
+                (index, Some(old_slot.value))
             }
             None => {
+                let index = self.entries.len();
                 self.entries.push(Slot { key, value });
-                None
+                (index, None)
             }
         }
     }

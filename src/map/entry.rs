@@ -272,7 +272,7 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// assert_eq!(map["poneyland"], 24);
     /// ```
     pub fn get_mut(&mut self) -> &mut V {
-        &mut self.map[self.index]
+        &mut self.map.entries[self.index].value
     }
 
     /// Converts the `OccupiedEntry` into a mutable reference to the value in the entry
@@ -299,7 +299,7 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// assert_eq!(map["poneyland"], 22);
     /// ```
     pub fn into_mut(self) -> &'a mut V {
-        &mut self.map[self.index]
+        &mut self.map.entries[self.index].value
     }
 
     /// Sets the value of the entry, and returns the entry's old value.
@@ -478,7 +478,7 @@ impl<'a, K, V> VacantEntry<'a, K, V> {
     /// assert_eq!(map.entry("poneyland").index(), 0);
     /// ```
     pub fn index(&self) -> usize {
-        self.map.len()
+        self.map.entries.len()
     }
 
     /// Take ownership of the key.
