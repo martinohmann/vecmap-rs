@@ -136,3 +136,46 @@ where
         VecMap::from_iter(arr)
     }
 }
+
+impl<K, V> PartialEq for VecMap<K, V>
+where
+    K: Eq,
+    V: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+
+        self.iter()
+            .all(|(key, value)| other.get(key).map_or(false, |v| *value == *v))
+    }
+}
+
+impl<K, V> Eq for VecMap<K, V>
+where
+    K: Eq,
+    V: Eq,
+{
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn eq() {
+        assert_ne!(VecMap::from([("a", 1)]), VecMap::from([]));
+        assert_ne!(VecMap::from([("a", 1)]), VecMap::from([("b", 2)]));
+        assert_eq!(VecMap::from([("a", 1)]), VecMap::from([("a", 1)]));
+        assert_ne!(VecMap::from([("a", 1)]), VecMap::from([("a", 1), ("b", 2)]));
+        assert_eq!(
+            VecMap::from([("a", 1), ("b", 2)]),
+            VecMap::from([("a", 1), ("b", 2)])
+        );
+        assert_eq!(
+            VecMap::from([("a", 1), ("b", 2)]),
+            VecMap::from([("b", 2), ("a", 1)])
+        );
+    }
+}

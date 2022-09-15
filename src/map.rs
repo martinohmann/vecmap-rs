@@ -18,7 +18,7 @@ pub use self::iter::{IntoIter, IntoKeys, IntoValues, Iter, IterMut, Keys, Values
 ///
 /// Internally it is represented as a `Vec<(K, V)>` to support keys that are neither `Hash` nor
 /// `Ord`.
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug)]
 pub struct VecMap<K, V> {
     entries: Vec<Slot<K, V>>,
 }
@@ -124,11 +124,14 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
+    /// # extern crate alloc;
+    /// # use alloc::vec::Vec;
     /// use vecmap::VecMap;
     ///
     /// let mut map = VecMap::from_iter([("a", 1), ("b", 2), ("c", 3)]);
     /// map.reverse();
-    /// assert_eq!(map, VecMap::from_iter([("c", 3), ("b", 2), ("a", 1)]));
+    /// let reversed: Vec<(&str, u8)> = map.into_iter().collect();
+    /// assert_eq!(reversed, Vec::from_iter([("c", 3), ("b", 2), ("a", 1)]));
     /// ```
     pub fn reverse(&mut self) {
         self.entries.reverse();
