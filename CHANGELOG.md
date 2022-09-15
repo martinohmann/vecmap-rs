@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.2](https://github.com/martinohmann/vecmap-rs/compare/v0.1.1...v0.1.2) (2022-09-15)
+
+
+### Features
+
+* add `drain` ([380b801](https://github.com/martinohmann/vecmap-rs/commit/380b801c75df8b847d90186d499c4a829b56331a))
+* add `retain` ([da11a0a](https://github.com/martinohmann/vecmap-rs/commit/da11a0ad069bcef7d47275453f2844a7858bde14))
+* add `shrink_to_fit` and `shrink_to` ([e38cb08](https://github.com/martinohmann/vecmap-rs/commit/e38cb08c0ed00a8cdad0e80ecff629e37582f6ec))
+
+
+### Bug Fixes
+
+* manually implement `PartialEq` and `Eq` ([6809137](https://github.com/martinohmann/vecmap-rs/commit/680913709db23fa14e592af5c6f3a362f4e4680a))
+
+
+### Miscellaneous
+
+* add documentation link to `Cargo.toml` ([4c76dc1](https://github.com/martinohmann/vecmap-rs/commit/4c76dc156b34e2fe2580035f9c3c67c645546439))
+
 ## [0.1.1](https://github.com/martinohmann/vecmap-rs/compare/v0.1.0...v0.1.1) (2022-09-14)
 
 
