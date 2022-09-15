@@ -233,3 +233,26 @@ impl<K, V> IntoValues<K, V> {
 }
 
 impl_iterator!(IntoValues<K, V>, V, Slot::value);
+
+/// A draining iterator for `VecMap`.
+///
+/// This `struct` is created by the [`drain`] method on [`VecMap`]. See its documentation for
+/// more.
+///
+/// [`drain`]: VecMap::drain
+pub struct Drain<'a, K, V> {
+    entries: vec::Drain<'a, Slot<K, V>>,
+}
+
+impl<'a, K, V> Drain<'a, K, V> {
+    pub(super) fn new<R>(map: &'a mut VecMap<K, V>, range: R) -> Drain<'a, K, V>
+    where
+        R: RangeBounds<usize>,
+    {
+        Drain {
+            entries: map.entries.drain(range),
+        }
+    }
+}
+
+impl_iterator!(Drain<'a, K, V>, (K, V), Slot::key_value);

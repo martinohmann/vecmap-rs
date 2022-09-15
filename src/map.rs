@@ -10,9 +10,10 @@ use super::{Entries, Slot};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::mem;
+use core::ops::RangeBounds;
 
 pub use self::entry::{Entry, OccupiedEntry, VacantEntry};
-pub use self::iter::{IntoIter, IntoKeys, IntoValues, Iter, IterMut, Keys, Values, ValuesMut};
+pub use self::iter::*;
 
 /// A vector-based map implementation which retains the order of inserted entries.
 ///
@@ -222,6 +223,38 @@ impl<K, V> VecMap<K, V> {
     /// ```
     pub fn shrink_to(&mut self, min_capacity: usize) {
         self.entries.shrink_to(min_capacity);
+    }
+
+    /// Removes the specified range from the vector in bulk, returning all removed elements as an
+    /// iterator. If the iterator is dropped before being fully consumed, it drops the remaining
+    /// removed elements.
+    ///
+    /// The returned iterator keeps a mutable borrow on the vector to optimize its implementation.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the starting point is greater than the end point or if the end point is greater
+    /// than the length of the vector.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::{vecmap, VecMap};
+    ///
+    /// let mut v = vecmap!["a" => 1, "b" => 2, "c" => 3];
+    /// let u: VecMap<_, _> = v.drain(1..).collect();
+    /// assert_eq!(v, vecmap!["a" => 1]);
+    /// assert_eq!(u, vecmap!["b" => 2, "c" => 3]);
+    ///
+    /// // A full range clears the vector, like `clear()` does
+    /// v.drain(..);
+    /// assert_eq!(v, vecmap![]);
+    /// ```
+    pub fn drain<R>(&mut self, range: R) -> Drain<'_, K, V>
+    where
+        R: RangeBounds<usize>,
+    {
+        Drain::new(self, range)
     }
 }
 
