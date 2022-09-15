@@ -179,6 +179,50 @@ impl<K, V> VecMap<K, V> {
         self.entries
             .retain_mut(|slot| f(&slot.key, &mut slot.value))
     }
+
+    /// Shrinks the capacity of the map as much as possible. It will drop down as much as possible
+    /// while maintaining the internal rules and possibly leaving some space in accordance with
+    /// the resize policy.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map: VecMap<i32, i32> = VecMap::with_capacity(100);
+    /// map.insert(1, 2);
+    /// map.insert(3, 4);
+    /// assert!(map.capacity() >= 100);
+    /// map.shrink_to_fit();
+    /// assert!(map.capacity() >= 2);
+    /// ```
+    pub fn shrink_to_fit(&mut self) {
+        self.entries.shrink_to_fit();
+    }
+
+    /// Shrinks the capacity of the map with a lower limit. It will drop down no lower than the
+    /// supplied limit while maintaining the internal rules and possibly leaving some space in
+    /// accordance with the resize policy.
+    ///
+    /// If the current capacity is less than the lower limit, this is a no-op.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map: VecMap<i32, i32> = VecMap::with_capacity(100);
+    /// map.insert(1, 2);
+    /// map.insert(3, 4);
+    /// assert!(map.capacity() >= 100);
+    /// map.shrink_to(10);
+    /// assert!(map.capacity() >= 10);
+    /// map.shrink_to(0);
+    /// assert!(map.capacity() >= 2);
+    /// ```
+    pub fn shrink_to(&mut self, min_capacity: usize) {
+        self.entries.shrink_to(min_capacity);
+    }
 }
 
 // Lookup operations.
