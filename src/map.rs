@@ -158,6 +158,27 @@ impl<K, V> VecMap<K, V> {
     pub fn reserve(&mut self, additional: usize) {
         self.entries.reserve(additional);
     }
+
+    /// Retains only the elements specified by the predicate.
+    ///
+    /// In other words, remove all pairs `(k, v)` for which `f(&k, &mut v)` returns `false`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map: VecMap<i32, i32> = (0..8).map(|x| (x, x*10)).collect();
+    /// map.retain(|&k, _| k % 2 == 0);
+    /// assert_eq!(map.len(), 4);
+    /// ```
+    pub fn retain<F>(&mut self, mut f: F)
+    where
+        F: FnMut(&K, &V) -> bool,
+    {
+        self.entries
+            .retain_mut(|slot| f(&slot.key, &mut slot.value))
+    }
 }
 
 // Lookup operations.
