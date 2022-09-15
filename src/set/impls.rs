@@ -1,9 +1,19 @@
+use core::ops::{BitAnd, BitOr, BitXor, Index, Sub};
+
 use super::VecSet;
 use alloc::vec::Vec;
 
 impl<T> Default for VecSet<T> {
     fn default() -> Self {
         VecSet::new()
+    }
+}
+
+impl<T> Index<usize> for VecSet<T> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &T {
+        self.get_index(index).expect("VecSet: index out of bounds")
     }
 }
 
@@ -89,5 +99,78 @@ where
 {
     fn from(arr: [T; N]) -> Self {
         VecSet::from_iter(arr)
+    }
+}
+
+impl<T> PartialEq for VecSet<T>
+where
+    T: Eq,
+{
+    fn eq(&self, other: &VecSet<T>) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+
+        self.iter().all(|key| other.contains(key))
+    }
+}
+
+impl<T> Eq for VecSet<T> where T: Eq {}
+
+impl<T> BitAnd<&VecSet<T>> for &VecSet<T>
+where
+    T: Eq + Clone,
+{
+    type Output = VecSet<T>;
+
+    /// Returns the set intersection, cloned into a new set.
+    ///
+    /// Values are collected in the same order that they appear in `self`.
+    fn bitand(self, other: &VecSet<T>) -> Self::Output {
+        self.intersection(other).cloned().collect()
+    }
+}
+
+impl<T> BitOr<&VecSet<T>> for &VecSet<T>
+where
+    T: Eq + Clone,
+{
+    type Output = VecSet<T>;
+
+    /// Returns the set union, cloned into a new set.
+    ///
+    /// Values from `self` are collected in their original order, followed by values that are
+    /// unique to `other` in their original order.
+    fn bitor(self, other: &VecSet<T>) -> Self::Output {
+        self.union(other).cloned().collect()
+    }
+}
+
+impl<T> BitXor<&VecSet<T>> for &VecSet<T>
+where
+    T: Eq + Clone,
+{
+    type Output = VecSet<T>;
+
+    /// Returns the set symmetric-difference, cloned into a new set.
+    ///
+    /// Values from `self` are collected in their original order, followed by values from `other`
+    /// in their original order.
+    fn bitxor(self, other: &VecSet<T>) -> Self::Output {
+        self.symmetric_difference(other).cloned().collect()
+    }
+}
+
+impl<T> Sub<&VecSet<T>> for &VecSet<T>
+where
+    T: Eq + Clone,
+{
+    type Output = VecSet<T>;
+
+    /// Returns the set difference, cloned into a new set.
+    ///
+    /// Values are collected in the same order that they appear in `self`.
+    fn sub(self, other: &VecSet<T>) -> Self::Output {
+        self.difference(other).cloned().collect()
     }
 }
