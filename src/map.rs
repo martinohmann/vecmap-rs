@@ -225,6 +225,32 @@ impl<K, V> VecMap<K, V> {
         self.entries.shrink_to(min_capacity);
     }
 
+    /// Splits the map into two at the given index.
+    ///
+    /// Returns a newly allocated map containing the key-value pairs in the range `[at, len)`.
+    /// After the call, the original map will be left containing the key-value pairs `[0, at)`
+    /// with its previous capacity unchanged.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `at > len`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3)]);
+    /// let map2 = map.split_off(1);
+    /// assert_eq!(map, VecMap::from([("a", 1)]));
+    /// assert_eq!(map2, VecMap::from([("b", 2), ("c", 3)]));
+    /// ```
+    pub fn split_off(&mut self, at: usize) -> VecMap<K, V> {
+        VecMap {
+            entries: self.entries.split_off(at),
+        }
+    }
+
     /// Removes the specified range from the vector in bulk, returning all removed elements as an
     /// iterator. If the iterator is dropped before being fully consumed, it drops the remaining
     /// removed elements.
