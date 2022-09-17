@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.3](https://github.com/martinohmann/vecmap-rs/compare/v0.1.2...v0.1.3) (2022-09-17)
+
+
+### Features
+
+* add `remove_index` ([fbf9e96](https://github.com/martinohmann/vecmap-rs/commit/fbf9e9674ffc3dafcc59e351a612054c508a9c67))
+* add `split_off` ([ef05a94](https://github.com/martinohmann/vecmap-rs/commit/ef05a94571dff910b5f53d8f277ef23b840f7d42))
+* add `VecSet` ([#5](https://github.com/martinohmann/vecmap-rs/issues/5)) ([52cbc1e](https://github.com/martinohmann/vecmap-rs/commit/52cbc1eb1e90abe2c3b453f7957b109465c8e5bb))
+
 ## [0.1.2](https://github.com/martinohmann/vecmap-rs/compare/v0.1.1...v0.1.2) (2022-09-15)
 
 
