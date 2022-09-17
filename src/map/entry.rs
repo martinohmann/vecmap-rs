@@ -241,7 +241,7 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// }
     /// ```
     pub fn get(&self) -> &V {
-        &self.map.entries[self.index].value
+        &self.map[self.index]
     }
 
     /// Gets a mutable reference to the value in the entry.
@@ -272,7 +272,7 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// assert_eq!(map["poneyland"], 24);
     /// ```
     pub fn get_mut(&mut self) -> &mut V {
-        &mut self.map.entries[self.index].value
+        &mut self.map[self.index]
     }
 
     /// Converts the `OccupiedEntry` into a mutable reference to the value in the entry
@@ -299,7 +299,7 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// assert_eq!(map["poneyland"], 22);
     /// ```
     pub fn into_mut(self) -> &'a mut V {
-        &mut self.map.entries[self.index].value
+        &mut self.map[self.index]
     }
 
     /// Sets the value of the entry, and returns the entry's old value.
@@ -478,7 +478,7 @@ impl<'a, K, V> VacantEntry<'a, K, V> {
     /// assert_eq!(map.entry("poneyland").index(), 0);
     /// ```
     pub fn index(&self) -> usize {
-        self.map.entries.len()
+        self.map.len()
     }
 
     /// Take ownership of the key.
@@ -516,11 +516,7 @@ impl<'a, K, V> VacantEntry<'a, K, V> {
     /// assert_eq!(map["poneyland"], 37);
     /// ```
     pub fn insert(self, value: V) -> &'a mut V {
-        let index = self.index();
-        self.map.entries.push(Slot {
-            key: self.key,
-            value,
-        });
-        &mut self.map.entries[index].value
+        let index = self.map.push(self.key, value);
+        &mut self.map[index]
     }
 }

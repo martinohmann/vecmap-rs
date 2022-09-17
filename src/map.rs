@@ -282,6 +282,14 @@ impl<K, V> VecMap<K, V> {
     {
         Drain::new(self, range)
     }
+
+    // Push a key-value pair at the end of the `VecMap` without checking whether the key already
+    // exists.
+    fn push(&mut self, key: K, value: V) -> usize {
+        let index = self.entries.len();
+        self.entries.push(Slot { key, value });
+        index
+    }
 }
 
 // Lookup operations.
@@ -798,11 +806,7 @@ where
                 let old_slot = mem::replace(&mut self.entries[index], Slot { key, value });
                 (index, Some(old_slot.value))
             }
-            None => {
-                let index = self.entries.len();
-                self.entries.push(Slot { key, value });
-                (index, None)
-            }
+            None => (self.push(key, value), None),
         }
     }
 
