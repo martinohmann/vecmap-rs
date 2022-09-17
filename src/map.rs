@@ -579,8 +579,7 @@ impl<K, V> VecMap<K, V> {
         Q: Eq + ?Sized,
     {
         self.get_index_of(key)
-            .map(|index| self.entries.remove(index))
-            .map(Slot::value)
+            .map(|index| self.remove_index(index).1)
     }
 
     /// Remove and return the key-value pair equivalent to `key`.
@@ -603,9 +602,31 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        self.get_index_of(key)
-            .map(|index| self.entries.remove(index))
-            .map(Slot::key_value)
+        self.get_index_of(key).map(|index| self.remove_index(index))
+    }
+
+    /// Removes and returns the key-value pair at position `index` within the map, shifting all
+    /// elements after it to the left.
+    ///
+    /// If you don't need the order of elements to be preserved, use [`swap_remove`] instead.
+    ///
+    /// [`swap_remove`]: VecMap::swap_remove
+    ///
+    /// # Panics
+    ///
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut v = VecMap::from([("a", 1), ("b", 2), ("c", 3)]);
+    /// assert_eq!(v.remove_index(1), ("b", 2));
+    /// assert_eq!(v, VecMap::from([("a", 1), ("c", 3)]));
+    /// ```
+    pub fn remove_index(&mut self, index: usize) -> (K, V) {
+        self.entries.remove(index).key_value()
     }
 
     /// Remove the key-value pair equivalent to `key` and return its value.
@@ -629,8 +650,7 @@ impl<K, V> VecMap<K, V> {
         Q: Eq + ?Sized,
     {
         self.get_index_of(key)
-            .map(|index| self.entries.swap_remove(index))
-            .map(Slot::value)
+            .map(|index| self.swap_remove_index(index).1)
     }
 
     /// Remove and return the key-value pair equivalent to `key`.
@@ -654,8 +674,36 @@ impl<K, V> VecMap<K, V> {
         Q: Eq + ?Sized,
     {
         self.get_index_of(key)
-            .map(|index| self.entries.swap_remove(index))
-            .map(Slot::key_value)
+            .map(|index| self.swap_remove_index(index))
+    }
+
+    /// Removes a key-value pair from the map and returns it.
+    ///
+    /// The removed key-value pair is replaced by the last key-value pair of the map.
+    ///
+    /// If you need to preserve the element order, use [`remove`] instead.
+    ///
+    /// [`remove`]: VecMap::remove
+    ///
+    /// # Panics
+    ///
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut v = VecMap::from([("foo", 1), ("bar", 2), ("baz", 3), ("qux", 4)]);
+    ///
+    /// assert_eq!(v.swap_remove_index(0), ("foo", 1));
+    /// assert_eq!(v, VecMap::from([("qux", 4), ("bar", 2), ("baz", 3)]));
+    ///
+    /// assert_eq!(v.swap_remove_index(0), ("qux", 4));
+    /// assert_eq!(v, VecMap::from([("baz", 3), ("bar", 2)]));
+    /// ```
+    pub fn swap_remove_index(&mut self, index: usize) -> (K, V) {
+        self.entries.swap_remove(index).key_value()
     }
 }
 

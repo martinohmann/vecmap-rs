@@ -350,7 +350,7 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// assert_eq!(map.get_index_of("bar"), Some(0));
     /// ```
     pub fn swap_remove_entry(self) -> (K, V) {
-        self.map.entries.swap_remove(self.index).key_value()
+        self.map.swap_remove_index(self.index)
     }
 
     /// Removes and return the key-value pair stored in the map for this entry.
@@ -379,7 +379,7 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// assert_eq!(map.get_index_of("bar"), Some(1));
     /// ```
     pub fn remove_entry(self) -> (K, V) {
-        self.map.entries.remove(self.index).key_value()
+        self.map.remove_index(self.index)
     }
 
     /// Removes the key-value pair stored in the map for this entry, and return the value.
