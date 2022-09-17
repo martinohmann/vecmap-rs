@@ -7,9 +7,12 @@ extern crate alloc;
 #[macro_use]
 mod macros;
 pub mod map;
+pub mod set;
 
 #[doc(inline)]
 pub use self::map::VecMap;
+#[doc(inline)]
+pub use self::set::VecSet;
 use alloc::vec::Vec;
 
 // The type used to store entries in a `VecMap`.
