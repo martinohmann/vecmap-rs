@@ -1,4 +1,3 @@
-#[macro_export]
 /// Create an `VecMap` from a list of key-value pairs
 ///
 /// ## Example
@@ -17,6 +16,7 @@
 /// // "a" is the first key
 /// assert_eq!(map.keys().next(), Some(&"a"));
 /// ```
+#[macro_export]
 macro_rules! vecmap {
     ($($key:expr => $value:expr,)+) => { $crate::vecmap!($($key => $value),+) };
     ($($key:expr => $value:expr),*) => {
@@ -29,6 +29,39 @@ macro_rules! vecmap {
                 map.insert($key, $value);
             )*
             map
+        }
+    };
+}
+
+/// Create an `VecSet` from a list of values
+///
+/// ## Example
+///
+/// ```
+/// use vecmap::vecset;
+///
+/// let set = vecset!{"a", "b"};
+/// assert!(set.contains("a"));
+/// assert!(set.contains("b"));
+/// assert!(!set.contains("c"));
+///
+/// // "a" is the first value
+/// assert_eq!(set.iter().next(), Some(&"a"));
+/// ```
+#[macro_export]
+macro_rules! vecset {
+    (@single $($x:tt)*) => (());
+    (@count $($rest:expr),*) => (<[()]>::len(&[$($crate::vecset!(@single $rest)),*]));
+
+    ($($value:expr,)+) => { $crate::vecset!($($value),+) };
+    ($($value:expr),*) => {
+        {
+            let _cap = $crate::vecset!(@count $($value),*);
+            let mut _set = $crate::VecSet::with_capacity(_cap);
+            $(
+                _set.insert($value);
+            )*
+            _set
         }
     };
 }
