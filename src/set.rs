@@ -216,6 +216,32 @@ impl<T> VecSet<T> {
         self.base.shrink_to(min_capacity);
     }
 
+    /// Splits the set into two at the given index.
+    ///
+    /// Returns a newly allocated set containing the elements in the range `[at, len)`. After the
+    /// call, the original set will be left containing the elements `[0, at)` with its previous
+    /// capacity unchanged.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `at > len`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["a", "b", "c"]);
+    /// let set2 = set.split_off(1);
+    /// assert_eq!(set, VecSet::from(["a"]));
+    /// assert_eq!(set2, VecSet::from(["b", "c"]));
+    /// ```
+    pub fn split_off(&mut self, at: usize) -> VecSet<T> {
+        VecSet {
+            base: self.base.split_off(at),
+        }
+    }
+
     /// Removes the specified range from the vector in bulk, returning all removed elements as an
     /// iterator. If the iterator is dropped before being fully consumed, it drops the remaining
     /// removed elements.
@@ -446,6 +472,30 @@ impl<T> VecSet<T> {
         self.base.remove(value).is_some()
     }
 
+    /// Removes and returns the element at position `index` within the set, shifting all elements
+    /// after it to the left.
+    ///
+    /// If you don't need the order of elements to be preserved, use [`swap_remove`] instead.
+    ///
+    /// [`swap_remove`]: VecSet::swap_remove
+    ///
+    /// # Panics
+    ///
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut v = VecSet::from(["a", "b", "c"]);
+    /// assert_eq!(v.remove_index(1), "b");
+    /// assert_eq!(v, VecSet::from(["a", "c"]));
+    /// ```
+    pub fn remove_index(&mut self, index: usize) -> T {
+        self.base.remove_index(index).0
+    }
+
     /// Remove the element equivalent to `value`.
     ///
     /// Like `Vec::swap_remove`, the element is removed by swapping it with the last element of the
@@ -467,6 +517,35 @@ impl<T> VecSet<T> {
         Q: Eq + ?Sized,
     {
         self.base.swap_remove(value).is_some()
+    }
+
+    /// Removes an element from the set and returns it.
+    ///
+    /// The removed element is replaced by the last element of the set.
+    ///
+    /// If you need to preserve the element order, use [`remove`] instead.
+    ///
+    /// [`remove`]: VecSet::remove
+    ///
+    /// # Panics
+    ///
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut v = VecSet::from(["foo", "bar", "baz", "qux"]);
+    ///
+    /// assert_eq!(v.swap_remove_index(0), "foo");
+    /// assert_eq!(v, VecSet::from(["qux", "bar", "baz"]));
+    ///
+    /// assert_eq!(v.swap_remove_index(0), "qux");
+    /// assert_eq!(v, VecSet::from(["baz", "bar"]));
+    /// ```
+    pub fn swap_remove_index(&mut self, index: usize) -> T {
+        self.base.swap_remove_index(index).0
     }
 
     /// Removes and returns the value in the set, if any, that is equal to the given one.
