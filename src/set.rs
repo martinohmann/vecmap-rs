@@ -7,7 +7,9 @@ mod serde;
 
 use super::{Entries, Slot, VecMap};
 use alloc::vec::Vec;
-use core::{borrow::Borrow, ops::RangeBounds};
+use core::borrow::Borrow;
+use core::cmp::Ordering;
+use core::ops::RangeBounds;
 
 pub use self::iter::*;
 
@@ -290,6 +292,102 @@ impl<T> VecSet<T> {
     /// ```
     pub fn iter(&self) -> Iter<'_, T> {
         Iter::new(self.as_entries())
+    }
+
+    /// Sorts the set.
+    ///
+    /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))
+    /// worst-case.
+    ///
+    /// When applicable, unstable sorting is preferred because it is generally faster than stable
+    /// sorting and it doesn't allocate auxiliary memory. See
+    /// [`sort_unstable`](VecSet::sort_unstable).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["b", "a", "c"]);
+    ///
+    /// set.sort();
+    /// let vec: Vec<_> = set.into_iter().collect();
+    /// assert_eq!(vec, ["a", "b", "c"]);
+    /// ```
+    pub fn sort(&mut self)
+    where
+        T: Ord,
+    {
+        self.base.sort_keys();
+    }
+
+    /// Sorts the set.
+    ///
+    /// This sort is unstable (i.e., may reorder equal elements), in-place (i.e., does not
+    /// allocate), and *O*(*n* \* log(*n*)) worst-case.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["b", "a", "c"]);
+    ///
+    /// set.sort_unstable();
+    /// let vec: Vec<_> = set.into_iter().collect();
+    /// assert_eq!(vec, ["a", "b", "c"]);
+    /// ```
+    pub fn sort_unstable(&mut self)
+    where
+        T: Ord,
+    {
+        self.base.sort_unstable_keys();
+    }
+
+    /// Sorts the set with a comparator function.
+    ///
+    /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))
+    /// worst-case.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["b", "a", "c"]);
+    ///
+    /// set.sort_by(|a, b| b.cmp(&a));
+    /// let vec: Vec<_> = set.into_iter().collect();
+    /// assert_eq!(vec, ["c", "b", "a"]);
+    /// ```
+    pub fn sort_by<F>(&mut self, mut compare: F)
+    where
+        F: FnMut(&T, &T) -> Ordering,
+    {
+        self.base.sort_by(|a, b| compare(&a.0, &b.0));
+    }
+
+    /// Sorts the set with a comparator function.
+    ///
+    /// This sort is unstable (i.e., may reorder equal elements), in-place (i.e., does not
+    /// allocate), and *O*(*n* \* log(*n*)) worst-case.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["b", "a", "c"]);
+    ///
+    /// set.sort_unstable_by(|a, b| b.cmp(&a));
+    /// let vec: Vec<_> = set.into_iter().collect();
+    /// assert_eq!(vec, ["c", "b", "a"]);
+    /// ```
+    pub fn sort_unstable_by<F>(&mut self, mut compare: F)
+    where
+        F: FnMut(&T, &T) -> Ordering,
+    {
+        self.base.sort_unstable_by(|a, b| compare(&a.0, &b.0));
     }
 }
 
