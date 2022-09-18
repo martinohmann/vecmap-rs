@@ -10,15 +10,19 @@ A vector-based ordered map and set implementation with zero dependencies and
 support for `#![no_std]`.
 
 Map keys are not required to be hashable and do not need to form a total order.
-Therefore, `VecMap<K, V>` and `VecSet<T>` can be used with key types which
-neither implement `Hash` nor `Ord`.
+Therefore, [`VecMap<K, V>`](https://docs.rs/vecmap-rs/latest/vecmap/map/struct.VecMap.html)
+and [`VecSet<T>`](https://docs.rs/vecmap-rs/latest/vecmap/set/struct.VecSet.html)
+can be used with key types which neither implement `Hash` nor `Ord`.
 
-Since vecmap-rs is a `Vec<(K, V)>` under the hood, worst case lookup and
-insertion performance is `O(n)` and scales with the number of map entries.
-Thus, its main use case are small collections with unhashable keys.
+Since vecmap-rs is a [`Vec<(K, V)>`](https://doc.rust-lang.org/alloc/vec/struct.Vec.html)
+under the hood, worst case lookup and insertion performance is `O(n)` and
+scales with the number of map entries. Thus, its main use case are small
+collections with unhashable keys.
 
-For key types that implement `Hash` and `Ord` consider using a map or set
-implementation with better performance such as
+For key types that implement
+[`Hash`](https://doc.rust-lang.org/core/hash/trait.Hash.html) and
+[`Ord`](https://doc.rust-lang.org/core/cmp/trait.Ord.html) consider using a map
+or set implementation with better performance such as
 [`HashMap`](https://doc.rust-lang.org/std/collections/struct.HashMap.html)/[`HashSet`](https://doc.rust-lang.org/std/collections/struct.HashSet.html)
 and
 [`BTreeMap`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html)/[`BTreeSet`](https://doc.rust-lang.org/std/collections/struct.BTreeSet.html)
