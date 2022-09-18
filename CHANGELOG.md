@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.4](https://github.com/martinohmann/vecmap-rs/compare/v0.1.3...v0.1.4) (2022-09-18)
+
+
+### Features
+
+* add sort methods ([b443fe3](https://github.com/martinohmann/vecmap-rs/commit/b443fe37ab3fcf56bb9a15032c2a85324a67dfaf))
+* implement `Clone` for all immutable iterators ([86478ba](https://github.com/martinohmann/vecmap-rs/commit/86478ba668ce7c4641f3ce76b9103b1da2b457ac))
+
 ## [0.1.3](https://github.com/martinohmann/vecmap-rs/compare/v0.1.2...v0.1.3) (2022-09-17)
 
 
