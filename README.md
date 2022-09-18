@@ -6,7 +6,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A vector-based ordered map and set implementations with zero dependencies and
+A vector-based ordered map and set implementation with zero dependencies and
 support for `#![no_std]`.
 
 Map keys are not required to be hashable and do not need to form a total order.
@@ -23,7 +23,7 @@ implementation with better performance such as
 and
 [`BTreeMap`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html)/[`BTreeSet`](https://doc.rust-lang.org/std/collections/struct.BTreeSet.html)
 from the standard library or popular alternatives like
-[`IndexMap`](https://docs.rs/indexmap/latest/indexmap/map/struct.IndexMap.html)/[`IndexSet`](https://docs.rs/indexmap/latest/indexmap/set/struct.IndexMap.html).
+[`IndexMap`](https://docs.rs/indexmap/latest/indexmap/map/struct.IndexMap.html)/[`IndexSet`](https://docs.rs/indexmap/latest/indexmap/set/struct.IndexSet.html).
 
 ## Cargo features
 
