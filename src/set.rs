@@ -169,7 +169,7 @@ impl<T> VecSet<T> {
     where
         F: FnMut(&T) -> bool,
     {
-        self.base.retain(|k, _| f(&k))
+        self.base.retain(|k, _| f(k))
     }
 
     /// Shrinks the capacity of the set as much as possible. It will drop down as much as possible

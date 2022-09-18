@@ -10,23 +10,23 @@ macro_rules! impl_iterator {
             type Item = $item;
 
             fn next(&mut self) -> Option<Self::Item> {
-                self.entries.next().map($map)
+                self.iter.next().map($map)
             }
 
             fn size_hint(&self) -> (usize, Option<usize>) {
-                self.entries.size_hint()
+                self.iter.size_hint()
             }
         }
 
         impl<$($lt,)*$($gen),+> DoubleEndedIterator for $ty<$($lt,)*$($gen),+> {
             fn next_back(&mut self) -> Option<Self::Item> {
-                self.entries.next_back().map($map)
+                self.iter.next_back().map($map)
             }
         }
 
         impl<$($lt,)*$($gen),+> ExactSizeIterator for $ty<$($lt,)*$($gen),+> {
             fn len(&self) -> usize {
-                self.entries.len()
+                self.iter.len()
             }
         }
 
@@ -38,7 +38,7 @@ macro_rules! impl_iterator {
             V: fmt::Debug,
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                let iter = self.entries.as_slice().iter().map(Slot::refs);
+                let iter = self.iter.as_slice().iter().map(Slot::refs);
                 f.debug_list().entries(iter).finish()
             }
         }
@@ -81,13 +81,21 @@ impl<'a, K, V> IntoIterator for &'a mut VecMap<K, V> {
 ///
 /// [`iter`]: VecMap::iter
 pub struct Iter<'a, K, V> {
-    entries: slice::Iter<'a, Slot<K, V>>,
+    iter: slice::Iter<'a, Slot<K, V>>,
 }
 
 impl<'a, K, V> Iter<'a, K, V> {
     pub(super) fn new(entries: &'a [Slot<K, V>]) -> Iter<'a, K, V> {
         Iter {
-            entries: entries.iter(),
+            iter: entries.iter(),
+        }
+    }
+}
+
+impl<K, V> Clone for Iter<'_, K, V> {
+    fn clone(&self) -> Self {
+        Iter {
+            iter: self.iter.clone(),
         }
     }
 }
@@ -101,13 +109,13 @@ impl_iterator!(Iter<'a, K, V>, (&'a K, &'a V), Slot::refs);
 ///
 /// [`iter_mut`]: VecMap::iter_mut
 pub struct IterMut<'a, K, V> {
-    entries: slice::IterMut<'a, Slot<K, V>>,
+    iter: slice::IterMut<'a, Slot<K, V>>,
 }
 
 impl<'a, K, V> IterMut<'a, K, V> {
     pub(super) fn new(entries: &'a mut [Slot<K, V>]) -> IterMut<'a, K, V> {
         IterMut {
-            entries: entries.iter_mut(),
+            iter: entries.iter_mut(),
         }
     }
 }
@@ -122,13 +130,25 @@ impl_iterator!(IterMut<'a, K, V>, (&'a K, &'a mut V), Slot::ref_mut);
 /// [`into_iter`]: IntoIterator::into_iter
 /// [`IntoIterator`]: core::iter::IntoIterator
 pub struct IntoIter<K, V> {
-    entries: vec::IntoIter<Slot<K, V>>,
+    iter: vec::IntoIter<Slot<K, V>>,
 }
 
 impl<K, V> IntoIter<K, V> {
     pub(super) fn new(entries: Vec<Slot<K, V>>) -> IntoIter<K, V> {
         IntoIter {
-            entries: entries.into_iter(),
+            iter: entries.into_iter(),
+        }
+    }
+}
+
+impl<K, V> Clone for IntoIter<K, V>
+where
+    K: Clone,
+    V: Clone,
+{
+    fn clone(&self) -> Self {
+        IntoIter {
+            iter: self.iter.clone(),
         }
     }
 }
@@ -141,13 +161,21 @@ impl_iterator!(IntoIter<K, V>, (K, V), Slot::key_value);
 ///
 /// [`keys`]: VecMap::keys
 pub struct Keys<'a, K, V> {
-    entries: slice::Iter<'a, Slot<K, V>>,
+    iter: slice::Iter<'a, Slot<K, V>>,
 }
 
 impl<'a, K, V> Keys<'a, K, V> {
     pub(super) fn new(entries: &'a [Slot<K, V>]) -> Keys<'a, K, V> {
         Keys {
-            entries: entries.iter(),
+            iter: entries.iter(),
+        }
+    }
+}
+
+impl<K, V> Clone for Keys<'_, K, V> {
+    fn clone(&self) -> Self {
+        Keys {
+            iter: self.iter.clone(),
         }
     }
 }
@@ -161,13 +189,25 @@ impl_iterator!(Keys<'a, K, V>, &'a K, Slot::key_ref);
 ///
 /// [`into_keys`]: VecMap::into_keys
 pub struct IntoKeys<K, V> {
-    entries: vec::IntoIter<Slot<K, V>>,
+    iter: vec::IntoIter<Slot<K, V>>,
 }
 
 impl<K, V> IntoKeys<K, V> {
     pub(super) fn new(entries: Vec<Slot<K, V>>) -> IntoKeys<K, V> {
         IntoKeys {
-            entries: entries.into_iter(),
+            iter: entries.into_iter(),
+        }
+    }
+}
+
+impl<K, V> Clone for IntoKeys<K, V>
+where
+    K: Clone,
+    V: Clone,
+{
+    fn clone(&self) -> Self {
+        IntoKeys {
+            iter: self.iter.clone(),
         }
     }
 }
@@ -181,13 +221,21 @@ impl_iterator!(IntoKeys<K, V>, K, Slot::key);
 ///
 /// [`values`]: VecMap::values
 pub struct Values<'a, K, V> {
-    entries: slice::Iter<'a, Slot<K, V>>,
+    iter: slice::Iter<'a, Slot<K, V>>,
 }
 
 impl<'a, K, V> Values<'a, K, V> {
     pub(super) fn new(entries: &'a [Slot<K, V>]) -> Values<'a, K, V> {
         Values {
-            entries: entries.iter(),
+            iter: entries.iter(),
+        }
+    }
+}
+
+impl<K, V> Clone for Values<'_, K, V> {
+    fn clone(&self) -> Self {
+        Values {
+            iter: self.iter.clone(),
         }
     }
 }
@@ -201,13 +249,13 @@ impl_iterator!(Values<'a, K, V>, &'a V, Slot::value_ref);
 ///
 /// [`values_mut`]: VecMap::values_mut
 pub struct ValuesMut<'a, K, V> {
-    entries: slice::IterMut<'a, Slot<K, V>>,
+    iter: slice::IterMut<'a, Slot<K, V>>,
 }
 
 impl<'a, K, V> ValuesMut<'a, K, V> {
     pub(super) fn new(entries: &'a mut [Slot<K, V>]) -> ValuesMut<'a, K, V> {
         ValuesMut {
-            entries: entries.iter_mut(),
+            iter: entries.iter_mut(),
         }
     }
 }
@@ -221,13 +269,25 @@ impl_iterator!(ValuesMut<'a, K, V>, &'a mut V, Slot::value_mut);
 ///
 /// [`into_values`]: VecMap::into_values
 pub struct IntoValues<K, V> {
-    entries: vec::IntoIter<Slot<K, V>>,
+    iter: vec::IntoIter<Slot<K, V>>,
 }
 
 impl<K, V> IntoValues<K, V> {
     pub(super) fn new(entries: Vec<Slot<K, V>>) -> IntoValues<K, V> {
         IntoValues {
-            entries: entries.into_iter(),
+            iter: entries.into_iter(),
+        }
+    }
+}
+
+impl<K, V> Clone for IntoValues<K, V>
+where
+    K: Clone,
+    V: Clone,
+{
+    fn clone(&self) -> Self {
+        IntoValues {
+            iter: self.iter.clone(),
         }
     }
 }
@@ -241,7 +301,7 @@ impl_iterator!(IntoValues<K, V>, V, Slot::value);
 ///
 /// [`drain`]: VecMap::drain
 pub struct Drain<'a, K, V> {
-    entries: vec::Drain<'a, Slot<K, V>>,
+    iter: vec::Drain<'a, Slot<K, V>>,
 }
 
 impl<'a, K, V> Drain<'a, K, V> {
@@ -250,7 +310,7 @@ impl<'a, K, V> Drain<'a, K, V> {
         R: RangeBounds<usize>,
     {
         Drain {
-            entries: map.entries.drain(range),
+            iter: map.entries.drain(range),
         }
     }
 }

@@ -11,23 +11,23 @@ macro_rules! impl_iterator {
             type Item = $item;
 
             fn next(&mut self) -> Option<Self::Item> {
-                self.entries.next().map($map)
+                self.iter.next().map($map)
             }
 
             fn size_hint(&self) -> (usize, Option<usize>) {
-                self.entries.size_hint()
+                self.iter.size_hint()
             }
         }
 
         impl<$($lt,)*$($gen),+> DoubleEndedIterator for $ty<$($lt,)*$($gen),+> {
             fn next_back(&mut self) -> Option<Self::Item> {
-                self.entries.next_back().map($map)
+                self.iter.next_back().map($map)
             }
         }
 
         impl<$($lt,)*$($gen),+> ExactSizeIterator for $ty<$($lt,)*$($gen),+> {
             fn len(&self) -> usize {
-                self.entries.len()
+                self.iter.len()
             }
         }
 
@@ -38,7 +38,7 @@ macro_rules! impl_iterator {
             T: fmt::Debug,
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                let iter = self.entries.as_slice().iter().map(Slot::key_ref);
+                let iter = self.iter.as_slice().iter().map(Slot::key_ref);
                 f.debug_list().entries(iter).finish()
             }
         }
@@ -71,13 +71,13 @@ impl<'a, T> IntoIterator for &'a VecSet<T> {
 ///
 /// [`iter`]: VecSet::iter
 pub struct Iter<'a, T> {
-    entries: slice::Iter<'a, Slot<T, ()>>,
+    iter: slice::Iter<'a, Slot<T, ()>>,
 }
 
 impl<'a, T> Iter<'a, T> {
     pub(super) fn new(entries: &'a [Slot<T, ()>]) -> Iter<'a, T> {
         Iter {
-            entries: entries.iter(),
+            iter: entries.iter(),
         }
     }
 }
@@ -87,7 +87,7 @@ impl_iterator!(Iter<'a, T>, &'a T, Slot::key_ref);
 impl<T> Clone for Iter<'_, T> {
     fn clone(&self) -> Self {
         Iter {
-            entries: self.entries.clone(),
+            iter: self.iter.clone(),
         }
     }
 }
@@ -100,13 +100,13 @@ impl<T> Clone for Iter<'_, T> {
 /// [`into_iter`]: IntoIterator::into_iter
 /// [`IntoIterator`]: core::iter::IntoIterator
 pub struct IntoIter<T> {
-    entries: vec::IntoIter<Slot<T, ()>>,
+    iter: vec::IntoIter<Slot<T, ()>>,
 }
 
 impl<T> IntoIter<T> {
     pub(super) fn new(entries: Vec<Slot<T, ()>>) -> IntoIter<T> {
         IntoIter {
-            entries: entries.into_iter(),
+            iter: entries.into_iter(),
         }
     }
 }
