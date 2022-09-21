@@ -225,6 +225,25 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
         self.index
     }
 
+    /// Take ownership of the key.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    /// use vecmap::map::Entry;
+    ///
+    /// let mut map: VecMap<&str, u32> = VecMap::new();
+    /// map.insert("foo", 1);
+    ///
+    /// if let Entry::Occupied(v) = map.entry("foo") {
+    ///     v.into_key();
+    /// }
+    /// ```
+    pub fn into_key(self) -> K {
+        self.key
+    }
+
     /// Gets a reference to the value in the entry.
     ///
     /// # Examples
