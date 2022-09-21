@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/martinohmann/vecmap-rs/compare/v0.1.4...v0.1.5) (2022-09-21)
+
+
+### Features
+
+* **entry:** add `into_key` method to `OccupiedEntry` ([f94cbc3](https://github.com/martinohmann/vecmap-rs/commit/f94cbc376c053f9055ee2ac1a6f78eccc46189e1))
+
 ## [0.1.4](https://github.com/martinohmann/vecmap-rs/compare/v0.1.3...v0.1.4) (2022-09-18)
 
 
