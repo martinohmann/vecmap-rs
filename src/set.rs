@@ -365,7 +365,7 @@ impl<T> VecSet<T> {
     where
         F: FnMut(&T, &T) -> Ordering,
     {
-        self.base.sort_by(|a, b| compare(&a.0, &b.0));
+        self.base.sort_by(|a, b| compare(a.0, b.0));
     }
 
     /// Sorts the set with a comparator function.
@@ -388,7 +388,7 @@ impl<T> VecSet<T> {
     where
         F: FnMut(&T, &T) -> Ordering,
     {
-        self.base.sort_unstable_by(|a, b| compare(&a.0, &b.0));
+        self.base.sort_unstable_by(|a, b| compare(a.0, b.0));
     }
 
     /// Extracts a slice containing the set elements.
