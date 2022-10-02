@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.6](https://github.com/martinohmann/vecmap-rs/compare/v0.1.5...v0.1.6) (2022-10-02)
+
+
+### Features
+
+* add `as_slice`, `to_vec` and `into_vec` methods ([3f1906d](https://github.com/martinohmann/vecmap-rs/commit/3f1906d45f0452ddb625a587f27adf0df47b64a8))
+
+
+### Bug Fixes
+
+* remove some needless borrows ([29bd06e](https://github.com/martinohmann/vecmap-rs/commit/29bd06e9634b181eeba0e23da319035a153794e7))
+
 ## [0.1.5](https://github.com/martinohmann/vecmap-rs/compare/v0.1.4...v0.1.5) (2022-09-21)
 
 
