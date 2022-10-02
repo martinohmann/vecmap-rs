@@ -9,6 +9,7 @@ use super::{Entries, Slot, VecMap};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
+use core::mem;
 use core::ops::RangeBounds;
 
 pub use self::iter::*;
@@ -388,6 +389,52 @@ impl<T> VecSet<T> {
         F: FnMut(&T, &T) -> Ordering,
     {
         self.base.sort_unstable_by(|a, b| compare(&a.0, &b.0));
+    }
+
+    /// Extracts a slice containing the set elements.
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from(["b", "a", "c"]);
+    /// let slice = set.as_slice();
+    /// assert_eq!(slice, ["b", "a", "c"]);
+    /// ```
+    pub fn as_slice(&self) -> &[T] {
+        // SAFETY: `&[(T, ())]` and `&[T]` have the same memory layout.
+        unsafe { mem::transmute(self.base.as_slice()) }
+    }
+
+    /// Copies the set elements into a new `Vec<T>`.
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from(["b", "a", "c"]);
+    /// let vec = set.to_vec();
+    /// assert_eq!(vec, ["b", "a", "c"]);
+    /// // Here, `set` and `vec` can be modified independently.
+    /// ```
+    pub fn to_vec(&self) -> Vec<T>
+    where
+        T: Clone,
+    {
+        // SAFETY: `Vec<(T, ())>` and `Vec<T>` have the same memory layout.
+        unsafe { mem::transmute(self.base.to_vec()) }
+    }
+
+    /// Takes ownership of the set and returns its elements as a `Vec<T>`.
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from(["b", "a", "c"]);
+    /// let vec = set.into_vec();
+    /// assert_eq!(vec, ["b", "a", "c"]);
+    /// ```
+    pub fn into_vec(self) -> Vec<T> {
+        // SAFETY: `Vec<(T, ())>` and `Vec<T>` have the same memory layout.
+        unsafe { mem::transmute(self.base.into_vec()) }
     }
 }
 

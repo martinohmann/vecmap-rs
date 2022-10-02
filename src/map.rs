@@ -389,6 +389,53 @@ impl<K, V> VecMap<K, V> {
         self.entries
             .sort_unstable_by(|a, b| compare(a.refs(), b.refs()));
     }
+
+    /// Extracts a slice containing the map entries.
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    /// let slice = map.as_slice();
+    /// assert_eq!(slice, [("b", 2), ("a", 1), ("c", 3)]);
+    /// ```
+    pub fn as_slice(&self) -> &[(K, V)] {
+        // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
+        unsafe { mem::transmute(self.entries.as_slice()) }
+    }
+
+    /// Copies the map entries into a new `Vec<(K, V)>`.
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    /// let vec = map.to_vec();
+    /// assert_eq!(vec, [("b", 2), ("a", 1), ("c", 3)]);
+    /// // Here, `map` and `vec` can be modified independently.
+    /// ```
+    pub fn to_vec(&self) -> Vec<(K, V)>
+    where
+        K: Clone,
+        V: Clone,
+    {
+        // SAFETY: `Vec<Slot<K, V>>` and `Vec<(K, V)>` have the same memory layout.
+        unsafe { mem::transmute(self.entries.to_vec()) }
+    }
+
+    /// Takes ownership of the map and returns its entries as a `Vec<(K, V)>`.
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    /// let vec = map.into_vec();
+    /// assert_eq!(vec, [("b", 2), ("a", 1), ("c", 3)]);
+    /// ```
+    pub fn into_vec(self) -> Vec<(K, V)> {
+        // SAFETY: `Vec<Slot<K, V>>` and `Vec<(K, V)>` have the same memory layout.
+        unsafe { mem::transmute(self.entries) }
+    }
 }
 
 // Lookup operations.
