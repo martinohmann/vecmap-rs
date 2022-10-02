@@ -310,7 +310,7 @@ impl<'a, K, V> Drain<'a, K, V> {
         R: RangeBounds<usize>,
     {
         Drain {
-            iter: map.entries.drain(range),
+            iter: map.base.drain(range),
         }
     }
 }
