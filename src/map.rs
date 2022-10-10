@@ -1,4 +1,4 @@
-//! `VecMap` is a vector-based map implementation which retains the order inserted entries.
+//! `VecMap` is a vector-based map implementation which retains the order of inserted entries.
 
 mod entry;
 mod impls;

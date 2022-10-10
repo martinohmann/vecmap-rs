@@ -1,4 +1,4 @@
-//! `VecSet` is a vector-based set implementation which retains the order inserted elements.
+//! `VecSet` is a vector-based set implementation which retains the order of inserted elements.
 
 mod impls;
 mod iter;
