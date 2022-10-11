@@ -73,24 +73,29 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use alloc::string::String;
-    use serde_json::json;
+    use serde_test::{assert_tokens, Token};
 
     #[test]
-    fn serialize() {
-        let map = VecMap::from([("a", 1), ("b", 2), ("c", 3)]);
-        let value = serde_json::to_value(&map).unwrap();
-        let expected = json!({"a": 1, "b": 2, "c": 3});
-
-        assert_eq!(value, expected);
+    fn ser_de_empty() {
+        let map = VecMap::<u8, &str>::new();
+        assert_tokens(&map, &[Token::Map { len: Some(0) }, Token::MapEnd]);
     }
 
     #[test]
-    fn deserialize() {
-        let value = json!({"a": 1, "b": 2, "c": 3});
-        let map: VecMap<String, u8> = serde_json::from_value(value).unwrap();
-        let expected = VecMap::from([("a".into(), 1), ("b".into(), 2), ("c".into(), 3)]);
-
-        assert_eq!(map, expected);
+    fn ser_de() {
+        let map = VecMap::from([("a", 1), ("b", 2), ("c", 3)]);
+        assert_tokens(
+            &map,
+            &[
+                Token::Map { len: Some(3) },
+                Token::BorrowedStr("a"),
+                Token::I32(1),
+                Token::BorrowedStr("b"),
+                Token::I32(2),
+                Token::BorrowedStr("c"),
+                Token::I32(3),
+                Token::MapEnd,
+            ],
+        );
     }
 }

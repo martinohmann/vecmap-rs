@@ -27,10 +27,8 @@ default-features = false
 optional = true
 version = "1.0"
 
-[dev-dependencies.serde_json]
-default-features = false
-features = ["alloc"]
-version = "1.0.85"
+[dev-dependencies]
+serde_test = "1.0"
 
 [package.metadata.docs.rs]
 features = ["serde"]

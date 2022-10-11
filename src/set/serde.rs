@@ -69,25 +69,26 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use alloc::string::String;
-    use alloc::vec;
-    use serde_json::json;
+    use serde_test::{assert_tokens, Token};
 
     #[test]
-    fn serialize() {
-        let set = VecSet::from(["a", "b", "c"]);
-        let value = serde_json::to_value(&set).unwrap();
-        let expected = json!(["a", "b", "c"]);
-
-        assert_eq!(value, expected);
+    fn ser_de_empty() {
+        let set = VecSet::<&str>::new();
+        assert_tokens(&set, &[Token::Seq { len: Some(0) }, Token::SeqEnd]);
     }
 
     #[test]
-    fn deserialize() {
-        let value = json!(["a", "b", "c"]);
-        let set: VecSet<String> = serde_json::from_value(value).unwrap();
-        let expected = VecSet::from(["a".into(), "b".into(), "c".into()]);
-
-        assert_eq!(set, expected);
+    fn ser_de() {
+        let set = VecSet::from(["a", "b", "c"]);
+        assert_tokens(
+            &set,
+            &[
+                Token::Seq { len: Some(3) },
+                Token::BorrowedStr("a"),
+                Token::BorrowedStr("b"),
+                Token::BorrowedStr("c"),
+                Token::SeqEnd,
+            ],
+        );
     }
 }
