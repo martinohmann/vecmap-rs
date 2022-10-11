@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/martinohmann/vecmap-rs/compare/v0.1.6...v0.1.7) (2022-10-11)
+
+
+### Miscellaneous
+
+* **test:** switch to `serde_test` ([a980545](https://github.com/martinohmann/vecmap-rs/commit/a9805459bc7997e0cdd630653bcc01be3923005f))
+
 ## [0.1.6](https://github.com/martinohmann/vecmap-rs/compare/v0.1.5...v0.1.6) (2022-10-02)
 
 
