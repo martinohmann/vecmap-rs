@@ -925,8 +925,6 @@ where
     /// If no equivalent key existed in the map: the new key-value pair is
     /// inserted, last in order, and `(index, None)` is returned.
     ///
-    /// Computes in **O(1)** time (amortized average).
-    ///
     /// See also [`entry`](#method.entry) if you you want to insert *or* modify
     /// or if you need to get the index of the corresponding key-value pair.
     ///
