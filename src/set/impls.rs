@@ -46,7 +46,7 @@ where
     where
         I: IntoIterator<Item = &'a T>,
     {
-        self.extend(iterable.into_iter().cloned());
+        self.extend(iterable.into_iter().copied());
     }
 }
 

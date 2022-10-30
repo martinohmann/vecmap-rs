@@ -176,7 +176,7 @@ impl<K, V> VecMap<K, V> {
     where
         F: FnMut(&K, &V) -> bool,
     {
-        self.base.retain_mut(|slot| f(&slot.key, &mut slot.value))
+        self.base.retain_mut(|slot| f(&slot.key, &mut slot.value));
     }
 
     /// Shrinks the capacity of the map as much as possible. It will drop down as much as possible
@@ -398,7 +398,7 @@ impl<K, V> VecMap<K, V> {
     /// ```
     pub fn as_slice(&self) -> &[(K, V)] {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
-        unsafe { mem::transmute(self.base.as_slice()) }
+        unsafe { &*(self.base.as_slice() as *const [Slot<K, V>] as *const [(K, V)]) }
     }
 
     /// Copies the map entries into a new `Vec<(K, V)>`.
@@ -417,7 +417,7 @@ impl<K, V> VecMap<K, V> {
         V: Clone,
     {
         // SAFETY: `Vec<Slot<K, V>>` and `Vec<(K, V)>` have the same memory layout.
-        unsafe { mem::transmute(self.base.to_vec()) }
+        unsafe { mem::transmute(self.base.clone()) }
     }
 
     /// Takes ownership of the map and returns its entries as a `Vec<(K, V)>`.

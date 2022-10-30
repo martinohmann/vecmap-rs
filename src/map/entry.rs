@@ -1,4 +1,5 @@
-use super::*;
+use super::VecMap;
+use core::mem;
 
 /// Entry for an existing key-value pair or a vacant location to insert one.
 #[derive(Debug)]

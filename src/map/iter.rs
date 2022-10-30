@@ -1,7 +1,8 @@
-use super::*;
-use alloc::vec;
+use super::{Entries, Slot, VecMap};
+use alloc::vec::{self, Vec};
 use core::fmt;
 use core::iter::FusedIterator;
+use core::ops::RangeBounds;
 use core::slice;
 
 macro_rules! impl_iterator {

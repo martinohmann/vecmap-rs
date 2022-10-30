@@ -172,7 +172,7 @@ impl<T> VecSet<T> {
     where
         F: FnMut(&T) -> bool,
     {
-        self.base.retain(|k, _| f(k))
+        self.base.retain(|k, _| f(k));
     }
 
     /// Shrinks the capacity of the set as much as possible. It will drop down as much as possible
@@ -402,7 +402,7 @@ impl<T> VecSet<T> {
     /// ```
     pub fn as_slice(&self) -> &[T] {
         // SAFETY: `&[(T, ())]` and `&[T]` have the same memory layout.
-        unsafe { mem::transmute(self.base.as_slice()) }
+        unsafe { &*(self.base.as_slice() as *const [(T, ())] as *const [T]) }
     }
 
     /// Copies the set elements into a new `Vec<T>`.
@@ -503,10 +503,10 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.get(&2), Some(&2));
     /// assert_eq!(set.get(&4), None);
     /// ```
-    pub fn get<Q: ?Sized>(&self, value: &Q) -> Option<&T>
+    pub fn get<Q>(&self, value: &Q) -> Option<&T>
     where
         T: Borrow<Q>,
-        Q: Eq,
+        Q: ?Sized + Eq,
     {
         self.base.get_key_value(value).map(|(k, _)| k)
     }
@@ -542,10 +542,10 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.get_full(&2), Some((1, &2)));
     /// assert_eq!(set.get_full(&4), None);
     /// ```
-    pub fn get_full<Q: ?Sized>(&self, value: &Q) -> Option<(usize, &T)>
+    pub fn get_full<Q>(&self, value: &Q) -> Option<(usize, &T)>
     where
         T: Borrow<Q>,
-        Q: Eq,
+        Q: ?Sized + Eq,
     {
         self.base.get_full(value).map(|(index, k, _)| (index, k))
     }
@@ -710,10 +710,10 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.take(&2), Some(2));
     /// assert_eq!(set.take(&2), None);
     /// ```
-    pub fn take<Q: ?Sized>(&mut self, value: &Q) -> Option<T>
+    pub fn take<Q>(&mut self, value: &Q) -> Option<T>
     where
         T: Borrow<Q>,
-        Q: Eq,
+        Q: ?Sized + Eq,
     {
         self.base.remove_entry(value).map(|(k, _)| k)
     }
@@ -735,10 +735,10 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.take(&2), Some(2));
     /// assert_eq!(set.take(&2), None);
     /// ```
-    pub fn swap_take<Q: ?Sized>(&mut self, value: &Q) -> Option<T>
+    pub fn swap_take<Q>(&mut self, value: &Q) -> Option<T>
     where
         T: Borrow<Q>,
-        Q: Eq,
+        Q: ?Sized + Eq,
     {
         self.base.swap_remove_entry(value).map(|(k, _)| k)
     }
