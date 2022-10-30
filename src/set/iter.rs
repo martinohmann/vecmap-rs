@@ -82,8 +82,6 @@ impl<'a, T> Iter<'a, T> {
     }
 }
 
-impl_iterator!(Iter<'a, T>, &'a T, Slot::key_ref);
-
 impl<T> Clone for Iter<'_, T> {
     fn clone(&self) -> Self {
         Iter {
@@ -91,6 +89,8 @@ impl<T> Clone for Iter<'_, T> {
         }
     }
 }
+
+impl_iterator!(Iter<'a, T>, &'a T, Slot::key_ref);
 
 /// An owning iterator over the elements of a `VecSet`.
 ///
@@ -107,6 +107,17 @@ impl<T> IntoIter<T> {
     pub(super) fn new(entries: Vec<Slot<T, ()>>) -> IntoIter<T> {
         IntoIter {
             iter: entries.into_iter(),
+        }
+    }
+}
+
+impl<T> Clone for IntoIter<T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        IntoIter {
+            iter: self.iter.clone(),
         }
     }
 }
