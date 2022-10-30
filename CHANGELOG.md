@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.8](https://github.com/martinohmann/vecmap-rs/compare/v0.1.7...v0.1.8) (2022-10-30)
+
+
+### Features
+
+* **set:** implement `Clone` for `IntoIter` ([e78d5ee](https://github.com/martinohmann/vecmap-rs/commit/e78d5eea597703f25ef02965f2f55bf23faac647))
+
+
+### Miscellaneous
+
+* enable `clippy::pedantic` warnings ([d61b8f8](https://github.com/martinohmann/vecmap-rs/commit/d61b8f83572973b500a5603239d140d2d9faba1d))
+
 ## [0.1.7](https://github.com/martinohmann/vecmap-rs/compare/v0.1.6...v0.1.7) (2022-10-11)
 
 

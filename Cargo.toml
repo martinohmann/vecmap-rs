@@ -1,6 +1,6 @@
 [package]
 name = "vecmap-rs"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Martin Ohmann <martinohmann@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "A vector-based map and set implementation"
