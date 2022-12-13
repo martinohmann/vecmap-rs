@@ -416,8 +416,7 @@ impl<K, V> VecMap<K, V> {
         K: Clone,
         V: Clone,
     {
-        // SAFETY: `Vec<Slot<K, V>>` and `Vec<(K, V)>` have the same memory layout.
-        unsafe { mem::transmute(self.base.clone()) }
+        self.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
     }
 
     /// Takes ownership of the map and returns its entries as a `Vec<(K, V)>`.
@@ -430,8 +429,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(vec, [("b", 2), ("a", 1), ("c", 3)]);
     /// ```
     pub fn into_vec(self) -> Vec<(K, V)> {
-        // SAFETY: `Vec<Slot<K, V>>` and `Vec<(K, V)>` have the same memory layout.
-        unsafe { mem::transmute(self.base) }
+        self.into_iter().collect()
     }
 }
 

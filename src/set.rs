@@ -9,7 +9,6 @@ use super::{Entries, Slot, VecMap};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
-use core::mem;
 use core::ops::RangeBounds;
 
 pub use self::iter::*;
@@ -419,8 +418,7 @@ impl<T> VecSet<T> {
     where
         T: Clone,
     {
-        // SAFETY: `Vec<(T, ())>` and `Vec<T>` have the same memory layout.
-        unsafe { mem::transmute(self.base.to_vec()) }
+        self.iter().cloned().collect()
     }
 
     /// Takes ownership of the set and returns its elements as a `Vec<T>`.
@@ -433,8 +431,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(vec, ["b", "a", "c"]);
     /// ```
     pub fn into_vec(self) -> Vec<T> {
-        // SAFETY: `Vec<(T, ())>` and `Vec<T>` have the same memory layout.
-        unsafe { mem::transmute(self.base.into_vec()) }
+        self.into_iter().collect()
     }
 }
 
