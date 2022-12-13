@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.9](https://github.com/martinohmann/vecmap-rs/compare/v0.1.8...v0.1.9) (2022-12-13)
+
+
+### Bug Fixes
+
+* remove unnecessary usages of `mem::transmute` ([41d90b6](https://github.com/martinohmann/vecmap-rs/commit/41d90b6c8a5cbae5be56dd0b4ae12cda4968eff7))
+
 ## [0.1.8](https://github.com/martinohmann/vecmap-rs/compare/v0.1.7...v0.1.8) (2022-10-30)
 
 
