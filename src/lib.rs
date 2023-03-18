@@ -35,6 +35,10 @@ impl<K, V> Slot<K, V> {
         &self.key
     }
 
+    fn key_mut(&mut self) -> &mut K {
+        &mut self.key
+    }
+
     fn key(self) -> K {
         self.key
     }
@@ -51,16 +55,20 @@ impl<K, V> Slot<K, V> {
         self.value
     }
 
-    fn key_value(self) -> (K, V) {
-        (self.key, self.value)
-    }
-
     fn refs(&self) -> (&K, &V) {
         (&self.key, &self.value)
     }
 
     fn ref_mut(&mut self) -> (&K, &mut V) {
         (&self.key, &mut self.value)
+    }
+
+    fn muts(&mut self) -> (&mut K, &mut V) {
+        (&mut self.key, &mut self.value)
+    }
+
+    fn key_value(self) -> (K, V) {
+        (self.key, self.value)
     }
 }
 
