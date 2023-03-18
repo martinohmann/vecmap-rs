@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10](https://github.com/martinohmann/vecmap-rs/compare/v0.1.9...v0.1.10) (2023-03-18)
+
+
+### Features
+
+* **map:** add `MutableKeys` trait ([#12](https://github.com/martinohmann/vecmap-rs/issues/12)) ([a2fc16b](https://github.com/martinohmann/vecmap-rs/commit/a2fc16b2393d9786ee5cba58f98d49367721d689))
+
 ## [0.1.9](https://github.com/martinohmann/vecmap-rs/compare/v0.1.8...v0.1.9) (2022-12-13)
 
 
