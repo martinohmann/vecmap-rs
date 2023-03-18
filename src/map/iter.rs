@@ -123,6 +123,27 @@ impl<'a, K, V> IterMut<'a, K, V> {
 
 impl_iterator!(IterMut<'a, K, V>, (&'a K, &'a mut V), Slot::ref_mut);
 
+/// A mutable iterator over the entries of a `VecMap`.
+///
+/// This `struct` is created by the [`iter_mut2`] method on [`MutableKeys`]. See its documentation
+/// for more.
+///
+/// [`iter_mut2`]: crate::map::MutableKeys::iter_mut2
+/// [`MutableKeys`]: crate::map::MutableKeys
+pub struct IterMut2<'a, K, V> {
+    iter: slice::IterMut<'a, Slot<K, V>>,
+}
+
+impl<'a, K, V> IterMut2<'a, K, V> {
+    pub(super) fn new(entries: &'a mut [Slot<K, V>]) -> IterMut2<'a, K, V> {
+        IterMut2 {
+            iter: entries.iter_mut(),
+        }
+    }
+}
+
+impl_iterator!(IterMut2<'a, K, V>, (&'a mut K, &'a mut V), Slot::muts);
+
 /// An owning iterator over the entries of a `VecMap`.
 ///
 /// This `struct` is created by the [`into_iter`] method on [`VecMap`] (provided by the
@@ -182,6 +203,27 @@ impl<K, V> Clone for Keys<'_, K, V> {
 }
 
 impl_iterator!(Keys<'a, K, V>, &'a K, Slot::key_ref);
+
+/// A mutable iterator over the keys of a `VecMap`.
+///
+/// This `struct` is created by the [`keys_mut`] method on [`MutableKeys`]. See its documentation
+/// for more.
+///
+/// [`keys_mut`]: crate::map::MutableKeys::keys_mut
+/// [`MutableKeys`]: crate::map::MutableKeys
+pub struct KeysMut<'a, K, V> {
+    iter: slice::IterMut<'a, Slot<K, V>>,
+}
+
+impl<'a, K, V> KeysMut<'a, K, V> {
+    pub(super) fn new(entries: &'a mut [Slot<K, V>]) -> KeysMut<'a, K, V> {
+        KeysMut {
+            iter: entries.iter_mut(),
+        }
+    }
+}
+
+impl_iterator!(KeysMut<'a, K, V>, &'a mut K, Slot::key_mut);
 
 /// An owning iterator over the keys of a `VecMap`.
 ///

@@ -3,6 +3,7 @@
 mod entry;
 mod impls;
 mod iter;
+mod mutable_keys;
 #[cfg(feature = "serde")]
 mod serde;
 
@@ -15,6 +16,7 @@ use core::ops::RangeBounds;
 
 pub use self::entry::{Entry, OccupiedEntry, VacantEntry};
 pub use self::iter::*;
+pub use self::mutable_keys::MutableKeys;
 
 /// A vector-based map implementation which retains the order of inserted entries.
 ///
