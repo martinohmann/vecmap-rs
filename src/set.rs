@@ -690,6 +690,30 @@ impl<T> VecSet<T> {
         self.base.swap_remove_index(index).0
     }
 
+    /// Swaps the position of two elements in the set.
+    ///
+    /// # Arguments
+    ///
+    /// * a - The index of the first element
+    /// * b - The index of the second element
+    ///
+    /// # Panics
+    ///
+    /// Panics if `a` or `b` are out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["a", "b", "c", "d"]);
+    /// set.swap_indices(1, 3);
+    /// assert_eq!(set.to_vec(), ["a", "d", "c", "b"]);
+    /// ```
+    pub fn swap_indices(&mut self, a: usize, b: usize) {
+        self.base.swap_indices(a, b);
+    }
+
     /// Removes and returns the value in the set, if any, that is equal to the given one.
     ///
     /// The value may be any borrowed form of the set's value type, but [`Eq`] on the borrowed form
