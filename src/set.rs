@@ -117,6 +117,35 @@ impl<T> VecSet<T> {
         self.base.clear();
     }
 
+    /// Shortens the set, keeping the first `len` elements and dropping the rest.
+    ///
+    /// If `len` is greater than the set's current length, this has no effect.
+    ///
+    /// # Examples
+    ///
+    /// Truncating a four element set to two elements:
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["a", "b", "c", "d"]);
+    /// set.truncate(2);
+    /// assert_eq!(set, VecSet::from(["a", "b"]));
+    /// ```
+    ///
+    /// No truncation occurs when `len` is greater than the set's current length:
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["a", "b", "c", "d"]);
+    /// set.truncate(8);
+    /// assert_eq!(set, VecSet::from(["a", "b", "c", "d"]));
+    /// ```
+    pub fn truncate(&mut self, len: usize) {
+        self.base.truncate(len);
+    }
+
     /// Reverses the order of entries in the set, in place.
     ///
     /// # Examples

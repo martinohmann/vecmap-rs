@@ -121,6 +121,35 @@ impl<K, V> VecMap<K, V> {
         self.base.clear();
     }
 
+    /// Shortens the map, keeping the first `len` key-value pairs and dropping the rest.
+    ///
+    /// If `len` is greater than the map's current length, this has no effect.
+    ///
+    /// # Examples
+    ///
+    /// Truncating a four element map to two elements:
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3), ("d", 4)]);
+    /// map.truncate(2);
+    /// assert_eq!(map, VecMap::from([("a", 1), ("b", 2)]));
+    /// ```
+    ///
+    /// No truncation occurs when `len` is greater than the map's current length:
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3), ("d", 4)]);
+    /// map.truncate(8);
+    /// assert_eq!(map, VecMap::from([("a", 1), ("b", 2), ("c", 3), ("d", 4)]));
+    /// ```
+    pub fn truncate(&mut self, len: usize) {
+        self.base.truncate(len);
+    }
+
     /// Reverses the order of entries in the map, in place.
     ///
     /// # Examples
