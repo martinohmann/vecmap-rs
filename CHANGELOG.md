@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.11](https://github.com/martinohmann/vecmap-rs/compare/v0.1.10...v0.1.11) (2023-06-23)
+
+
+### Features
+
+* add `swap_indices` ([a219c7f](https://github.com/martinohmann/vecmap-rs/commit/a219c7f32c636a3d4721948810d600737c13cb82))
+* add `truncate` ([a1e1625](https://github.com/martinohmann/vecmap-rs/commit/a1e1625ad70c33e2af3580807647c1514af686fc))
+
 ## [0.1.10](https://github.com/martinohmann/vecmap-rs/compare/v0.1.9...v0.1.10) (2023-03-18)
 
 
