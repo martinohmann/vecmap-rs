@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.12](https://github.com/martinohmann/vecmap-rs/compare/v0.1.11...v0.1.12) (2023-09-19)
+
+
+### Features
+
+* **map:** add `insert_at` ([7cbef1d](https://github.com/martinohmann/vecmap-rs/commit/7cbef1d3ee44c3002a9bdfe57117b9d315845fee))
+* **map:** impl `ExactSizeIterator` and `Debug` for `Drain` ([aca02b4](https://github.com/martinohmann/vecmap-rs/commit/aca02b4327d768e48ff6f9fada94ea98eac3c61d))
+
+
+### Bug Fixes
+
+* **set:** remove unnecessary trait bounds from `Drain` ([5643f73](https://github.com/martinohmann/vecmap-rs/commit/5643f737a487d7045a7a170b383c36796f977786))
+
 ## [0.1.11](https://github.com/martinohmann/vecmap-rs/compare/v0.1.10...v0.1.11) (2023-06-23)
 
 
