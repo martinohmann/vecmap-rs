@@ -50,18 +50,17 @@ macro_rules! vecmap {
 /// ```
 #[macro_export]
 macro_rules! vecset {
-    (@single $($x:tt)*) => (());
-    (@count $($rest:expr),*) => (<[()]>::len(&[$($crate::vecset!(@single $rest)),*]));
-
     ($($value:expr,)+) => { $crate::vecset!($($value),+) };
     ($($value:expr),*) => {
         {
-            let _cap = $crate::vecset!(@count $($value),*);
-            let mut _set = $crate::VecSet::with_capacity(_cap);
+            // Note: `stringify!($key)` is just here to consume the repetition,
+            // but we throw away that string literal during constant evaluation.
+            const CAP: usize = <[()]>::len(&[$({ stringify!($value); }),*]);
+            let mut set = $crate::VecSet::with_capacity(CAP);
             $(
-                _set.insert($value);
+                set.insert($value);
             )*
-            _set
+            set
         }
     };
 }
