@@ -429,10 +429,7 @@ impl<'a, T> Drain<'a, T> {
     }
 }
 
-impl<'a, T> Iterator for Drain<'a, T>
-where
-    T: Eq,
-{
+impl<'a, T> Iterator for Drain<'a, T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -444,13 +441,10 @@ where
     }
 }
 
-impl<T> DoubleEndedIterator for Drain<'_, T>
-where
-    T: Eq,
-{
+impl<T> DoubleEndedIterator for Drain<'_, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.iter.next_back().map(|(k, _)| k)
     }
 }
 
-impl<T> FusedIterator for Drain<'_, T> where T: Eq {}
+impl<T> FusedIterator for Drain<'_, T> {}
