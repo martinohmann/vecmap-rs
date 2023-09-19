@@ -31,4 +31,5 @@ version = "1.0"
 serde_test = "1.0"
 
 [package.metadata.docs.rs]
-features = ["serde"]
+rustdoc-args = ["--cfg", "docsrs"]
+all-features = true
