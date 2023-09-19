@@ -429,22 +429,4 @@ impl<'a, T> Drain<'a, T> {
     }
 }
 
-impl<'a, T> Iterator for Drain<'a, T> {
-    type Item = T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|(k, _)| k)
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.iter.size_hint()
-    }
-}
-
-impl<T> DoubleEndedIterator for Drain<'_, T> {
-    fn next_back(&mut self) -> Option<Self::Item> {
-        self.iter.next_back().map(|(k, _)| k)
-    }
-}
-
-impl<T> FusedIterator for Drain<'_, T> {}
+impl_iterator!(Drain<'a, T>, T, |(k, _)| k);
