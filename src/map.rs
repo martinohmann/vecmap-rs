@@ -1002,6 +1002,48 @@ where
         }
     }
 
+    /// Insert a key-value pair at position `index` within the map, shifting all
+    /// elements after it to the right.
+    ///
+    /// If an equivalent key already exists in the map: the key is removed from the map and the new
+    /// key-value pair is inserted at `index`. The old index and its value are returned inside
+    /// `Some((usize, _))`.
+    ///
+    /// If no equivalent key existed in the map: the new key-value pair is
+    /// inserted at position `index` and `None` is returned.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `index > len`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// assert_eq!(map.insert_at(0, "a", 1), None);
+    /// assert_eq!(map.insert_at(1, "b", 2), None);
+    /// assert_eq!(map.insert_at(0, "b", 3), Some((1, 2)));
+    /// assert_eq!(map.to_vec(), [("b", 3), ("a", 1)]);
+    /// ```
+    pub fn insert_at(&mut self, index: usize, key: K, value: V) -> Option<(usize, V)> {
+        if let Some(old_index) = self.get_index_of(&key) {
+            let old_slot = if old_index == index {
+                mem::replace(&mut self.base[index], Slot { key, value })
+            } else {
+                let old_slot = self.base.remove(old_index);
+                self.base.insert(index, Slot { key, value });
+                old_slot
+            };
+
+            Some((old_index, old_slot.value))
+        } else {
+            self.base.insert(index, Slot { key, value });
+            None
+        }
+    }
+
     /// Get the given key's corresponding entry in the map for insertion and/or in-place
     /// manipulation.
     ///
