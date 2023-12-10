@@ -61,7 +61,10 @@ where
         let reserve = if self.is_empty() {
             iter.size_hint().0
         } else {
-            (iter.size_hint().0 + 1) / 2
+            // Round up but make sure we don’t overflow when size_hint ==
+            // usize::MAX.
+            let size_hint = iter.size_hint().0;
+            size_hint / 2 + size_hint % 2
         };
         self.reserve(reserve);
         iter.for_each(move |(k, v)| {
@@ -70,31 +73,39 @@ where
     }
 }
 
-impl<'a, K, V> Extend<(&'a K, &'a V)> for VecMap<K, V>
-where
-    K: Copy + Eq,
-    V: Copy,
-{
+impl<'a, K: Clone + Eq, V: Clone> Extend<(&'a K, &'a V)> for VecMap<K, V> {
     fn extend<I>(&mut self, iterable: I)
     where
         I: IntoIterator<Item = (&'a K, &'a V)>,
     {
-        self.extend(iterable.into_iter().map(|(&key, &value)| (key, value)));
+        self.extend(
+            iterable
+                .into_iter()
+                .map(|(key, value)| (key.clone(), value.clone())),
+        );
     }
 }
 
-impl<K, V> FromIterator<(K, V)> for VecMap<K, V>
-where
-    K: Eq,
-{
-    fn from_iter<I>(iter: I) -> Self
+impl<'a, K: Clone + Eq, V: Clone> Extend<&'a (K, V)> for VecMap<K, V> {
+    fn extend<I>(&mut self, iterable: I)
     where
-        I: IntoIterator<Item = (K, V)>,
+        I: IntoIterator<Item = &'a (K, V)>,
     {
-        let iter = iter.into_iter();
-        let lower = iter.size_hint().0;
-        let mut map = VecMap::with_capacity(lower);
-        map.extend(iter);
+        self.extend(
+            iterable
+                .into_iter()
+                .map(|(key, value)| (key.clone(), value.clone())),
+        );
+    }
+}
+
+impl<Item, K, V> FromIterator<Item> for VecMap<K, V>
+where
+    Self: Extend<Item>,
+{
+    fn from_iter<I: IntoIterator<Item = Item>>(iter: I) -> Self {
+        let mut map = VecMap::new();
+        map.extend(iter.into_iter());
         map
     }
 }
@@ -103,8 +114,16 @@ impl<K, V> From<Vec<(K, V)>> for VecMap<K, V>
 where
     K: Eq,
 {
-    fn from(vec: Vec<(K, V)>) -> Self {
-        VecMap::from_iter(vec)
+    /// Constructs map from a vector of `(key → value)` pairs.
+    ///
+    /// **Note**: This conversion has a quadratic complexity because the
+    /// conversion preserve order of elements while at the same time having to
+    /// make sure no duplicate keys exist.  To avoid it, sort and deduplicate
+    /// the vector and use [`VecMap::from_vec_unchecked`] instead.
+    fn from(mut vec: Vec<(K, V)>) -> Self {
+        crate::dedup(&mut vec, |rhs, lhs| rhs.0 == lhs.0);
+        // SUPER: We’ve just deduplicated the elements.
+        unsafe { Self::from_vec_unchecked(vec) }
     }
 }
 
@@ -114,7 +133,7 @@ where
     V: Clone,
 {
     fn from(slice: &[(K, V)]) -> Self {
-        VecMap::from_iter(slice.to_vec())
+        VecMap::from_iter(slice)
     }
 }
 
@@ -124,7 +143,7 @@ where
     V: Clone,
 {
     fn from(slice: &mut [(K, V)]) -> Self {
-        VecMap::from_iter(slice.to_vec())
+        VecMap::from_iter(&slice[..])
     }
 }
 
