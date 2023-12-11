@@ -122,7 +122,7 @@ where
     /// the vector and use [`VecMap::from_vec_unchecked`] instead.
     fn from(mut vec: Vec<(K, V)>) -> Self {
         crate::dedup(&mut vec, |rhs, lhs| rhs.0 == lhs.0);
-        // SUPER: We’ve just deduplicated the elements.
+        // SAFETY: We’ve just deduplicated the elements.
         unsafe { Self::from_vec_unchecked(vec) }
     }
 }
