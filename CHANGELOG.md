@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.13](https://github.com/martinohmann/vecmap-rs/compare/v0.1.12...v0.1.13) (2023-12-11)
+
+
+### Features
+
+* **map:** avoid allocations in conversion from vector or slice ([#16](https://github.com/martinohmann/vecmap-rs/issues/16)) ([c47c487](https://github.com/martinohmann/vecmap-rs/commit/c47c487a6560d0977e282cc204bab66b251e76b7))
+
 ## [0.1.12](https://github.com/martinohmann/vecmap-rs/compare/v0.1.11...v0.1.12) (2023-09-19)
 
 
