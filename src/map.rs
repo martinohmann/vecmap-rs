@@ -462,6 +462,35 @@ impl<K, V> VecMap<K, V> {
     pub fn into_vec(self) -> Vec<(K, V)> {
         self.into_iter().collect()
     }
+
+    /// Takes ownership of provided vector and converts it into `VecMap`.
+    ///
+    /// # Safety
+    ///
+    /// The vector must have no duplicate keys.  One way to guarantee it is to
+    /// sort the vector (e.g. by using [`[T]::sort_by_key`]) and then drop
+    /// duplicate keys (e.g. by using [`Vec::dedup_by_key`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut vec = vec![("b", 2), ("a", 1), ("c", 3), ("b", 4)];
+    /// vec.sort_by_key(|slot| slot.0);
+    /// vec.dedup_by_key(|slot| slot.0);
+    /// // SAFETY: We’ve just deduplicated the vector.
+    /// let map = unsafe { VecMap::from_vec_unchecked(vec) };
+    ///
+    /// assert_eq!(map, VecMap::from([("b", 2), ("a", 1), ("c", 3)]));
+    /// ```
+    pub unsafe fn from_vec_unchecked(mut vec: Vec<(K, V)>) -> Self {
+        let (ptr, len, cap) = (vec.as_mut_ptr(), vec.len(), vec.capacity());
+        core::mem::forget(vec);
+        // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
+        let base = unsafe { Vec::from_raw_parts(ptr.cast(), len, cap) };
+        VecMap { base }
+    }
 }
 
 // Lookup operations.
