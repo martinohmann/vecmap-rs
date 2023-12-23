@@ -24,52 +24,72 @@ pub use self::set::VecSet;
 use alloc::vec::Vec;
 
 // The type used to store entries in a `VecMap`.
+#[repr(transparent)]
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct Slot<K, V> {
-    key: K,
-    value: V,
+    entry: (K, V),
 }
 
 // Accessor methods which can be used in `map` functions.
 impl<K, V> Slot<K, V> {
+    #[inline]
+    fn new(key: K, value: V) -> Self {
+        Slot {
+            entry: (key, value),
+        }
+    }
+}
+
+// Accessor methods which can be used in `map` functions.
+impl<K, V> Slot<K, V> {
+    #[inline]
     fn key_ref(&self) -> &K {
-        &self.key
+        &self.entry.0
     }
 
+    #[inline]
     fn key_mut(&mut self) -> &mut K {
-        &mut self.key
+        &mut self.entry.0
     }
 
+    #[inline]
     fn key(self) -> K {
-        self.key
+        self.entry.0
     }
 
+    #[inline]
     fn value_ref(&self) -> &V {
-        &self.value
+        &self.entry.1
     }
 
+    #[inline]
     fn value_mut(&mut self) -> &mut V {
-        &mut self.value
+        &mut self.entry.1
     }
 
+    #[inline]
     fn value(self) -> V {
-        self.value
+        self.entry.1
     }
 
+    #[inline]
     fn refs(&self) -> (&K, &V) {
-        (&self.key, &self.value)
+        (&self.entry.0, &self.entry.1)
     }
 
+    #[inline]
     fn ref_mut(&mut self) -> (&K, &mut V) {
-        (&self.key, &mut self.value)
+        (&self.entry.0, &mut self.entry.1)
     }
 
+    #[inline]
     fn muts(&mut self) -> (&mut K, &mut V) {
-        (&mut self.key, &mut self.value)
+        (&mut self.entry.0, &mut self.entry.1)
     }
 
+    #[inline]
     fn key_value(self) -> (K, V) {
-        (self.key, self.value)
+        (self.entry.0, self.entry.1)
     }
 }
 
@@ -111,4 +131,35 @@ fn test_dedup() {
     test(&[1], &[1, 1, 1]);
     test(&[3, 1, 2], &[3, 1, 2]);
     test(&[3, 1, 2], &[3, 1, 2, 1, 2, 3]);
+}
+
+// https://github.com/martinohmann/vecmap-rs/issues/18
+//
+// If `Slot<K, V>` does not have the same memory layout as `(K, V)`, e.g. due to possible field
+// reordering, this test will:
+//
+// - Segfault with "SIGSEGV: invalid memory reference" in the `unsafe` block in `VecMap::as_slice`
+//   when run via `cargo test`.
+// - Trigger a miri error when run via `cargo +nightly miri test`.
+#[test]
+fn issue_18() {
+    use alloc::string::String;
+    use core::{fmt, mem};
+
+    fn test<K, V>(slice: &[(K, V)])
+    where
+        K: Clone + Eq + fmt::Debug,
+        V: Clone + PartialEq + fmt::Debug,
+    {
+        assert_eq!(mem::size_of::<Slot<K, V>>(), mem::size_of::<(K, V)>());
+        assert_eq!(mem::align_of::<Slot<K, V>>(), mem::align_of::<(K, V)>());
+
+        let map = VecMap::from(slice);
+        assert_eq!(map.as_slice(), slice);
+    }
+
+    test(&[(1i64, String::from("foo")), (2, String::from("bar"))]);
+    test(&[(String::from("foo"), 1i64), (String::from("bar"), 2)]);
+    test(&[(true, 1i64), (false, 2)]);
+    test(&[(1i64, true), (2, false)]);
 }
