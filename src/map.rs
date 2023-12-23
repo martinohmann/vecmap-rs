@@ -600,7 +600,7 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        self.get_slot(key).map(Slot::value)
+        self.get_index_of(key).map(|index| self.base[index].value())
     }
 
     /// Return a mutable reference to the value stored for `key`, if it is present, else `None`.
@@ -622,7 +622,8 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        self.get_slot_mut(key).map(Slot::value_mut)
+        self.get_index_of(key)
+            .map(|index| self.base[index].value_mut())
     }
 
     /// Return references to the key-value pair stored at `index`, if it is present, else `None`.
@@ -728,7 +729,7 @@ impl<K, V> VecMap<K, V> {
         K: Borrow<Q>,
         Q: Eq + ?Sized,
     {
-        self.get_slot(key).map(Slot::refs)
+        self.get_index_of(key).map(|index| self.base[index].refs())
     }
 
     /// Return item index, if it exists in the map.
@@ -755,22 +756,6 @@ impl<K, V> VecMap<K, V> {
         }
 
         self.base.iter().position(|slot| slot.key().borrow() == key)
-    }
-
-    fn get_slot<Q>(&self, key: &Q) -> Option<&Slot<K, V>>
-    where
-        K: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.get_index_of(key).map(|index| &self.base[index])
-    }
-
-    fn get_slot_mut<Q>(&mut self, key: &Q) -> Option<&mut Slot<K, V>>
-    where
-        K: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.get_index_of(key).map(|index| &mut self.base[index])
     }
 }
 
