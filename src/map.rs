@@ -207,7 +207,8 @@ impl<K, V> VecMap<K, V> {
     where
         F: FnMut(&K, &V) -> bool,
     {
-        self.base.retain_mut(|slot| f(&slot.key, &mut slot.value));
+        self.base
+            .retain_mut(|slot| f(&slot.entry.0, &mut slot.entry.1));
     }
 
     /// Shrinks the capacity of the map as much as possible. It will drop down as much as possible
@@ -316,7 +317,7 @@ impl<K, V> VecMap<K, V> {
     // exists.
     fn push(&mut self, key: K, value: V) -> usize {
         let index = self.base.len();
-        self.base.push(Slot { key, value });
+        self.base.push(Slot::new(key, value));
         index
     }
 
@@ -344,7 +345,7 @@ impl<K, V> VecMap<K, V> {
     where
         K: Ord,
     {
-        self.base.sort_by(|a, b| a.key.cmp(&b.key));
+        self.base.sort_by(|a, b| a.key_ref().cmp(b.key_ref()));
     }
 
     /// Sorts the map by key.
@@ -367,7 +368,8 @@ impl<K, V> VecMap<K, V> {
     where
         K: Ord,
     {
-        self.base.sort_unstable_by(|a, b| a.key.cmp(&b.key));
+        self.base
+            .sort_unstable_by(|a, b| a.key_ref().cmp(b.key_ref()));
     }
 
     /// Sorts the map with a comparator function.
@@ -677,7 +679,7 @@ impl<K, V> VecMap<K, V> {
     {
         self.get_index_of(key).map(|index| {
             let slot = &self.base[index];
-            (index, &slot.key, &slot.value)
+            (index, slot.key_ref(), slot.value_ref())
         })
     }
 
@@ -704,7 +706,7 @@ impl<K, V> VecMap<K, V> {
     {
         self.get_index_of(key).map(|index| {
             let slot = &mut self.base[index];
-            (index, &slot.key, &mut slot.value)
+            (index, &slot.entry.0, &mut slot.entry.1)
         })
     }
 
@@ -751,7 +753,9 @@ impl<K, V> VecMap<K, V> {
             return None;
         }
 
-        self.base.iter().position(|slot| slot.key.borrow() == key)
+        self.base
+            .iter()
+            .position(|slot| slot.key_ref().borrow() == key)
     }
 
     fn get_slot<Q>(&self, key: &Q) -> Option<&Slot<K, V>>
@@ -1024,8 +1028,8 @@ where
     pub fn insert_full(&mut self, key: K, value: V) -> (usize, Option<V>) {
         match self.get_index_of(&key) {
             Some(index) => {
-                let old_slot = mem::replace(&mut self.base[index], Slot { key, value });
-                (index, Some(old_slot.value))
+                let old_slot = mem::replace(&mut self.base[index], Slot::new(key, value));
+                (index, Some(old_slot.value()))
             }
             None => (self.push(key, value), None),
         }
@@ -1059,16 +1063,16 @@ where
     pub fn insert_at(&mut self, index: usize, key: K, value: V) -> Option<(usize, V)> {
         if let Some(old_index) = self.get_index_of(&key) {
             let old_slot = if old_index == index {
-                mem::replace(&mut self.base[index], Slot { key, value })
+                mem::replace(&mut self.base[index], Slot::new(key, value))
             } else {
                 let old_slot = self.base.remove(old_index);
-                self.base.insert(index, Slot { key, value });
+                self.base.insert(index, Slot::new(key, value));
                 old_slot
             };
 
-            Some((old_index, old_slot.value))
+            Some((old_index, old_slot.value()))
         } else {
-            self.base.insert(index, Slot { key, value });
+            self.base.insert(index, Slot::new(key, value));
             None
         }
     }

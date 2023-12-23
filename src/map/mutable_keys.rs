@@ -142,7 +142,7 @@ impl<K, V> MutableKeys for VecMap<K, V> {
     {
         self.get_index_of(key).map(|index| {
             let slot = &mut self.base[index];
-            (index, &mut slot.key, &mut slot.value)
+            (index, &mut slot.entry.0, &mut slot.entry.1)
         })
     }
 
@@ -155,7 +155,7 @@ impl<K, V> MutableKeys for VecMap<K, V> {
         F: FnMut(&mut K, &mut V) -> bool,
     {
         self.base
-            .retain_mut(|slot| f(&mut slot.key, &mut slot.value));
+            .retain_mut(|slot| f(&mut slot.entry.0, &mut slot.entry.1));
     }
 
     fn iter_mut2(&mut self) -> IterMut2<'_, K, V> {
