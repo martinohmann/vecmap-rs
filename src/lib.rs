@@ -24,72 +24,69 @@ pub use self::set::VecSet;
 use alloc::vec::Vec;
 
 // The type used to store entries in a `VecMap`.
+//
+// It is just a transparent wrapper around `(K, V)` with accessor methods for use in `map`
+// functions.
 #[repr(transparent)]
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct Slot<K, V> {
-    entry: (K, V),
+    data: (K, V),
 }
 
-// Accessor methods which can be used in `map` functions.
 impl<K, V> Slot<K, V> {
     #[inline]
     fn new(key: K, value: V) -> Self {
-        Slot {
-            entry: (key, value),
-        }
+        Slot { data: (key, value) }
     }
-}
 
-// Accessor methods which can be used in `map` functions.
-impl<K, V> Slot<K, V> {
     #[inline]
-    fn key_ref(&self) -> &K {
-        &self.entry.0
+    fn key(&self) -> &K {
+        &self.data.0
     }
 
     #[inline]
     fn key_mut(&mut self) -> &mut K {
-        &mut self.entry.0
+        &mut self.data.0
     }
 
     #[inline]
-    fn key(self) -> K {
-        self.entry.0
+    fn into_key(self) -> K {
+        self.data.0
     }
 
     #[inline]
-    fn value_ref(&self) -> &V {
-        &self.entry.1
+    fn value(&self) -> &V {
+        &self.data.1
     }
 
     #[inline]
     fn value_mut(&mut self) -> &mut V {
-        &mut self.entry.1
+        &mut self.data.1
     }
 
     #[inline]
-    fn value(self) -> V {
-        self.entry.1
+    fn into_value(self) -> V {
+        self.data.1
     }
 
     #[inline]
     fn refs(&self) -> (&K, &V) {
-        (&self.entry.0, &self.entry.1)
+        (&self.data.0, &self.data.1)
     }
 
     #[inline]
     fn ref_mut(&mut self) -> (&K, &mut V) {
-        (&self.entry.0, &mut self.entry.1)
+        (&self.data.0, &mut self.data.1)
     }
 
     #[inline]
     fn muts(&mut self) -> (&mut K, &mut V) {
-        (&mut self.entry.0, &mut self.entry.1)
+        (&mut self.data.0, &mut self.data.1)
     }
 
     #[inline]
-    fn key_value(self) -> (K, V) {
-        (self.entry.0, self.entry.1)
+    fn into_key_value(self) -> (K, V) {
+        self.data
     }
 }
 

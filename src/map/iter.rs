@@ -175,7 +175,7 @@ where
     }
 }
 
-impl_iterator!(IntoIter<K, V>, (K, V), Slot::key_value);
+impl_iterator!(IntoIter<K, V>, (K, V), Slot::into_key_value);
 
 /// An iterator over the keys of a `VecMap`.
 ///
@@ -202,7 +202,7 @@ impl<K, V> Clone for Keys<'_, K, V> {
     }
 }
 
-impl_iterator!(Keys<'a, K, V>, &'a K, Slot::key_ref);
+impl_iterator!(Keys<'a, K, V>, &'a K, Slot::key);
 
 /// A mutable iterator over the keys of a `VecMap`.
 ///
@@ -255,7 +255,7 @@ where
     }
 }
 
-impl_iterator!(IntoKeys<K, V>, K, Slot::key);
+impl_iterator!(IntoKeys<K, V>, K, Slot::into_key);
 
 /// An iterator over the values of a `VecMap`.
 ///
@@ -283,7 +283,7 @@ impl<K, V> Clone for Values<'_, K, V> {
     }
 }
 
-impl_iterator!(Values<'a, K, V>, &'a V, Slot::value_ref);
+impl_iterator!(Values<'a, K, V>, &'a V, Slot::value);
 
 /// A mutable iterator over the values of a `VecMap`.
 ///
@@ -335,7 +335,7 @@ where
     }
 }
 
-impl_iterator!(IntoValues<K, V>, V, Slot::value);
+impl_iterator!(IntoValues<K, V>, V, Slot::into_value);
 
 /// A draining iterator for `VecMap`.
 ///
@@ -362,4 +362,4 @@ impl<'a, K, V> Drain<'a, K, V> {
     }
 }
 
-impl_iterator!(Drain<'a, K, V>, (K, V), Slot::key_value);
+impl_iterator!(Drain<'a, K, V>, (K, V), Slot::into_key_value);

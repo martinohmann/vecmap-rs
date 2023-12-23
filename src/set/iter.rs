@@ -39,7 +39,7 @@ macro_rules! impl_iterator {
             T: fmt::Debug,
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                let iter = self.iter.as_slice().iter().map(Slot::key_ref);
+                let iter = self.iter.as_slice().iter().map(Slot::key);
                 f.debug_list().entries(iter).finish()
             }
         }
@@ -91,7 +91,7 @@ impl<T> Clone for Iter<'_, T> {
     }
 }
 
-impl_iterator!(Iter<'a, T>, &'a T, Slot::key_ref);
+impl_iterator!(Iter<'a, T>, &'a T, Slot::key);
 
 /// An owning iterator over the elements of a `VecSet`.
 ///
@@ -123,7 +123,7 @@ where
     }
 }
 
-impl_iterator!(IntoIter<T>, T, Slot::key);
+impl_iterator!(IntoIter<T>, T, Slot::into_key);
 
 /// A lazy iterator producing elements in the difference of `VecSet`s.
 ///
