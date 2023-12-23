@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.15](https://github.com/martinohmann/vecmap-rs/compare/v0.1.14...v0.1.15) (2023-12-23)
+
+
+### Miscellaneous
+
+* improve internal `Slot&lt;K, V&gt;` API ([#22](https://github.com/martinohmann/vecmap-rs/issues/22)) ([c3bb9b7](https://github.com/martinohmann/vecmap-rs/commit/c3bb9b78f277d852b28c96df27d5ef2d3266846b))
+
 ## [0.1.14](https://github.com/martinohmann/vecmap-rs/compare/v0.1.13...v0.1.14) (2023-12-23)
 
 
