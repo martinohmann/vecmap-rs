@@ -20,10 +20,10 @@ jobs:
           - nightly
         include:
           - build: stable
-            os: ubuntu-20.04
+            os: ubuntu-latest
             rust: stable
           - build: nightly
-            os: ubuntu-20.04
+            os: ubuntu-latest
             rust: nightly
     steps:
       - name: Checkout repository
@@ -53,9 +53,29 @@ jobs:
       - name: Run tests
         run: cargo test --workspace --all-features
 
+  miri:
+    name: miri
+    runs-on: ubuntu-latest
+    env:
+      MIRIFLAGS: -Zmiri-tag-raw-pointers
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+          components: miri
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Default features
+        run: cargo miri test --workspace
+
   rustfmt:
     name: rustfmt
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -73,7 +93,7 @@ jobs:
 
   docs:
     name: Docs
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
