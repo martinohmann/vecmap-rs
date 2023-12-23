@@ -615,7 +615,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.pop(), None);
     /// ```
     pub fn pop(&mut self) -> Option<T> {
-        self.base.pop().map(|(k, _)| k)
+        self.base.pop().map(|(k, ())| k)
     }
 
     /// Remove the element equivalent to `value`.
@@ -765,7 +765,7 @@ impl<T> VecSet<T> {
         T: Borrow<Q>,
         Q: ?Sized + Eq,
     {
-        self.base.remove_entry(value).map(|(k, _)| k)
+        self.base.remove_entry(value).map(|(k, ())| k)
     }
 
     /// Removes and returns the value in the set, if any, that is equal to the given one.
@@ -790,7 +790,7 @@ impl<T> VecSet<T> {
         T: Borrow<Q>,
         Q: ?Sized + Eq,
     {
-        self.base.swap_remove_entry(value).map(|(k, _)| k)
+        self.base.swap_remove_entry(value).map(|(k, ())| k)
     }
 }
 

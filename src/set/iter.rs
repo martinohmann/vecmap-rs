@@ -429,4 +429,4 @@ impl<'a, T> Drain<'a, T> {
     }
 }
 
-impl_iterator!(Drain<'a, T>, T, |(k, _)| k);
+impl_iterator!(Drain<'a, T>, T, |(k, ())| k);

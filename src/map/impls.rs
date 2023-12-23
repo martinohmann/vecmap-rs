@@ -143,6 +143,8 @@ where
     V: Clone,
 {
     fn from(slice: &mut [(K, V)]) -> Self {
+        // False-positive, we're re-slicing on purpose to go from `&mut [(K, V)]` to `&[(K, V)]`.
+        #[allow(clippy::redundant_slicing)]
         VecMap::from_iter(&slice[..])
     }
 }
