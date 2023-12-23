@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.14](https://github.com/martinohmann/vecmap-rs/compare/v0.1.13...v0.1.14) (2023-12-23)
+
+
+### Bug Fixes
+
+* **map:** prevent segmentation fault in `VecMap::as_slice` ([#19](https://github.com/martinohmann/vecmap-rs/issues/19)) ([a1d5990](https://github.com/martinohmann/vecmap-rs/commit/a1d599019a455656dc95d66fa31243daf9c7823d))
+
+
+### Miscellaneous
+
+* apply new clippy lint suggestions ([ed59fa5](https://github.com/martinohmann/vecmap-rs/commit/ed59fa5cbede6848e69665cc3215847672a7083b))
+
 ## [0.1.13](https://github.com/martinohmann/vecmap-rs/compare/v0.1.12...v0.1.13) (2023-12-11)
 
 
