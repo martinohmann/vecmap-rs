@@ -117,12 +117,12 @@ where
     /// Constructs map from a vector of `(key → value)` pairs.
     ///
     /// **Note**: This conversion has a quadratic complexity because the
-    /// conversion preserve order of elements while at the same time having to
-    /// make sure no duplicate keys exist.  To avoid it, sort and deduplicate
+    /// conversion preserves order of elements while at the same time having to
+    /// make sure no duplicate keys exist. To avoid it, sort and deduplicate
     /// the vector and use [`VecMap::from_vec_unchecked`] instead.
     fn from(mut vec: Vec<(K, V)>) -> Self {
         crate::dedup(&mut vec, |rhs, lhs| rhs.0 == lhs.0);
-        // SAFETY: We’ve just deduplicated the elements.
+        // SAFETY: We've just deduplicated the elements.
         unsafe { Self::from_vec_unchecked(vec) }
     }
 }

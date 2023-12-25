@@ -470,9 +470,9 @@ impl<K, V> VecMap<K, V> {
     ///
     /// # Safety
     ///
-    /// The vector must have no duplicate keys.  One way to guarantee it is to
-    /// sort the vector (e.g. by using [`[T]::sort_by_key`]) and then drop
-    /// duplicate keys (e.g. by using [`Vec::dedup_by_key`].
+    /// The vector must have no duplicate keys. One way to guarantee it is to
+    /// sort the vector (e.g. by using [`[T]::sort_by_key`][slice-sort-by-key]) and then drop
+    /// duplicate keys (e.g. by using [`Vec::dedup_by_key`]).
     ///
     /// # Example
     ///
@@ -482,15 +482,17 @@ impl<K, V> VecMap<K, V> {
     /// let mut vec = vec![("b", 2), ("a", 1), ("c", 3), ("b", 4)];
     /// vec.sort_by_key(|slot| slot.0);
     /// vec.dedup_by_key(|slot| slot.0);
-    /// // SAFETY: We’ve just deduplicated the vector.
+    /// // SAFETY: We've just deduplicated the vector.
     /// let map = unsafe { VecMap::from_vec_unchecked(vec) };
     ///
     /// assert_eq!(map, VecMap::from([("b", 2), ("a", 1), ("c", 3)]));
     /// ```
+    ///
+    /// [slice-sort-by-key]: https://doc.rust-lang.org/std/primitive.slice.html#method.sort_by_key
     pub unsafe fn from_vec_unchecked(mut vec: Vec<(K, V)>) -> Self {
         let (ptr, len, cap) = (vec.as_mut_ptr(), vec.len(), vec.capacity());
         core::mem::forget(vec);
-        // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
+        // SAFETY: `Vec<(K, V)>` and `Vec<Slot<K, V>>` have the same memory layout.
         let base = unsafe { Vec::from_raw_parts(ptr.cast(), len, cap) };
         VecMap { base }
     }
