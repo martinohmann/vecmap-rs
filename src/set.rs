@@ -462,6 +462,40 @@ impl<T> VecSet<T> {
     pub fn into_vec(self) -> Vec<T> {
         self.into_iter().collect()
     }
+
+    /// Takes ownership of provided vector and converts it into `VecSet`.
+    ///
+    /// # Safety
+    ///
+    /// The vector must have no duplicate elements. One way to guarantee it is to sort the vector
+    /// (e.g. by using [`[T]::sort`][slice-sort]) and then drop duplicate elements (e.g. by using
+    /// [`Vec::dedup`]).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut vec = vec!["b", "a", "c", "b"];
+    /// vec.sort();
+    /// vec.dedup();
+    /// // SAFETY: We've just deduplicated the vector.
+    /// let set = unsafe { VecSet::from_vec_unchecked(vec) };
+    ///
+    /// assert_eq!(set, VecSet::from(["b", "a", "c"]));
+    /// ```
+    ///
+    /// [slice-sort]: https://doc.rust-lang.org/std/primitive.slice.html#method.sort
+    pub unsafe fn from_vec_unchecked(mut vec: Vec<T>) -> Self {
+        let (ptr, len, cap) = (vec.as_mut_ptr(), vec.len(), vec.capacity());
+        core::mem::forget(vec);
+        // SAFETY: `Vec<T>` and `Vec<(T, ())>` have the same memory layout.
+        let base = unsafe { Vec::from_raw_parts(ptr.cast(), len, cap) };
+        VecSet {
+            // SAFETY: The caller ensures that the vector does not contain duplicate elements.
+            base: unsafe { VecMap::from_vec_unchecked(base) },
+        }
+    }
 }
 
 // Lookup operations.

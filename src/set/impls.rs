@@ -70,8 +70,16 @@ impl<T> From<Vec<T>> for VecSet<T>
 where
     T: Eq,
 {
-    fn from(vec: Vec<T>) -> Self {
-        VecSet::from_iter(vec)
+    /// Constructs set from a vector.
+    ///
+    /// **Note**: This conversion has a quadratic complexity because the
+    /// conversion preserves order of elements while at the same time having to
+    /// make sure no duplicate elements exist. To avoid it, sort and deduplicate
+    /// the vector and use [`VecSet::from_vec_unchecked`] instead.
+    fn from(mut vec: Vec<T>) -> Self {
+        crate::dedup(&mut vec, |rhs, lhs| rhs == lhs);
+        // SAFETY: We've just deduplicated the elements.
+        unsafe { Self::from_vec_unchecked(vec) }
     }
 }
 
