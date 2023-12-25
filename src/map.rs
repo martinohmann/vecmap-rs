@@ -205,7 +205,7 @@ impl<K, V> VecMap<K, V> {
     /// ```
     pub fn retain<F>(&mut self, mut f: F)
     where
-        F: FnMut(&K, &V) -> bool,
+        F: FnMut(&K, &mut V) -> bool,
     {
         self.base.retain_mut(|slot| {
             let (key, value) = slot.ref_mut();
