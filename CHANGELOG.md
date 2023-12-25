@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0](https://github.com/martinohmann/vecmap-rs/compare/v0.1.15...v0.2.0) (2023-12-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **map:** The type of the function parameter of `VecMap::retain` was changed from `FnMut(&K, &V) -> bool` to `FnMut(&K, &mut V) -> bool` to make it consistent with `retain` implementations of other common `std` collections.
+
+### Features
+
+* **set:** add `VecSet::from_vec_unchecked` ([#27](https://github.com/martinohmann/vecmap-rs/issues/27)) ([519348b](https://github.com/martinohmann/vecmap-rs/commit/519348bfba4a0ef2c2ddba144cbb9c0adb87a851))
+
+
+### Bug Fixes
+
+* **map:** update API of VecMap::retain to be consistent with std ([#25](https://github.com/martinohmann/vecmap-rs/issues/25)) ([0daf65d](https://github.com/martinohmann/vecmap-rs/commit/0daf65d7b04ad7fe8717bc03bd7b14c2f38d547b))
+
 ## [0.1.15](https://github.com/martinohmann/vecmap-rs/compare/v0.1.14...v0.1.15) (2023-12-23)
 
 
