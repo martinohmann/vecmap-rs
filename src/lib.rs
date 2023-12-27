@@ -114,6 +114,18 @@ fn dedup<T>(vec: &mut Vec<T>, eq_fn: impl Fn(&T, &T) -> bool) {
     vec.truncate(out);
 }
 
+/// Cast a `Vec<T>` into a `Vec<U>`.
+///
+/// # Safety
+///
+/// Callers must ensure that `T` and `U` have the same memory layout.
+unsafe fn transmute_vec<T, U>(mut vec: Vec<T>) -> Vec<U> {
+    let (ptr, len, cap) = (vec.as_mut_ptr(), vec.len(), vec.capacity());
+    core::mem::forget(vec);
+    // SAFETY: callers must uphold the invariants of `T` and `U` mentioned in the function doc.
+    unsafe { Vec::from_raw_parts(ptr.cast(), len, cap) }
+}
+
 #[test]
 fn test_dedup() {
     fn test(want: &[u32], arr: &[u32]) {

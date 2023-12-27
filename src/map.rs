@@ -24,7 +24,7 @@ pub use self::mutable_keys::MutableKeys;
 /// `Ord`.
 #[derive(Clone, Debug)]
 pub struct VecMap<K, V> {
-    base: Vec<Slot<K, V>>,
+    pub(crate) base: Vec<Slot<K, V>>,
 }
 
 impl<K, V> VecMap<K, V> {
@@ -463,7 +463,8 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(vec, [("b", 2), ("a", 1), ("c", 3)]);
     /// ```
     pub fn into_vec(self) -> Vec<(K, V)> {
-        self.into_iter().collect()
+        // SAFETY: `Vec<Slot<K, V>>` and `Vec<(K, V)>` have the same memory layout.
+        unsafe { super::transmute_vec(self.base) }
     }
 
     /// Takes ownership of provided vector and converts it into `VecMap`.
@@ -489,11 +490,9 @@ impl<K, V> VecMap<K, V> {
     /// ```
     ///
     /// [slice-sort-by-key]: https://doc.rust-lang.org/std/primitive.slice.html#method.sort_by_key
-    pub unsafe fn from_vec_unchecked(mut vec: Vec<(K, V)>) -> Self {
-        let (ptr, len, cap) = (vec.as_mut_ptr(), vec.len(), vec.capacity());
-        core::mem::forget(vec);
+    pub unsafe fn from_vec_unchecked(vec: Vec<(K, V)>) -> Self {
         // SAFETY: `Vec<(K, V)>` and `Vec<Slot<K, V>>` have the same memory layout.
-        let base = unsafe { Vec::from_raw_parts(ptr.cast(), len, cap) };
+        let base = unsafe { super::transmute_vec(vec) };
         VecMap { base }
     }
 }

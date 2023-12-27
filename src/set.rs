@@ -460,7 +460,8 @@ impl<T> VecSet<T> {
     /// assert_eq!(vec, ["b", "a", "c"]);
     /// ```
     pub fn into_vec(self) -> Vec<T> {
-        self.into_iter().collect()
+        // SAFETY: `Vec<Slot<T, ()>>` and `Vec<T>` have the same memory layout.
+        unsafe { super::transmute_vec(self.base.base) }
     }
 
     /// Takes ownership of provided vector and converts it into `VecSet`.
@@ -486,14 +487,11 @@ impl<T> VecSet<T> {
     /// ```
     ///
     /// [slice-sort]: https://doc.rust-lang.org/std/primitive.slice.html#method.sort
-    pub unsafe fn from_vec_unchecked(mut vec: Vec<T>) -> Self {
-        let (ptr, len, cap) = (vec.as_mut_ptr(), vec.len(), vec.capacity());
-        core::mem::forget(vec);
-        // SAFETY: `Vec<T>` and `Vec<(T, ())>` have the same memory layout.
-        let base = unsafe { Vec::from_raw_parts(ptr.cast(), len, cap) };
+    pub unsafe fn from_vec_unchecked(vec: Vec<T>) -> Self {
+        // SAFETY: `Vec<T>` and `Vec<Slot<T, ()>>` have the same memory layout.
+        let base = unsafe { super::transmute_vec(vec) };
         VecSet {
-            // SAFETY: The caller ensures that the vector does not contain duplicate elements.
-            base: unsafe { VecMap::from_vec_unchecked(base) },
+            base: VecMap { base },
         }
     }
 }
