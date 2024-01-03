@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1](https://github.com/martinohmann/vecmap-rs/compare/v0.2.0...v0.2.1) - 2024-01-03
+
+### Other
+- *(release)* switch to release-plz
+- avoid unnecessary allocations in `Vec{Map,Set}::into_vec`
+
 ## [0.2.0](https://github.com/martinohmann/vecmap-rs/compare/v0.1.15...v0.2.0) (2023-12-25)
 
 
