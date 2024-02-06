@@ -27,7 +27,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set: VecSet<&str> = VecSet::new();
     /// ```
@@ -43,7 +43,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set: VecSet<&str> = VecSet::with_capacity(10);
     /// assert_eq!(set.len(), 0);
@@ -60,7 +60,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set: VecSet<&str> = VecSet::with_capacity(10);
     /// assert_eq!(set.capacity(), 10);
@@ -74,7 +74,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut a = VecSet::new();
     /// assert_eq!(a.len(), 0);
@@ -90,7 +90,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut a = VecSet::new();
     /// assert!(a.is_empty());
@@ -106,7 +106,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut a = VecSet::new();
     /// a.insert(1);
@@ -126,7 +126,7 @@ impl<T> VecSet<T> {
     /// Truncating a four element set to two elements:
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from(["a", "b", "c", "d"]);
     /// set.truncate(2);
@@ -136,7 +136,7 @@ impl<T> VecSet<T> {
     /// No truncation occurs when `len` is greater than the set's current length:
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from(["a", "b", "c", "d"]);
     /// set.truncate(8);
@@ -151,7 +151,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from_iter(["a", "b", "c"]);
     /// set.reverse();
@@ -173,7 +173,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from_iter(["a"]);
     /// set.reserve(10);
@@ -190,7 +190,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set: VecSet<i32> = VecSet::from([0, 1, 2, 3, 4, 5, 6, 7]);
     /// set.retain(|&e| e % 2 == 0);
@@ -210,7 +210,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set: VecSet<i32> = VecSet::with_capacity(100);
     /// set.insert(1);
@@ -232,7 +232,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set: VecSet<i32> = VecSet::with_capacity(100);
     /// set.insert(1);
@@ -260,7 +260,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from(["a", "b", "c"]);
     /// let set2 = set.split_off(1);
@@ -287,7 +287,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut v = VecSet::from([1, 2, 3]);
     /// let u: VecSet<_> = v.drain(1..).collect();
@@ -311,7 +311,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let set = VecSet::from(["a", "b", "c"]);
     ///
@@ -335,7 +335,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from(["b", "a", "c"]);
     ///
@@ -358,7 +358,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from(["b", "a", "c"]);
     ///
@@ -381,7 +381,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from(["b", "a", "c"]);
     ///
@@ -404,7 +404,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from(["b", "a", "c"]);
     ///
@@ -422,7 +422,7 @@ impl<T> VecSet<T> {
     /// Extracts a slice containing the set elements.
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let set = VecSet::from(["b", "a", "c"]);
     /// let slice = set.as_slice();
@@ -436,7 +436,7 @@ impl<T> VecSet<T> {
     /// Copies the set elements into a new `Vec<T>`.
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let set = VecSet::from(["b", "a", "c"]);
     /// let vec = set.to_vec();
@@ -453,7 +453,7 @@ impl<T> VecSet<T> {
     /// Takes ownership of the set and returns its elements as a `Vec<T>`.
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let set = VecSet::from(["b", "a", "c"]);
     /// let vec = set.into_vec();
@@ -475,7 +475,7 @@ impl<T> VecSet<T> {
     /// # Example
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut vec = vec!["b", "a", "c", "b"];
     /// vec.sort();
@@ -503,7 +503,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::new();
     /// set.insert(1);
@@ -521,7 +521,7 @@ impl<T> VecSet<T> {
     /// Get the first element.
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from_iter(["a", "b"]);
     /// assert_eq!(set.first(), Some(&"a"));
@@ -535,7 +535,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from_iter(["a", "b"]);
     /// assert_eq!(set.last(), Some(&"b"));
@@ -555,7 +555,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let set = VecSet::from([1, 2, 3]);
     /// assert_eq!(set.get(&2), Some(&2));
@@ -574,7 +574,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::new();
     /// set.insert(1);
@@ -594,7 +594,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let set = VecSet::from([1, 2, 3]);
     /// assert_eq!(set.get_full(&2), Some((1, &2)));
@@ -613,7 +613,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::new();
     /// set.insert("a");
@@ -638,7 +638,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from_iter(["a", "b"]);
     /// assert_eq!(set.pop(), Some("b"));
@@ -660,7 +660,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from_iter([1, 2, 3, 4]);
     /// assert_eq!(set.remove(&2), true);
@@ -689,7 +689,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut v = VecSet::from(["a", "b", "c"]);
     /// assert_eq!(v.remove_index(1), "b");
@@ -707,7 +707,7 @@ impl<T> VecSet<T> {
     /// Returns `true` if `value` was found in the set.
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from_iter([1, 2, 3, 4]);
     /// assert_eq!(set.swap_remove(&2), true);
@@ -737,7 +737,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut v = VecSet::from(["foo", "bar", "baz", "qux"]);
     ///
@@ -765,7 +765,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from(["a", "b", "c", "d"]);
     /// set.swap_indices(1, 3);
@@ -786,7 +786,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from([1, 2, 3]);
     /// assert_eq!(set.take(&2), Some(2));
@@ -811,7 +811,7 @@ impl<T> VecSet<T> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::from([1, 2, 3]);
     /// assert_eq!(set.take(&2), Some(2));
@@ -841,7 +841,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let mut set = VecSet::new();
     ///
@@ -865,7 +865,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     /// let a = VecSet::from([1, 2, 3]);
     /// let b = VecSet::from([4, 2, 3, 4]);
     ///
@@ -897,7 +897,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     /// let a = VecSet::from([1, 2, 3]);
     /// let b = VecSet::from([4, 2, 3, 4]);
     ///
@@ -923,7 +923,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     /// let a = VecSet::from([1, 2, 3]);
     /// let b = VecSet::from([4, 2, 3, 4]);
     ///
@@ -948,7 +948,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     /// let a = VecSet::from([1, 2, 3]);
     /// let b = VecSet::from([4, 2, 3, 4]);
     ///
@@ -974,7 +974,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let a = VecSet::from([1, 2, 3]);
     /// let mut b = VecSet::new();
@@ -999,7 +999,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let sup = VecSet::from([1, 2, 3]);
     /// let mut set = VecSet::new();
@@ -1024,7 +1024,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecSet;
+    /// use vecset::VecSet;
     ///
     /// let sub = VecSet::from([1, 2]);
     /// let mut set = VecSet::new();

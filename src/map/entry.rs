@@ -17,7 +17,7 @@ impl<'a, K, V> Entry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     ///
@@ -40,7 +40,7 @@ impl<'a, K, V> Entry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, String> = VecMap::new();
     /// let s = "hoho".to_string();
@@ -69,7 +69,7 @@ impl<'a, K, V> Entry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, usize> = VecMap::new();
     ///
@@ -95,7 +95,7 @@ impl<'a, K, V> Entry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// assert_eq!(map.entry("poneyland").key(), &"poneyland");
@@ -112,7 +112,7 @@ impl<'a, K, V> Entry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// assert_eq!(map.entry("poneyland").index(), 0);
@@ -130,7 +130,7 @@ impl<'a, K, V> Entry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     ///
@@ -164,7 +164,7 @@ impl<'a, K, V> Entry<'a, K, V> {
     ///
     /// ```
     /// # fn main() {
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, Option<u32>> = VecMap::new();
     /// map.entry("poneyland").or_default();
@@ -201,7 +201,7 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.entry("poneyland").or_insert(12);
@@ -216,7 +216,7 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.entry("poneyland").or_insert(12);
@@ -231,8 +231,8 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.insert("foo", 1);
@@ -250,8 +250,8 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.entry("poneyland").or_insert(12);
@@ -274,8 +274,8 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.entry("poneyland").or_insert(12);
@@ -305,8 +305,8 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.entry("poneyland").or_insert(12);
@@ -327,8 +327,8 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.entry("poneyland").or_insert(12);
@@ -352,8 +352,8 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.entry("poneyland").or_insert(12);
@@ -381,8 +381,8 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.entry("poneyland").or_insert(12);
@@ -411,8 +411,8 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.entry("poneyland").or_insert(12);
@@ -439,8 +439,8 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// map.entry("poneyland").or_insert(12);
@@ -478,7 +478,7 @@ impl<'a, K, V> VacantEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// assert_eq!(map.entry("poneyland").key(), &"poneyland");
@@ -492,7 +492,7 @@ impl<'a, K, V> VacantEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     /// assert_eq!(map.entry("poneyland").index(), 0);
@@ -506,8 +506,8 @@ impl<'a, K, V> VacantEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     ///
@@ -525,8 +525,8 @@ impl<'a, K, V> VacantEntry<'a, K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
-    /// use vecmap::map::Entry;
+    /// use vecset::VecMap;
+    /// use vecset::map::Entry;
     ///
     /// let mut map: VecMap<&str, u32> = VecMap::new();
     ///

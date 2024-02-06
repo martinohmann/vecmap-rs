@@ -26,7 +26,7 @@ pub trait MutableKeys: private::Sealed {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::map::{MutableKeys, VecMap};
+    /// use vecset::map::{MutableKeys, VecMap};
     ///
     /// let mut map = VecMap::new();
     /// map.insert(1, "a");
@@ -49,7 +49,7 @@ pub trait MutableKeys: private::Sealed {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::map::{MutableKeys, VecMap};
+    /// use vecset::map::{MutableKeys, VecMap};
     ///
     /// let mut map = VecMap::new();
     /// map.insert(1, "a");
@@ -70,7 +70,7 @@ pub trait MutableKeys: private::Sealed {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::map::{MutableKeys, VecMap};
+    /// use vecset::map::{MutableKeys, VecMap};
     ///
     /// let mut map: VecMap<i32, i32> = (0..8).map(|x| (x, x*10)).collect();
     /// map.retain2(|k, v| {
@@ -90,7 +90,7 @@ pub trait MutableKeys: private::Sealed {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::map::{MutableKeys, VecMap};
+    /// use vecset::map::{MutableKeys, VecMap};
     ///
     /// let mut map = VecMap::from([
     ///     ('a', 1),
@@ -114,7 +114,7 @@ pub trait MutableKeys: private::Sealed {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::map::{MutableKeys, VecMap};
+    /// use vecset::map::{MutableKeys, VecMap};
     ///
     /// let mut map = VecMap::from([
     ///     (1, "a"),

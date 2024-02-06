@@ -3,7 +3,7 @@
 /// ## Example
 ///
 /// ```
-/// use vecmap::vecmap;
+/// use vecset::vecmap;
 ///
 /// let map = vecmap!{
 ///     "a" => 1,
@@ -38,7 +38,7 @@ macro_rules! vecmap {
 /// ## Example
 ///
 /// ```
-/// use vecmap::vecset;
+/// use vecset::vecset;
 ///
 /// let set = vecset!{"a", "b"};
 /// assert!(set.contains("a"));

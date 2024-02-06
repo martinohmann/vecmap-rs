@@ -33,7 +33,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<i32, &str> = VecMap::new();
     /// ```
@@ -47,7 +47,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<i32, &str> = VecMap::with_capacity(10);
     /// assert_eq!(map.len(), 0);
@@ -64,7 +64,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<i32, &str> = VecMap::with_capacity(10);
     /// assert_eq!(map.capacity(), 10);
@@ -78,7 +78,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut a = VecMap::new();
     /// assert_eq!(a.len(), 0);
@@ -94,7 +94,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut a = VecMap::new();
     /// assert!(a.is_empty());
@@ -110,7 +110,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut a = VecMap::new();
     /// a.insert(1, "a");
@@ -130,7 +130,7 @@ impl<K, V> VecMap<K, V> {
     /// Truncating a four element map to two elements:
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3), ("d", 4)]);
     /// map.truncate(2);
@@ -140,7 +140,7 @@ impl<K, V> VecMap<K, V> {
     /// No truncation occurs when `len` is greater than the map's current length:
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3), ("d", 4)]);
     /// map.truncate(8);
@@ -157,7 +157,7 @@ impl<K, V> VecMap<K, V> {
     /// ```
     /// # extern crate alloc;
     /// # use alloc::vec::Vec;
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([("a", 1), ("b", 2), ("c", 3)]);
     /// map.reverse();
@@ -180,7 +180,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([("a", 1)]);
     /// map.reserve(10);
@@ -197,7 +197,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<i32, i32> = (0..8).map(|x| (x, x*10)).collect();
     /// map.retain(|&k, _| k % 2 == 0);
@@ -220,7 +220,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<i32, i32> = VecMap::with_capacity(100);
     /// map.insert(1, 2);
@@ -242,7 +242,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map: VecMap<i32, i32> = VecMap::with_capacity(100);
     /// map.insert(1, 2);
@@ -270,7 +270,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3)]);
     /// let map2 = map.split_off(1);
@@ -297,7 +297,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::{vecmap, VecMap};
+    /// use vecset::{vecmap, VecMap};
     ///
     /// let mut v = vecmap!["a" => 1, "b" => 2, "c" => 3];
     /// let u: VecMap<_, _> = v.drain(1..).collect();
@@ -335,7 +335,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     ///
@@ -358,7 +358,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     ///
@@ -382,7 +382,7 @@ impl<K, V> VecMap<K, V> {
     ///
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     ///
@@ -405,7 +405,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     ///
@@ -424,7 +424,7 @@ impl<K, V> VecMap<K, V> {
     /// Extracts a slice containing the map entries.
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     /// let slice = map.as_slice();
@@ -438,7 +438,7 @@ impl<K, V> VecMap<K, V> {
     /// Copies the map entries into a new `Vec<(K, V)>`.
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     /// let vec = map.to_vec();
@@ -456,7 +456,7 @@ impl<K, V> VecMap<K, V> {
     /// Takes ownership of the map and returns its entries as a `Vec<(K, V)>`.
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     /// let vec = map.into_vec();
@@ -478,7 +478,7 @@ impl<K, V> VecMap<K, V> {
     /// # Example
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut vec = vec![("b", 2), ("a", 1), ("c", 3), ("b", 4)];
     /// vec.sort_by_key(|slot| slot.0);
@@ -504,7 +504,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// map.insert(1, "a");
@@ -522,7 +522,7 @@ impl<K, V> VecMap<K, V> {
     /// Get the first key-value pair.
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
     /// assert_eq!(map.first(), Some((&"a", &1)));
@@ -536,7 +536,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
     ///
@@ -554,7 +554,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
     /// assert_eq!(map.last(), Some((&"b", &2)));
@@ -571,7 +571,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
     ///
@@ -589,7 +589,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// map.insert(1, "a");
@@ -609,7 +609,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// map.insert(1, "a");
@@ -632,7 +632,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// map.insert(1, "a");
@@ -649,7 +649,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// map.insert(1, "a");
@@ -668,7 +668,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// map.insert(1, "a");
@@ -692,7 +692,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// map.insert(1, "a");
@@ -718,7 +718,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// map.insert(1, "a");
@@ -738,7 +738,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// map.insert("a", 10);
@@ -768,7 +768,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
     /// assert_eq!(map.pop(), Some(("b", 2)));
@@ -788,7 +788,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([(1, "a"), (2, "b"), (3, "c"), (4, "d")]);
     /// assert_eq!(map.remove(&2), Some("b"));
@@ -812,7 +812,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([(1, "a"), (2, "b"), (3, "c"), (4, "d")]);
     /// assert_eq!(map.remove_entry(&2), Some((2, "b")));
@@ -841,7 +841,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut v = VecMap::from([("a", 1), ("b", 2), ("c", 3)]);
     /// assert_eq!(v.remove_index(1), ("b", 2));
@@ -859,7 +859,7 @@ impl<K, V> VecMap<K, V> {
     /// Return `None` if `key` is not in map.
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([(1, "a"), (2, "b"), (3, "c"), (4, "d")]);
     /// assert_eq!(map.swap_remove(&2), Some("b"));
@@ -883,7 +883,7 @@ impl<K, V> VecMap<K, V> {
     /// Return `None` if `key` is not in map.
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from_iter([(1, "a"), (2, "b"), (3, "c"), (4, "d")]);
     /// assert_eq!(map.swap_remove_entry(&2), Some((2, "b")));
@@ -914,7 +914,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut v = VecMap::from([("foo", 1), ("bar", 2), ("baz", 3), ("qux", 4)]);
     ///
@@ -942,7 +942,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3), ("d", 4)]);
     /// map.swap_indices(1, 3);
@@ -973,7 +973,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// assert_eq!(map.insert(37, "a"), None);
@@ -1002,7 +1002,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// assert_eq!(map.insert_full("a", 1), (0, None));
@@ -1037,7 +1037,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::new();
     /// assert_eq!(map.insert_at(0, "a", 1), None);
@@ -1068,7 +1068,7 @@ where
     /// ## Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut letters = VecMap::new();
     ///
@@ -1097,7 +1097,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let map = VecMap::from([
     ///     ("a", 1),
@@ -1119,7 +1119,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from([
     ///     ("a", 1),
@@ -1145,7 +1145,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let map = VecMap::from([
     ///     ("a", 1),
@@ -1167,7 +1167,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let map = VecMap::from([
     ///     ("a", 1),
@@ -1187,7 +1187,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let map = VecMap::from([
     ///     ("a", 1),
@@ -1209,7 +1209,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let mut map = VecMap::from([
     ///     ("a", 1),
@@ -1235,7 +1235,7 @@ impl<K, V> VecMap<K, V> {
     /// # Examples
     ///
     /// ```
-    /// use vecmap::VecMap;
+    /// use vecset::VecMap;
     ///
     /// let map = VecMap::from([
     ///     ("a", 1),
