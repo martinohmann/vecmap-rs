@@ -14,9 +14,12 @@ extern crate alloc;
 
 #[macro_use]
 mod macros;
+pub mod keyed;
 pub mod map;
 pub mod set;
 
+#[doc(inline)]
+pub use self::keyed::{Keyed, KeyedVecSet};
 #[doc(inline)]
 pub use self::map::VecMap;
 #[doc(inline)]
