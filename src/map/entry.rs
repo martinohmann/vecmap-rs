@@ -345,36 +345,6 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
 
     /// Removes and return the key-value pair stored in the map for this entry.
     ///
-    /// Like `Vec::swap_remove`, the pair is removed by swapping it with the last element of the
-    /// map and popping it off. **This perturbs the position of what used to be the last
-    /// element!**
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecset::VecMap;
-    /// use vecset::map::Entry;
-    ///
-    /// let mut map: VecMap<&str, u32> = VecMap::new();
-    /// map.entry("poneyland").or_insert(12);
-    /// map.entry("foo").or_insert(13);
-    /// map.entry("bar").or_insert(14);
-    ///
-    /// if let Entry::Occupied(o) = map.entry("poneyland") {
-    ///     // We delete the entry from the map.
-    ///     o.swap_remove_entry();
-    /// }
-    ///
-    /// assert_eq!(map.contains_key("poneyland"), false);
-    /// assert_eq!(map.get_index_of("foo"), Some(1));
-    /// assert_eq!(map.get_index_of("bar"), Some(0));
-    /// ```
-    pub fn swap_remove_entry(self) -> (K, V) {
-        self.map.swap_remove_index(self.index)
-    }
-
-    /// Removes and return the key-value pair stored in the map for this entry.
-    ///
     /// Like `Vec::remove`, the pair is removed by shifting all of the elements that follow it,
     /// preserving their relative order. **This perturbs the index of all of those elements!**
     ///
@@ -395,40 +365,11 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// }
     ///
     /// assert_eq!(map.contains_key("poneyland"), false);
-    /// assert_eq!(map.get_index_of("foo"), Some(0));
-    /// assert_eq!(map.get_index_of("bar"), Some(1));
+    /// assert_eq!(map.binary_search("foo"), Ok(1));
+    /// assert_eq!(map.binary_search("bar"), Ok(0));
     /// ```
     pub fn remove_entry(self) -> (K, V) {
         self.map.remove_index(self.index)
-    }
-
-    /// Removes the key-value pair stored in the map for this entry, and return the value.
-    ///
-    /// Like `Vec::swap_remove`, the pair is removed by swapping it with the last element of the
-    /// map and popping it off. **This perturbs the position of what used to be the last
-    /// element!**
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecset::VecMap;
-    /// use vecset::map::Entry;
-    ///
-    /// let mut map: VecMap<&str, u32> = VecMap::new();
-    /// map.entry("poneyland").or_insert(12);
-    /// map.entry("foo").or_insert(13);
-    /// map.entry("bar").or_insert(14);
-    ///
-    /// if let Entry::Occupied(o) = map.entry("poneyland") {
-    ///     assert_eq!(o.swap_remove(), 12);
-    /// }
-    ///
-    /// assert_eq!(map.contains_key("poneyland"), false);
-    /// assert_eq!(map.get_index_of("foo"), Some(1));
-    /// assert_eq!(map.get_index_of("bar"), Some(0));
-    /// ```
-    pub fn swap_remove(self) -> V {
-        self.swap_remove_entry().1
     }
 
     /// Removes the key-value pair stored in the map for this entry, and return the value.
@@ -452,8 +393,8 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
     /// }
     ///
     /// assert_eq!(map.contains_key("poneyland"), false);
-    /// assert_eq!(map.get_index_of("foo"), Some(0));
-    /// assert_eq!(map.get_index_of("bar"), Some(1));
+    /// assert_eq!(map.binary_search("foo"), Ok(1));
+    /// assert_eq!(map.binary_search("bar"), Ok(0));
     /// ```
     pub fn remove(self) -> V {
         self.remove_entry().1
@@ -465,11 +406,12 @@ impl<'a, K, V> OccupiedEntry<'a, K, V> {
 pub struct VacantEntry<'a, K, V> {
     map: &'a mut VecMap<K, V>,
     key: K,
+    index: usize,
 }
 
 impl<'a, K, V> VacantEntry<'a, K, V> {
-    pub(super) fn new(map: &'a mut VecMap<K, V>, key: K) -> VacantEntry<'a, K, V> {
-        VacantEntry { map, key }
+    pub(super) fn new(map: &'a mut VecMap<K, V>, key: K, index: usize) -> VacantEntry<'a, K, V> {
+        VacantEntry { map, key, index }
     }
 
     /// Gets a reference to the key that would be used when inserting a value through the
@@ -536,7 +478,7 @@ impl<'a, K, V> VacantEntry<'a, K, V> {
     /// assert_eq!(map["poneyland"], 37);
     /// ```
     pub fn insert(self, value: V) -> &'a mut V {
-        let index = self.map.push(self.key, value);
-        &mut self.map[index]
+        self.map.base.base.insert(self.index, (self.key, value));
+        &mut self.map[self.index]
     }
 }

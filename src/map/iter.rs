@@ -1,8 +1,7 @@
-use super::{Entries, Slot, VecMap};
+use super::{Slot, VecMap};
 use alloc::vec::{self, Vec};
 use core::fmt;
 use core::iter::FusedIterator;
-use core::ops::RangeBounds;
 use core::slice;
 
 macro_rules! impl_iterator {
@@ -39,7 +38,7 @@ macro_rules! impl_iterator {
             V: fmt::Debug,
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                let iter = self.iter.as_slice().iter().map(Slot::refs);
+                let iter = self.iter.as_slice().iter().map(VecMap::refs);
                 f.debug_list().entries(iter).finish()
             }
         }
@@ -52,7 +51,7 @@ impl<K, V> IntoIterator for VecMap<K, V> {
     type IntoIter = IntoIter<K, V>;
 
     fn into_iter(self) -> Self::IntoIter {
-        IntoIter::new(self.into_entries())
+        IntoIter::new(self.base.into_vec())
     }
 }
 
@@ -101,7 +100,7 @@ impl<K, V> Clone for Iter<'_, K, V> {
     }
 }
 
-impl_iterator!(Iter<'a, K, V>, (&'a K, &'a V), Slot::refs);
+impl_iterator!(Iter<'a, K, V>, (&'a K, &'a V), VecMap::refs);
 
 /// A mutable iterator over the entries of a `VecMap`.
 ///
@@ -121,28 +120,7 @@ impl<'a, K, V> IterMut<'a, K, V> {
     }
 }
 
-impl_iterator!(IterMut<'a, K, V>, (&'a K, &'a mut V), Slot::ref_mut);
-
-/// A mutable iterator over the entries of a `VecMap`.
-///
-/// This `struct` is created by the [`iter_mut2`] method on [`MutableKeys`]. See its documentation
-/// for more.
-///
-/// [`iter_mut2`]: crate::map::MutableKeys::iter_mut2
-/// [`MutableKeys`]: crate::map::MutableKeys
-pub struct IterMut2<'a, K, V> {
-    iter: slice::IterMut<'a, Slot<K, V>>,
-}
-
-impl<'a, K, V> IterMut2<'a, K, V> {
-    pub(super) fn new(entries: &'a mut [Slot<K, V>]) -> IterMut2<'a, K, V> {
-        IterMut2 {
-            iter: entries.iter_mut(),
-        }
-    }
-}
-
-impl_iterator!(IterMut2<'a, K, V>, (&'a mut K, &'a mut V), Slot::muts);
+impl_iterator!(IterMut<'a, K, V>, (&'a K, &'a mut V), VecMap::ref_mut);
 
 /// An owning iterator over the entries of a `VecMap`.
 ///
@@ -175,7 +153,7 @@ where
     }
 }
 
-impl_iterator!(IntoIter<K, V>, (K, V), Slot::into_key_value);
+impl_iterator!(IntoIter<K, V>, (K, V), |slot| (slot.0, slot.1));
 
 /// An iterator over the keys of a `VecMap`.
 ///
@@ -202,28 +180,7 @@ impl<K, V> Clone for Keys<'_, K, V> {
     }
 }
 
-impl_iterator!(Keys<'a, K, V>, &'a K, Slot::key);
-
-/// A mutable iterator over the keys of a `VecMap`.
-///
-/// This `struct` is created by the [`keys_mut`] method on [`MutableKeys`]. See its documentation
-/// for more.
-///
-/// [`keys_mut`]: crate::map::MutableKeys::keys_mut
-/// [`MutableKeys`]: crate::map::MutableKeys
-pub struct KeysMut<'a, K, V> {
-    iter: slice::IterMut<'a, Slot<K, V>>,
-}
-
-impl<'a, K, V> KeysMut<'a, K, V> {
-    pub(super) fn new(entries: &'a mut [Slot<K, V>]) -> KeysMut<'a, K, V> {
-        KeysMut {
-            iter: entries.iter_mut(),
-        }
-    }
-}
-
-impl_iterator!(KeysMut<'a, K, V>, &'a mut K, Slot::key_mut);
+impl_iterator!(Keys<'a, K, V>, &'a K, |slot| &slot.0);
 
 /// An owning iterator over the keys of a `VecMap`.
 ///
@@ -255,7 +212,7 @@ where
     }
 }
 
-impl_iterator!(IntoKeys<K, V>, K, Slot::into_key);
+impl_iterator!(IntoKeys<K, V>, K, |slot| slot.0);
 
 /// An iterator over the values of a `VecMap`.
 ///
@@ -283,7 +240,7 @@ impl<K, V> Clone for Values<'_, K, V> {
     }
 }
 
-impl_iterator!(Values<'a, K, V>, &'a V, Slot::value);
+impl_iterator!(Values<'a, K, V>, &'a V, |slot| &slot.1);
 
 /// A mutable iterator over the values of a `VecMap`.
 ///
@@ -303,7 +260,7 @@ impl<'a, K, V> ValuesMut<'a, K, V> {
     }
 }
 
-impl_iterator!(ValuesMut<'a, K, V>, &'a mut V, Slot::value_mut);
+impl_iterator!(ValuesMut<'a, K, V>, &'a mut V, |slot| &mut slot.1);
 
 /// An owning iterator over the values of a `VecMap`.
 ///
@@ -335,31 +292,4 @@ where
     }
 }
 
-impl_iterator!(IntoValues<K, V>, V, Slot::into_value);
-
-/// A draining iterator for `VecMap`.
-///
-/// This `struct` is created by the [`drain`] method on [`VecMap`]. See its documentation for
-/// more.
-///
-/// [`drain`]: VecMap::drain
-pub struct Drain<'a, K, V> {
-    iter: vec::Drain<'a, Slot<K, V>>,
-}
-
-impl<'a, K, V> Drain<'a, K, V> {
-    pub(super) fn new<R>(map: &'a mut VecMap<K, V>, range: R) -> Drain<'a, K, V>
-    where
-        R: RangeBounds<usize>,
-    {
-        Drain {
-            iter: map.base.drain(range),
-        }
-    }
-
-    pub(crate) fn as_slice(&self) -> &[Slot<K, V>] {
-        self.iter.as_slice()
-    }
-}
-
-impl_iterator!(Drain<'a, K, V>, (K, V), Slot::into_key_value);
+impl_iterator!(IntoValues<K, V>, V, |slot| slot.1);

@@ -1,3 +1,5 @@
+use crate::KeyedVecSet;
+
 use super::VecMap;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
@@ -11,8 +13,8 @@ impl<K, V> Default for VecMap<K, V> {
 
 impl<K, V, Q> Index<&Q> for VecMap<K, V>
 where
-    K: Borrow<Q>,
-    Q: Eq + ?Sized,
+    K: Borrow<Q> + Ord,
+    Q: Ord + ?Sized,
 {
     type Output = V;
 
@@ -23,8 +25,8 @@ where
 
 impl<K, V, Q> IndexMut<&Q> for VecMap<K, V>
 where
-    K: Borrow<Q>,
-    Q: Eq + ?Sized,
+    K: Borrow<Q> + Ord,
+    Q: Ord + ?Sized,
 {
     fn index_mut(&mut self, key: &Q) -> &mut V {
         self.get_mut(key).expect("VecMap: key not found")
@@ -51,7 +53,7 @@ impl<K, V> IndexMut<usize> for VecMap<K, V> {
 
 impl<K, V> Extend<(K, V)> for VecMap<K, V>
 where
-    K: Eq,
+    K: Ord,
 {
     fn extend<I>(&mut self, iterable: I)
     where
@@ -67,13 +69,17 @@ where
             size_hint / 2 + size_hint % 2
         };
         self.reserve(reserve);
-        iter.for_each(move |(k, v)| {
+        for (k, v) in iter {
             self.insert(k, v);
-        });
+        }
     }
 }
 
-impl<'a, K: Clone + Eq, V: Clone> Extend<(&'a K, &'a V)> for VecMap<K, V> {
+impl<'a, K, V> Extend<(&'a K, &'a V)> for VecMap<K, V>
+where
+    K: Ord + Clone,
+    V: Clone,
+{
     fn extend<I>(&mut self, iterable: I)
     where
         I: IntoIterator<Item = (&'a K, &'a V)>,
@@ -86,7 +92,11 @@ impl<'a, K: Clone + Eq, V: Clone> Extend<(&'a K, &'a V)> for VecMap<K, V> {
     }
 }
 
-impl<'a, K: Clone + Eq, V: Clone> Extend<&'a (K, V)> for VecMap<K, V> {
+impl<'a, K, V> Extend<&'a (K, V)> for VecMap<K, V>
+where
+    K: Ord + Clone,
+    V: Clone,
+{
     fn extend<I>(&mut self, iterable: I)
     where
         I: IntoIterator<Item = &'a (K, V)>,
@@ -112,24 +122,18 @@ where
 
 impl<K, V> From<Vec<(K, V)>> for VecMap<K, V>
 where
-    K: Eq,
+    K: Ord,
 {
     /// Constructs map from a vector of `(key → value)` pairs.
-    ///
-    /// **Note**: This conversion has a quadratic complexity because the
-    /// conversion preserves order of elements while at the same time having to
-    /// make sure no duplicate keys exist. To avoid it, sort and deduplicate
-    /// the vector and use [`VecMap::from_vec_unchecked`] instead.
-    fn from(mut vec: Vec<(K, V)>) -> Self {
-        crate::dedup(&mut vec, |rhs, lhs| rhs.0 == lhs.0);
-        // SAFETY: We've just deduplicated the elements.
-        unsafe { Self::from_vec_unchecked(vec) }
+    fn from(vec: Vec<(K, V)>) -> Self {
+        let base = KeyedVecSet::from(vec);
+        Self { base }
     }
 }
 
 impl<K, V> From<&[(K, V)]> for VecMap<K, V>
 where
-    K: Clone + Eq,
+    K: Clone + Ord,
     V: Clone,
 {
     fn from(slice: &[(K, V)]) -> Self {
@@ -139,7 +143,7 @@ where
 
 impl<K, V> From<&mut [(K, V)]> for VecMap<K, V>
 where
-    K: Clone + Eq,
+    K: Clone + Ord,
     V: Clone,
 {
     fn from(slice: &mut [(K, V)]) -> Self {
@@ -151,7 +155,7 @@ where
 
 impl<K, V, const N: usize> From<[(K, V); N]> for VecMap<K, V>
 where
-    K: Eq,
+    K: Ord,
 {
     fn from(arr: [(K, V); N]) -> Self {
         VecMap::from_iter(arr)
@@ -160,16 +164,11 @@ where
 
 impl<K, V> PartialEq for VecMap<K, V>
 where
-    K: Eq,
+    K: PartialEq,
     V: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        if self.len() != other.len() {
-            return false;
-        }
-
-        self.iter()
-            .all(|(key, value)| other.get(key).map_or(false, |v| *value == *v))
+        self.base.eq(&other.base)
     }
 }
 

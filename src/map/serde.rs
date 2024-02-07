@@ -6,7 +6,7 @@ use serde::ser;
 
 impl<K, V> ser::Serialize for VecMap<K, V>
 where
-    K: ser::Serialize + Eq,
+    K: ser::Serialize + Ord,
     V: ser::Serialize,
 {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -19,7 +19,7 @@ where
 
 impl<'de, K, V> de::Deserialize<'de> for VecMap<K, V>
 where
-    K: de::Deserialize<'de> + Eq,
+    K: de::Deserialize<'de> + Ord,
     V: de::Deserialize<'de>,
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -30,7 +30,7 @@ where
 
         impl<'de, K, V> de::Visitor<'de> for VecMapVisitor<K, V>
         where
-            K: de::Deserialize<'de> + Eq,
+            K: de::Deserialize<'de> + Ord,
             V: de::Deserialize<'de>,
         {
             type Value = VecMap<K, V>;
@@ -59,7 +59,7 @@ where
 
 impl<'de, K, V, E> de::IntoDeserializer<'de, E> for VecMap<K, V>
 where
-    K: de::IntoDeserializer<'de, E> + Eq,
+    K: de::IntoDeserializer<'de, E> + Ord,
     V: de::IntoDeserializer<'de, E>,
     E: de::Error,
 {
