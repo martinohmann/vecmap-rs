@@ -1,5 +1,7 @@
 use core::ops::{BitAnd, BitOr, BitXor, Index, Sub};
 
+use crate::KeyedVecSet;
+
 use super::VecSet;
 use alloc::vec::Vec;
 
@@ -19,7 +21,7 @@ impl<T> Index<usize> for VecSet<T> {
 
 impl<T> Extend<T> for VecSet<T>
 where
-    T: Eq,
+    T: Ord,
 {
     fn extend<I>(&mut self, iterable: I)
     where
@@ -40,19 +42,19 @@ where
 
 impl<'a, T> Extend<&'a T> for VecSet<T>
 where
-    T: 'a + Copy + Eq,
+    T: 'a + Ord + Clone,
 {
     fn extend<I>(&mut self, iterable: I)
     where
         I: IntoIterator<Item = &'a T>,
     {
-        self.extend(iterable.into_iter().copied());
+        self.extend(iterable.into_iter().cloned());
     }
 }
 
 impl<T> FromIterator<T> for VecSet<T>
 where
-    T: Eq,
+    T: Ord,
 {
     fn from_iter<I>(iter: I) -> Self
     where
@@ -68,24 +70,18 @@ where
 
 impl<T> From<Vec<T>> for VecSet<T>
 where
-    T: Eq,
+    T: Ord,
 {
     /// Constructs set from a vector.
-    ///
-    /// **Note**: This conversion has a quadratic complexity because the
-    /// conversion preserves order of elements while at the same time having to
-    /// make sure no duplicate elements exist. To avoid it, sort and deduplicate
-    /// the vector and use [`VecSet::from_vec_unchecked`] instead.
-    fn from(mut vec: Vec<T>) -> Self {
-        crate::dedup(&mut vec, |rhs, lhs| rhs == lhs);
-        // SAFETY: We've just deduplicated the elements.
-        unsafe { Self::from_vec_unchecked(vec) }
+    fn from(vec: Vec<T>) -> Self {
+        let base = KeyedVecSet::from(vec);
+        Self { base }
     }
 }
 
 impl<T> From<&[T]> for VecSet<T>
 where
-    T: Clone + Eq,
+    T: Ord + Clone,
 {
     fn from(slice: &[T]) -> Self {
         VecSet::from_iter(slice.to_vec())
@@ -94,7 +90,7 @@ where
 
 impl<T> From<&mut [T]> for VecSet<T>
 where
-    T: Clone + Eq,
+    T: Ord + Clone,
 {
     fn from(slice: &mut [T]) -> Self {
         VecSet::from_iter(slice.to_vec())
@@ -103,7 +99,7 @@ where
 
 impl<T, const N: usize> From<[T; N]> for VecSet<T>
 where
-    T: Eq,
+    T: Ord,
 {
     fn from(arr: [T; N]) -> Self {
         VecSet::from_iter(arr)
@@ -115,11 +111,7 @@ where
     T: Eq,
 {
     fn eq(&self, other: &VecSet<T>) -> bool {
-        if self.len() != other.len() {
-            return false;
-        }
-
-        self.iter().all(|key| other.contains(key))
+        self.base.eq(&other.base)
     }
 }
 
@@ -127,7 +119,7 @@ impl<T> Eq for VecSet<T> where T: Eq {}
 
 impl<T> BitAnd<&VecSet<T>> for &VecSet<T>
 where
-    T: Eq + Clone,
+    T: Ord + Clone,
 {
     type Output = VecSet<T>;
 
@@ -141,7 +133,7 @@ where
 
 impl<T> BitOr<&VecSet<T>> for &VecSet<T>
 where
-    T: Eq + Clone,
+    T: Ord + Clone,
 {
     type Output = VecSet<T>;
 
@@ -156,7 +148,7 @@ where
 
 impl<T> BitXor<&VecSet<T>> for &VecSet<T>
 where
-    T: Eq + Clone,
+    T: Ord + Clone,
 {
     type Output = VecSet<T>;
 
@@ -171,7 +163,7 @@ where
 
 impl<T> Sub<&VecSet<T>> for &VecSet<T>
 where
-    T: Eq + Clone,
+    T: Ord + Clone,
 {
     type Output = VecSet<T>;
 

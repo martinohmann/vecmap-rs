@@ -1,129 +1,28 @@
-use super::{Entries, Slot, VecSet};
-use crate::map;
+use super::VecSet;
 use alloc::vec::{self, Vec};
 use core::fmt;
 use core::iter::{Chain, FusedIterator};
-use core::ops::RangeBounds;
 use core::slice;
-
-macro_rules! impl_iterator {
-    ($ty:ident<$($lt:lifetime,)*$($gen:ident),+>, $item:ty, $map:expr) => {
-        impl<$($lt,)*$($gen),+> Iterator for $ty<$($lt,)*$($gen),+> {
-            type Item = $item;
-
-            fn next(&mut self) -> Option<Self::Item> {
-                self.iter.next().map($map)
-            }
-
-            fn size_hint(&self) -> (usize, Option<usize>) {
-                self.iter.size_hint()
-            }
-        }
-
-        impl<$($lt,)*$($gen),+> DoubleEndedIterator for $ty<$($lt,)*$($gen),+> {
-            fn next_back(&mut self) -> Option<Self::Item> {
-                self.iter.next_back().map($map)
-            }
-        }
-
-        impl<$($lt,)*$($gen),+> ExactSizeIterator for $ty<$($lt,)*$($gen),+> {
-            fn len(&self) -> usize {
-                self.iter.len()
-            }
-        }
-
-        impl<$($lt,)*$($gen),+> FusedIterator for $ty<$($lt,)*$($gen),+> {}
-
-        impl<$($lt,)*$($gen),+> fmt::Debug for $ty<$($lt,)*$($gen),+>
-        where
-            T: fmt::Debug,
-        {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                let iter = self.iter.as_slice().iter().map(Slot::key);
-                f.debug_list().entries(iter).finish()
-            }
-        }
-    };
-}
 
 impl<T> IntoIterator for VecSet<T> {
     type Item = T;
 
-    type IntoIter = IntoIter<T>;
+    type IntoIter = vec::IntoIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        IntoIter::new(self.into_entries())
+        self.base.into_iter()
     }
 }
 
 impl<'a, T> IntoIterator for &'a VecSet<T> {
     type Item = &'a T;
 
-    type IntoIter = Iter<'a, T>;
+    type IntoIter = <&'a Vec<T> as core::iter::IntoIterator>::IntoIter;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.iter()
+        (&self.base).into_iter()
     }
 }
-
-/// An iterator over the elements of a `VecSet`.
-///
-/// This `struct` is created by the [`iter`] method on [`VecSet`]. See its documentation for more.
-///
-/// [`iter`]: VecSet::iter
-pub struct Iter<'a, T> {
-    iter: slice::Iter<'a, Slot<T, ()>>,
-}
-
-impl<'a, T> Iter<'a, T> {
-    pub(super) fn new(entries: &'a [Slot<T, ()>]) -> Iter<'a, T> {
-        Iter {
-            iter: entries.iter(),
-        }
-    }
-}
-
-impl<T> Clone for Iter<'_, T> {
-    fn clone(&self) -> Self {
-        Iter {
-            iter: self.iter.clone(),
-        }
-    }
-}
-
-impl_iterator!(Iter<'a, T>, &'a T, Slot::key);
-
-/// An owning iterator over the elements of a `VecSet`.
-///
-/// This `struct` is created by the [`into_iter`] method on [`VecSet`] (provided by the
-/// [`IntoIterator`] trait). See its documentation for more.
-///
-/// [`into_iter`]: IntoIterator::into_iter
-/// [`IntoIterator`]: core::iter::IntoIterator
-pub struct IntoIter<T> {
-    iter: vec::IntoIter<Slot<T, ()>>,
-}
-
-impl<T> IntoIter<T> {
-    pub(super) fn new(entries: Vec<Slot<T, ()>>) -> IntoIter<T> {
-        IntoIter {
-            iter: entries.into_iter(),
-        }
-    }
-}
-
-impl<T> Clone for IntoIter<T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Self {
-        IntoIter {
-            iter: self.iter.clone(),
-        }
-    }
-}
-
-impl_iterator!(IntoIter<T>, T, Slot::into_key);
 
 /// A lazy iterator producing elements in the difference of `VecSet`s.
 ///
@@ -133,7 +32,7 @@ impl_iterator!(IntoIter<T>, T, Slot::into_key);
 /// [`VecSet`]: struct.VecSet.html
 /// [`difference`]: struct.VecSet.html#method.difference
 pub struct Difference<'a, T> {
-    iter: Iter<'a, T>,
+    iter: slice::Iter<'a, T>,
     other: &'a VecSet<T>,
 }
 
@@ -148,7 +47,7 @@ impl<'a, T> Difference<'a, T> {
 
 impl<'a, T> Iterator for Difference<'a, T>
 where
-    T: Eq,
+    T: Ord,
 {
     type Item = &'a T;
 
@@ -169,7 +68,7 @@ where
 
 impl<T> DoubleEndedIterator for Difference<'_, T>
 where
-    T: Eq,
+    T: Ord,
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         loop {
@@ -182,7 +81,7 @@ where
     }
 }
 
-impl<T> FusedIterator for Difference<'_, T> where T: Eq {}
+impl<T> FusedIterator for Difference<'_, T> where T: Ord {}
 
 impl<T> Clone for Difference<'_, T> {
     fn clone(&self) -> Self {
@@ -195,7 +94,7 @@ impl<T> Clone for Difference<'_, T> {
 
 impl<T> fmt::Debug for Difference<'_, T>
 where
-    T: fmt::Debug + Eq,
+    T: fmt::Debug + Ord,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.clone()).finish()
@@ -210,7 +109,7 @@ where
 /// [`VecSet`]: struct.VecSet.html
 /// [`intersection`]: struct.VecSet.html#method.intersection
 pub struct Intersection<'a, T> {
-    iter: Iter<'a, T>,
+    iter: slice::Iter<'a, T>,
     other: &'a VecSet<T>,
 }
 
@@ -225,7 +124,7 @@ impl<'a, T> Intersection<'a, T> {
 
 impl<'a, T> Iterator for Intersection<'a, T>
 where
-    T: Eq,
+    T: Ord,
 {
     type Item = &'a T;
 
@@ -246,7 +145,7 @@ where
 
 impl<T> DoubleEndedIterator for Intersection<'_, T>
 where
-    T: Eq,
+    T: Ord,
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         loop {
@@ -259,7 +158,7 @@ where
     }
 }
 
-impl<T> FusedIterator for Intersection<'_, T> where T: Eq {}
+impl<T> FusedIterator for Intersection<'_, T> where T: Ord {}
 
 impl<T> Clone for Intersection<'_, T> {
     fn clone(&self) -> Self {
@@ -272,7 +171,7 @@ impl<T> Clone for Intersection<'_, T> {
 
 impl<T> fmt::Debug for Intersection<'_, T>
 where
-    T: fmt::Debug + Eq,
+    T: fmt::Debug + Ord,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.clone()).finish()
@@ -292,7 +191,7 @@ pub struct SymmetricDifference<'a, T> {
 
 impl<'a, T> SymmetricDifference<'a, T>
 where
-    T: Eq,
+    T: Ord,
 {
     pub(super) fn new(set: &'a VecSet<T>, other: &'a VecSet<T>) -> SymmetricDifference<'a, T> {
         SymmetricDifference {
@@ -303,7 +202,7 @@ where
 
 impl<'a, T> Iterator for SymmetricDifference<'a, T>
 where
-    T: Eq,
+    T: Ord,
 {
     type Item = &'a T;
 
@@ -318,14 +217,14 @@ where
 
 impl<T> DoubleEndedIterator for SymmetricDifference<'_, T>
 where
-    T: Eq,
+    T: Ord,
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.iter.next_back()
     }
 }
 
-impl<T> FusedIterator for SymmetricDifference<'_, T> where T: Eq {}
+impl<T> FusedIterator for SymmetricDifference<'_, T> where T: Ord {}
 
 impl<T> Clone for SymmetricDifference<'_, T> {
     fn clone(&self) -> Self {
@@ -337,7 +236,7 @@ impl<T> Clone for SymmetricDifference<'_, T> {
 
 impl<T> fmt::Debug for SymmetricDifference<'_, T>
 where
-    T: fmt::Debug + Eq,
+    T: fmt::Debug + Ord,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.clone()).finish()
@@ -351,12 +250,12 @@ where
 /// [`VecSet`]: struct.VecSet.html
 /// [`union`]: struct.VecSet.html#method.union
 pub struct Union<'a, T> {
-    iter: Chain<Iter<'a, T>, Difference<'a, T>>,
+    iter: Chain<slice::Iter<'a, T>, Difference<'a, T>>,
 }
 
 impl<'a, T> Union<'a, T>
 where
-    T: Eq,
+    T: Ord,
 {
     pub(super) fn new(set: &'a VecSet<T>, other: &'a VecSet<T>) -> Union<'a, T> {
         Union {
@@ -367,7 +266,7 @@ where
 
 impl<'a, T> Iterator for Union<'a, T>
 where
-    T: Eq,
+    T: Ord,
 {
     type Item = &'a T;
 
@@ -382,14 +281,14 @@ where
 
 impl<T> DoubleEndedIterator for Union<'_, T>
 where
-    T: Eq,
+    T: Ord,
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.iter.next_back()
     }
 }
 
-impl<T> FusedIterator for Union<'_, T> where T: Eq {}
+impl<T> FusedIterator for Union<'_, T> where T: Ord {}
 
 impl<T> Clone for Union<'_, T> {
     fn clone(&self) -> Self {
@@ -401,32 +300,9 @@ impl<T> Clone for Union<'_, T> {
 
 impl<T> fmt::Debug for Union<'_, T>
 where
-    T: fmt::Debug + Eq,
+    T: fmt::Debug + Ord,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.clone()).finish()
     }
 }
-
-/// A draining iterator for `VecSet`.
-///
-/// This `struct` is created by the [`drain`] method on [`VecSet`]. See its documentation for
-/// more.
-///
-/// [`drain`]: VecSet::drain
-pub struct Drain<'a, T> {
-    iter: map::Drain<'a, T, ()>,
-}
-
-impl<'a, T> Drain<'a, T> {
-    pub(super) fn new<R>(set: &'a mut VecSet<T>, range: R) -> Drain<'a, T>
-    where
-        R: RangeBounds<usize>,
-    {
-        Drain {
-            iter: set.base.drain(range),
-        }
-    }
-}
-
-impl_iterator!(Drain<'a, T>, T, |(k, ())| k);

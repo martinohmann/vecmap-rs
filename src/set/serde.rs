@@ -6,7 +6,7 @@ use serde::ser;
 
 impl<T> ser::Serialize for VecSet<T>
 where
-    T: ser::Serialize + Eq,
+    T: ser::Serialize + Ord,
 {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -18,7 +18,7 @@ where
 
 impl<'de, T> de::Deserialize<'de> for VecSet<T>
 where
-    T: de::Deserialize<'de> + Eq,
+    T: de::Deserialize<'de> + Ord,
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -28,7 +28,7 @@ where
 
         impl<'de, T> de::Visitor<'de> for VecSetVisitor<T>
         where
-            T: de::Deserialize<'de> + Eq,
+            T: de::Deserialize<'de> + Ord,
         {
             type Value = VecSet<T>;
 
@@ -56,7 +56,7 @@ where
 
 impl<'de, T, E> de::IntoDeserializer<'de, E> for VecSet<T>
 where
-    T: de::IntoDeserializer<'de, E> + Eq,
+    T: de::IntoDeserializer<'de, E> + Ord,
     E: de::Error,
 {
     type Deserializer = SeqDeserializer<<Self as IntoIterator>::IntoIter, E>;

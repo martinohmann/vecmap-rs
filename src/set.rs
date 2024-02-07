@@ -5,11 +5,11 @@ mod iter;
 #[cfg(feature = "serde")]
 mod serde;
 
-use super::{Entries, Slot, VecMap};
-use alloc::vec::Vec;
+use super::KeyedVecSet;
+use alloc::vec::{self, Vec};
 use core::borrow::Borrow;
-use core::cmp::Ordering;
 use core::ops::RangeBounds;
+use core::slice;
 
 pub use self::iter::*;
 
@@ -18,7 +18,7 @@ pub use self::iter::*;
 /// Internally it is represented as a `Vec<T>` to support keys that are neither `Hash` nor `Ord`.
 #[derive(Clone, Debug)]
 pub struct VecSet<T> {
-    base: VecMap<T, ()>,
+    base: KeyedVecSet<T, T>,
 }
 
 impl<T> VecSet<T> {
@@ -33,7 +33,7 @@ impl<T> VecSet<T> {
     /// ```
     pub const fn new() -> Self {
         VecSet {
-            base: VecMap::new(),
+            base: KeyedVecSet::new(),
         }
     }
 
@@ -51,7 +51,7 @@ impl<T> VecSet<T> {
     /// ```
     pub fn with_capacity(capacity: usize) -> Self {
         VecSet {
-            base: VecMap::with_capacity(capacity),
+            base: KeyedVecSet::with_capacity(capacity),
         }
     }
 
@@ -146,21 +146,6 @@ impl<T> VecSet<T> {
         self.base.truncate(len);
     }
 
-    /// Reverses the order of entries in the set, in place.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecset::VecSet;
-    ///
-    /// let mut set = VecSet::from_iter(["a", "b", "c"]);
-    /// set.reverse();
-    /// assert_eq!(set, VecSet::from_iter(["c", "b", "a"]));
-    /// ```
-    pub fn reverse(&mut self) {
-        self.base.reverse();
-    }
-
     /// Reserves capacity for at least `additional` more elements to be inserted in the given
     /// `VecSet<T>`. The collection may reserve more space to speculatively avoid frequent
     /// reallocations. After calling `reserve`, capacity will be greater than or equal to
@@ -200,7 +185,7 @@ impl<T> VecSet<T> {
     where
         F: FnMut(&T) -> bool,
     {
-        self.base.retain(|k, _| f(k));
+        self.base.retain(|k| f(k));
     }
 
     /// Shrinks the capacity of the set as much as possible. It will drop down as much as possible
@@ -298,11 +283,11 @@ impl<T> VecSet<T> {
     /// v.drain(..);
     /// assert_eq!(v, VecSet::new());
     /// ```
-    pub fn drain<R>(&mut self, range: R) -> Drain<'_, T>
+    pub fn drain<R>(&mut self, range: R) -> vec::Drain<'_, T>
     where
         R: RangeBounds<usize>,
     {
-        Drain::new(self, range)
+        self.base.drain(range)
     }
 
     /// An iterator visiting all elements in insertion order. The iterator element type is
@@ -319,104 +304,8 @@ impl<T> VecSet<T> {
     ///     println!("elem: {elem}");
     /// }
     /// ```
-    pub fn iter(&self) -> Iter<'_, T> {
-        Iter::new(self.as_entries())
-    }
-
-    /// Sorts the set.
-    ///
-    /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))
-    /// worst-case.
-    ///
-    /// When applicable, unstable sorting is preferred because it is generally faster than stable
-    /// sorting and it doesn't allocate auxiliary memory. See
-    /// [`sort_unstable`](VecSet::sort_unstable).
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecset::VecSet;
-    ///
-    /// let mut set = VecSet::from(["b", "a", "c"]);
-    ///
-    /// set.sort();
-    /// let vec: Vec<_> = set.into_iter().collect();
-    /// assert_eq!(vec, ["a", "b", "c"]);
-    /// ```
-    pub fn sort(&mut self)
-    where
-        T: Ord,
-    {
-        self.base.sort_keys();
-    }
-
-    /// Sorts the set.
-    ///
-    /// This sort is unstable (i.e., may reorder equal elements), in-place (i.e., does not
-    /// allocate), and *O*(*n* \* log(*n*)) worst-case.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecset::VecSet;
-    ///
-    /// let mut set = VecSet::from(["b", "a", "c"]);
-    ///
-    /// set.sort_unstable();
-    /// let vec: Vec<_> = set.into_iter().collect();
-    /// assert_eq!(vec, ["a", "b", "c"]);
-    /// ```
-    pub fn sort_unstable(&mut self)
-    where
-        T: Ord,
-    {
-        self.base.sort_unstable_keys();
-    }
-
-    /// Sorts the set with a comparator function.
-    ///
-    /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))
-    /// worst-case.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecset::VecSet;
-    ///
-    /// let mut set = VecSet::from(["b", "a", "c"]);
-    ///
-    /// set.sort_by(|a, b| b.cmp(&a));
-    /// let vec: Vec<_> = set.into_iter().collect();
-    /// assert_eq!(vec, ["c", "b", "a"]);
-    /// ```
-    pub fn sort_by<F>(&mut self, mut compare: F)
-    where
-        F: FnMut(&T, &T) -> Ordering,
-    {
-        self.base.sort_by(|a, b| compare(a.0, b.0));
-    }
-
-    /// Sorts the set with a comparator function.
-    ///
-    /// This sort is unstable (i.e., may reorder equal elements), in-place (i.e., does not
-    /// allocate), and *O*(*n* \* log(*n*)) worst-case.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecset::VecSet;
-    ///
-    /// let mut set = VecSet::from(["b", "a", "c"]);
-    ///
-    /// set.sort_unstable_by(|a, b| b.cmp(&a));
-    /// let vec: Vec<_> = set.into_iter().collect();
-    /// assert_eq!(vec, ["c", "b", "a"]);
-    /// ```
-    pub fn sort_unstable_by<F>(&mut self, mut compare: F)
-    where
-        F: FnMut(&T, &T) -> Ordering,
-    {
-        self.base.sort_unstable_by(|a, b| compare(a.0, b.0));
+    pub fn iter(&self) -> slice::Iter<'_, T> {
+        self.base.iter()
     }
 
     /// Extracts a slice containing the set elements.
@@ -426,11 +315,10 @@ impl<T> VecSet<T> {
     ///
     /// let set = VecSet::from(["b", "a", "c"]);
     /// let slice = set.as_slice();
-    /// assert_eq!(slice, ["b", "a", "c"]);
+    /// assert_eq!(slice, ["a", "b", "c"]);
     /// ```
     pub fn as_slice(&self) -> &[T] {
-        // SAFETY: `&[(T, ())]` and `&[T]` have the same memory layout.
-        unsafe { &*(self.base.as_slice() as *const [(T, ())] as *const [T]) }
+        self.base.as_slice()
     }
 
     /// Copies the set elements into a new `Vec<T>`.
@@ -440,7 +328,7 @@ impl<T> VecSet<T> {
     ///
     /// let set = VecSet::from(["b", "a", "c"]);
     /// let vec = set.to_vec();
-    /// assert_eq!(vec, ["b", "a", "c"]);
+    /// assert_eq!(vec, ["a", "b", "c"]);
     /// // Here, `set` and `vec` can be modified independently.
     /// ```
     pub fn to_vec(&self) -> Vec<T>
@@ -457,18 +345,17 @@ impl<T> VecSet<T> {
     ///
     /// let set = VecSet::from(["b", "a", "c"]);
     /// let vec = set.into_vec();
-    /// assert_eq!(vec, ["b", "a", "c"]);
+    /// assert_eq!(vec, ["a", "b", "c"]);
     /// ```
     pub fn into_vec(self) -> Vec<T> {
-        // SAFETY: `Vec<Slot<T, ()>>` and `Vec<T>` have the same memory layout.
-        unsafe { super::transmute_vec(self.base.base) }
+        self.base.into_vec()
     }
 
     /// Takes ownership of provided vector and converts it into `VecSet`.
     ///
     /// # Safety
     ///
-    /// The vector must have no duplicate elements. One way to guarantee it is to sort the vector
+    /// The vector must be sorted and have no duplicate elements. One way to guarantee it is to sort the vector
     /// (e.g. by using [`[T]::sort`][slice-sort]) and then drop duplicate elements (e.g. by using
     /// [`Vec::dedup`]).
     ///
@@ -488,11 +375,8 @@ impl<T> VecSet<T> {
     ///
     /// [slice-sort]: https://doc.rust-lang.org/std/primitive.slice.html#method.sort
     pub unsafe fn from_vec_unchecked(vec: Vec<T>) -> Self {
-        // SAFETY: `Vec<T>` and `Vec<Slot<T, ()>>` have the same memory layout.
-        let base = unsafe { super::transmute_vec(vec) };
-        VecSet {
-            base: VecMap { base },
-        }
+        let base = KeyedVecSet::from_vec_unchecked(vec);
+        VecSet { base }
     }
 }
 
@@ -512,8 +396,8 @@ impl<T> VecSet<T> {
     /// ```
     pub fn contains<Q>(&self, value: &Q) -> bool
     where
-        T: Borrow<Q>,
-        Q: Eq + ?Sized,
+        T: Borrow<Q> + Ord,
+        Q: Ord + ?Sized,
     {
         self.base.contains_key(value)
     }
@@ -527,7 +411,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.first(), Some(&"a"));
     /// ```
     pub fn first(&self) -> Option<&T> {
-        self.base.first().map(|(k, _)| k)
+        self.base.first()
     }
 
     /// Get the last element.
@@ -544,12 +428,15 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.last(), None);
     /// ```
     pub fn last(&self) -> Option<&T> {
-        self.base.last().map(|(k, _)| k)
+        self.base.last()
     }
+}
 
+// Lookup operations.
+impl<T> VecSet<T> {
     /// Returns a reference to the value in the set, if any, that is equal to the given value.
     ///
-    /// The value may be any borrowed form of the set's value type, but [`Eq`] on the borrowed form
+    /// The value may be any borrowed form of the set's value type, but [`Ord`] on the borrowed form
     /// *must* match those for the value type.
     ///
     /// # Examples
@@ -563,10 +450,10 @@ impl<T> VecSet<T> {
     /// ```
     pub fn get<Q>(&self, value: &Q) -> Option<&T>
     where
-        T: Borrow<Q>,
-        Q: ?Sized + Eq,
+        T: Borrow<Q> + Ord,
+        Q: ?Sized + Ord,
     {
-        self.base.get_key_value(value).map(|(k, _)| k)
+        self.base.get(value)
     }
 
     /// Return references to the element stored at `index`, if it is present, else `None`.
@@ -582,13 +469,13 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.get_index(1), None);
     /// ```
     pub fn get_index(&self, index: usize) -> Option<&T> {
-        self.base.get_index(index).map(|(k, _)| k)
+        self.base.get_index(index)
     }
 
     /// Returns the index and a reference to the value in the set, if any, that is equal to the
     /// given value.
     ///
-    /// The value may be any borrowed form of the set's value type, but [`Eq`] on the borrowed form
+    /// The value may be any borrowed form of the set's value type, but [`Ord`] on the borrowed form
     /// *must* match those for the value type.
     ///
     /// # Examples
@@ -597,15 +484,15 @@ impl<T> VecSet<T> {
     /// use vecset::VecSet;
     ///
     /// let set = VecSet::from([1, 2, 3]);
-    /// assert_eq!(set.get_full(&2), Some((1, &2)));
-    /// assert_eq!(set.get_full(&4), None);
+    /// assert_eq!(set.get_full(&2), Ok((1, &2)));
+    /// assert_eq!(set.get_full(&4), Err(3));
     /// ```
-    pub fn get_full<Q>(&self, value: &Q) -> Option<(usize, &T)>
+    pub fn get_full<Q>(&self, value: &Q) -> Result<(usize, &T), usize>
     where
-        T: Borrow<Q>,
-        Q: ?Sized + Eq,
+        T: Borrow<Q> + Ord,
+        Q: ?Sized + Ord,
     {
-        self.base.get_full(value).map(|(index, k, _)| (index, k))
+        self.base.get_full(value)
     }
 
     /// Return item index, if it exists in the set.
@@ -618,16 +505,16 @@ impl<T> VecSet<T> {
     /// let mut set = VecSet::new();
     /// set.insert("a");
     /// set.insert("b");
-    /// assert_eq!(set.get_index_of("a"), Some(0));
-    /// assert_eq!(set.get_index_of("b"), Some(1));
-    /// assert_eq!(set.get_index_of("c"), None);
+    /// assert_eq!(set.binary_search("a"), Ok(0));
+    /// assert_eq!(set.binary_search("b"), Ok(1));
+    /// assert_eq!(set.binary_search("c"), Err(2));
     /// ```
-    pub fn get_index_of<Q>(&self, value: &Q) -> Option<usize>
+    pub fn binary_search<Q>(&self, value: &Q) -> Result<usize, usize>
     where
-        T: Borrow<Q>,
-        Q: Eq + ?Sized,
+        T: Borrow<Q> + Ord,
+        Q: Ord + ?Sized,
     {
-        self.base.get_index_of(value)
+        self.base.binary_search(value)
     }
 }
 
@@ -647,7 +534,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.pop(), None);
     /// ```
     pub fn pop(&mut self) -> Option<T> {
-        self.base.pop().map(|(k, ())| k)
+        self.base.pop()
     }
 
     /// Remove the element equivalent to `value`.
@@ -669,8 +556,8 @@ impl<T> VecSet<T> {
     /// ```
     pub fn remove<Q>(&mut self, value: &Q) -> bool
     where
-        T: Borrow<Q>,
-        Q: Eq + ?Sized,
+        T: Borrow<Q> + Ord,
+        Q: Ord + ?Sized,
     {
         self.base.remove(value).is_some()
     }
@@ -696,88 +583,12 @@ impl<T> VecSet<T> {
     /// assert_eq!(v, VecSet::from(["a", "c"]));
     /// ```
     pub fn remove_index(&mut self, index: usize) -> T {
-        self.base.remove_index(index).0
-    }
-
-    /// Remove the element equivalent to `value`.
-    ///
-    /// Like `Vec::swap_remove`, the element is removed by swapping it with the last element of the
-    /// map and popping it off. **This perturbs the position of what used to be the last element!**
-    ///
-    /// Returns `true` if `value` was found in the set.
-    ///
-    /// ```
-    /// use vecset::VecSet;
-    ///
-    /// let mut set = VecSet::from_iter([1, 2, 3, 4]);
-    /// assert_eq!(set.swap_remove(&2), true);
-    /// assert_eq!(set.swap_remove(&2), false);
-    /// assert_eq!(set, VecSet::from_iter([1, 4, 3]));
-    /// ```
-    pub fn swap_remove<Q>(&mut self, value: &Q) -> bool
-    where
-        T: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.base.swap_remove(value).is_some()
-    }
-
-    /// Removes an element from the set and returns it.
-    ///
-    /// The removed element is replaced by the last element of the set.
-    ///
-    /// If you need to preserve the element order, use [`remove`] instead.
-    ///
-    /// [`remove`]: VecSet::remove
-    ///
-    /// # Panics
-    ///
-    /// Panics if `index` is out of bounds.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecset::VecSet;
-    ///
-    /// let mut v = VecSet::from(["foo", "bar", "baz", "qux"]);
-    ///
-    /// assert_eq!(v.swap_remove_index(0), "foo");
-    /// assert_eq!(v, VecSet::from(["qux", "bar", "baz"]));
-    ///
-    /// assert_eq!(v.swap_remove_index(0), "qux");
-    /// assert_eq!(v, VecSet::from(["baz", "bar"]));
-    /// ```
-    pub fn swap_remove_index(&mut self, index: usize) -> T {
-        self.base.swap_remove_index(index).0
-    }
-
-    /// Swaps the position of two elements in the set.
-    ///
-    /// # Arguments
-    ///
-    /// * a - The index of the first element
-    /// * b - The index of the second element
-    ///
-    /// # Panics
-    ///
-    /// Panics if `a` or `b` are out of bounds.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecset::VecSet;
-    ///
-    /// let mut set = VecSet::from(["a", "b", "c", "d"]);
-    /// set.swap_indices(1, 3);
-    /// assert_eq!(set.to_vec(), ["a", "d", "c", "b"]);
-    /// ```
-    pub fn swap_indices(&mut self, a: usize, b: usize) {
-        self.base.swap_indices(a, b);
+        self.base.remove_index(index)
     }
 
     /// Removes and returns the value in the set, if any, that is equal to the given one.
     ///
-    /// The value may be any borrowed form of the set's value type, but [`Eq`] on the borrowed form
+    /// The value may be any borrowed form of the set's value type, but [`Ord`] on the borrowed form
     /// *must* match those for the value type.
     ///
     /// Like `Vec::remove`, the element is removed by shifting all of the elements that follow it,
@@ -794,42 +605,17 @@ impl<T> VecSet<T> {
     /// ```
     pub fn take<Q>(&mut self, value: &Q) -> Option<T>
     where
-        T: Borrow<Q>,
-        Q: ?Sized + Eq,
+        T: Borrow<Q> + Ord,
+        Q: ?Sized + Ord,
     {
-        self.base.remove_entry(value).map(|(k, ())| k)
-    }
-
-    /// Removes and returns the value in the set, if any, that is equal to the given one.
-    ///
-    /// The value may be any borrowed form of the set's value type, but [`Eq`] on the borrowed form
-    /// *must* match those for the value type.
-    ///
-    /// Like `Vec::swap_remove`, the element is removed by swapping it with the last element of the
-    /// map and popping it off. **This perturbs the position of what used to be the last element!**
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecset::VecSet;
-    ///
-    /// let mut set = VecSet::from([1, 2, 3]);
-    /// assert_eq!(set.take(&2), Some(2));
-    /// assert_eq!(set.take(&2), None);
-    /// ```
-    pub fn swap_take<Q>(&mut self, value: &Q) -> Option<T>
-    where
-        T: Borrow<Q>,
-        Q: ?Sized + Eq,
-    {
-        self.base.swap_remove_entry(value).map(|(k, ())| k)
+        self.base.remove(value)
     }
 }
 
 // Insertion operations.
 impl<T> VecSet<T>
 where
-    T: Eq,
+    T: Ord,
 {
     /// Adds a value to the set.
     ///
@@ -850,14 +636,14 @@ where
     /// assert_eq!(set.len(), 1);
     /// ```
     pub fn insert(&mut self, value: T) -> bool {
-        self.base.insert(value, ()).is_none()
+        self.base.insert(value).is_none()
     }
 }
 
 // Set operations.
 impl<T> VecSet<T>
 where
-    T: Eq,
+    T: Ord,
 {
     /// Visits the values representing the difference, i.e., the values that are in `self` but not
     /// in `other`.
@@ -891,7 +677,7 @@ where
     ///
     /// When an equal element is present in `self` and `other` then the resulting `Intersection`
     /// may yield references to one or the other. This can be relevant if `T` contains fields which
-    /// are not compared by its `Eq` implementation, and may hold different value between the two
+    /// are not compared by its `Ord` implementation, and may hold different value between the two
     /// equal copies of `T` in the two sets.
     ///
     /// # Examples
@@ -1040,21 +826,5 @@ where
     /// ```
     pub fn is_superset(&self, other: &VecSet<T>) -> bool {
         other.is_subset(self)
-    }
-}
-
-impl<T> Entries for VecSet<T> {
-    type Entry = Slot<T, ()>;
-
-    fn as_entries(&self) -> &[Self::Entry] {
-        self.base.as_entries()
-    }
-
-    fn as_entries_mut(&mut self) -> &mut [Self::Entry] {
-        self.base.as_entries_mut()
-    }
-
-    fn into_entries(self) -> Vec<Self::Entry> {
-        self.base.into_entries()
     }
 }
