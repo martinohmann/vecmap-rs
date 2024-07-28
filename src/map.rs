@@ -363,8 +363,7 @@ impl<K, V> VecMap<K, V> {
     /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     ///
     /// map.sort_unstable_keys();
-    /// let vec: Vec<_> = map.into_iter().collect();
-    /// assert_eq!(vec, [("a", 1), ("b", 2), ("c", 3)]);
+    /// assert_eq!(map.as_slice(), [("a", 1), ("b", 2), ("c", 3)]);
     /// ```
     pub fn sort_unstable_keys(&mut self)
     where
@@ -419,6 +418,34 @@ impl<K, V> VecMap<K, V> {
     {
         self.base
             .sort_unstable_by(|a, b| compare(a.refs(), b.refs()));
+    }
+
+    /// Sort the map’s key-value pairs in place using a sort-key extraction function.
+    ///
+    /// During sorting, the function is called at most once per entry, by using temporary storage
+    /// to remember the results of its evaluation. The order of calls to the function is
+    /// unspecified and may change between versions of `vecmap-rs` or the standard library.
+    ///
+    /// See [`slice::sort_by_cached_key`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    ///
+    /// map.sort_by_cached_key(|_, v| v.to_string());
+    /// let vec: Vec<_> = map.into_iter().collect();
+    /// assert_eq!(vec, [("a", 1), ("b", 2), ("c", 3)]);
+    /// ```
+    pub fn sort_by_cached_key<T, F>(&mut self, mut sort_key: F)
+    where
+        T: Ord,
+        F: FnMut(&K, &V) -> T,
+    {
+        self.base
+            .sort_by_cached_key(|a| sort_key(a.key(), a.value()));
     }
 
     /// Extracts a slice containing the map entries.
