@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2](https://github.com/martinohmann/vecmap-rs/compare/v0.2.1...v0.2.2) - 2024-07-28
+
+### Added
+- add `sort_by_cached_key` ([#31](https://github.com/martinohmann/vecmap-rs/pull/31))
+- add binary search methods ([#30](https://github.com/martinohmann/vecmap-rs/pull/30))
+
 ## [0.2.1](https://github.com/martinohmann/vecmap-rs/compare/v0.2.0...v0.2.1) - 2024-01-03
 
 ### Other
