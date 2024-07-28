@@ -283,6 +283,98 @@ impl<K, V> VecMap<K, V> {
         }
     }
 
+    /// Search over a sorted map for a key.
+    ///
+    /// Returns the position where that key is present, or the position where it can be inserted to
+    /// maintain the sort. See [`slice::binary_search`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("a", 1), ("b", 2), ("d", 4)]);
+    /// assert_eq!(map.binary_search_keys(&"b"), Ok(1));
+    /// assert_eq!(map.binary_search_keys(&"c"), Err(2));
+    /// assert_eq!(map.binary_search_keys(&"z"), Err(3));
+    /// ```
+    pub fn binary_search_keys(&self, key: &K) -> Result<usize, usize>
+    where
+        K: Ord,
+    {
+        self.binary_search_by(|k, _| k.cmp(key))
+    }
+
+    /// Search over a sorted map with a comparator function.
+    ///
+    /// Returns the position where that value is present, or the position where it can be inserted
+    /// to maintain the sort. See [`slice::binary_search_by`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("a", 1), ("b", 2), ("d", 4)]);
+    /// assert_eq!(map.binary_search_by(|k, _| k.cmp(&"b")), Ok(1));
+    /// assert_eq!(map.binary_search_by(|k, _| k.cmp(&"c")), Err(2));
+    /// assert_eq!(map.binary_search_by(|k, _| k.cmp(&"z")), Err(3));
+    /// assert_eq!(map.binary_search_by(|_, v| v.cmp(&4)), Ok(2));
+    /// ```
+    pub fn binary_search_by<'a, F>(&'a self, mut f: F) -> Result<usize, usize>
+    where
+        F: FnMut(&'a K, &'a V) -> Ordering,
+    {
+        self.as_slice().binary_search_by(|(k, v)| f(k, v))
+    }
+
+    /// Search over a sorted map with an extraction function.
+    ///
+    /// Returns the position where that value is present, or the position where it can be inserted
+    /// to maintain the sort. See [`slice::binary_search_by_key`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("a", 1), ("b", 2), ("d", 4)]);
+    /// assert_eq!(map.binary_search_by_key(&"b", |&k, _| k), Ok(1));
+    /// assert_eq!(map.binary_search_by_key(&"c", |&k, _| k), Err(2));
+    /// assert_eq!(map.binary_search_by_key(&"z", |&k, _| k), Err(3));
+    /// assert_eq!(map.binary_search_by_key(&4, |_, &v| v), Ok(2));
+    /// ```
+    pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, mut f: F) -> Result<usize, usize>
+    where
+        F: FnMut(&'a K, &'a V) -> B,
+        B: Ord,
+    {
+        self.as_slice().binary_search_by_key(b, |(k, v)| f(k, v))
+    }
+
+    /// Returns the index of the partition point of a sorted map according to the given predicate
+    /// (the index of the first element of the second partition).
+    ///
+    /// See [`slice::partition_point`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("a", 1), ("b", 2), ("d", 4)]);
+    /// assert_eq!(map.partition_point(|&k, _| k < "d"), 2);
+    /// assert_eq!(map.partition_point(|_, &v| v < 2), 1);
+    /// assert_eq!(map.partition_point(|_, &v| v > 100), 0);
+    /// assert_eq!(map.partition_point(|_, &v| v < 100), 3);
+    /// ```
+    pub fn partition_point<P>(&self, mut pred: P) -> usize
+    where
+        P: FnMut(&K, &V) -> bool,
+    {
+        self.as_slice().partition_point(|(k, v)| pred(k, v))
+    }
+
     /// Removes the specified range from the vector in bulk, returning all removed elements as an
     /// iterator. If the iterator is dropped before being fully consumed, it drops the remaining
     /// removed elements.
