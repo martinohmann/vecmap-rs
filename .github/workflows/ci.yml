@@ -56,8 +56,6 @@ jobs:
   miri:
     name: miri
     runs-on: ubuntu-latest
-    env:
-      MIRIFLAGS: -Zmiri-tag-raw-pointers
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
