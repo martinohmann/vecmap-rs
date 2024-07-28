@@ -510,6 +510,32 @@ impl<T> VecSet<T> {
         self.base.sort_unstable_by(|a, b| compare(a.0, b.0));
     }
 
+    /// Sort the set’s values in place using a key extraction function.
+    ///
+    /// During sorting, the function is called at most once per entry, by using temporary storage
+    /// to remember the results of its evaluation. The order of calls to the function is
+    /// unspecified and may change between versions of `vecmap-rs` or the standard library.
+    ///
+    /// See [`slice::sort_by_cached_key`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["b", "a", "c"]);
+    ///
+    /// set.sort_by_cached_key(|k| k.to_string());
+    /// assert_eq!(set.as_slice(), ["a", "b", "c"]);
+    /// ```
+    pub fn sort_by_cached_key<K, F>(&mut self, mut sort_key: F)
+    where
+        K: Ord,
+        F: FnMut(&T) -> K,
+    {
+        self.base.sort_by_cached_key(|k, _| sort_key(k));
+    }
+
     /// Extracts a slice containing the set elements.
     ///
     /// ```
