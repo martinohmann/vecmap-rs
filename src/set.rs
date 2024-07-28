@@ -273,6 +273,97 @@ impl<T> VecSet<T> {
         }
     }
 
+    /// Search over a sorted set for a value.
+    ///
+    /// Returns the position where that key is present, or the position where it can be inserted to
+    /// maintain the sort. See [`slice::binary_search`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from(["a", "b", "d"]);
+    /// assert_eq!(set.binary_search(&"b"), Ok(1));
+    /// assert_eq!(set.binary_search(&"c"), Err(2));
+    /// assert_eq!(set.binary_search(&"z"), Err(3));
+    /// ```
+    pub fn binary_search(&self, value: &T) -> Result<usize, usize>
+    where
+        T: Ord,
+    {
+        self.binary_search_by(|v| v.cmp(value))
+    }
+
+    /// Search over a sorted set with a comparator function.
+    ///
+    /// Returns the position where that value is present, or the position where it can be inserted
+    /// to maintain the sort. See [`slice::binary_search_by`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from(["a", "b", "d"]);
+    ///
+    /// assert_eq!(set.binary_search_by(|probe| probe.cmp(&"b")), Ok(1));
+    /// assert_eq!(set.binary_search_by(|probe| probe.cmp(&"c")), Err(2));
+    /// assert_eq!(set.binary_search_by(|probe| probe.cmp(&"z")), Err(3));
+    /// ```
+    pub fn binary_search_by<'a, F>(&'a self, f: F) -> Result<usize, usize>
+    where
+        F: FnMut(&'a T) -> Ordering,
+    {
+        self.as_slice().binary_search_by(f)
+    }
+
+    /// Search over a sorted set with an extraction function.
+    ///
+    /// Returns the position where that value is present, or the position where it can be inserted
+    /// to maintain the sort. See [`slice::binary_search_by_key`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let map = VecSet::from([("a", 1), ("b", 2), ("d", 4)]);
+    /// assert_eq!(map.binary_search_by_key(&"b", |&(k, _)| k), Ok(1));
+    /// assert_eq!(map.binary_search_by_key(&"c", |&(k, _)| k), Err(2));
+    /// assert_eq!(map.binary_search_by_key(&"z", |&(k, _)| k), Err(3));
+    /// assert_eq!(map.binary_search_by_key(&4, |&(_, v)| v), Ok(2));
+    /// ```
+    pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, f: F) -> Result<usize, usize>
+    where
+        F: FnMut(&'a T) -> B,
+        B: Ord,
+    {
+        self.as_slice().binary_search_by_key(b, f)
+    }
+
+    /// Returns the index of the partition point of a sorted set according to the given predicate
+    /// (the index of the first element of the second partition).
+    ///
+    /// See [`slice::partition_point`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let map = VecSet::from([1, 2, 4]);
+    /// assert_eq!(map.partition_point(|&v| v < 2), 1);
+    /// assert_eq!(map.partition_point(|&v| v > 100), 0);
+    /// assert_eq!(map.partition_point(|&v| v < 100), 3);
+    /// ```
+    pub fn partition_point<P>(&self, pred: P) -> usize
+    where
+        P: FnMut(&T) -> bool,
+    {
+        self.as_slice().partition_point(pred)
+    }
+
     /// Removes the specified range from the vector in bulk, returning all removed elements as an
     /// iterator. If the iterator is dropped before being fully consumed, it drops the remaining
     /// removed elements.
