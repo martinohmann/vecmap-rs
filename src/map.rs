@@ -6,8 +6,10 @@ mod iter;
 mod mutable_keys;
 #[cfg(feature = "serde")]
 mod serde;
+mod slice;
 
 use super::{Entries, Slot, TryReserveError};
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
@@ -18,6 +20,7 @@ use core::ptr;
 pub use self::entry::{Entry, OccupiedEntry, VacantEntry};
 pub use self::iter::*;
 pub use self::mutable_keys::MutableKeys;
+pub use self::slice::Slice;
 
 /// A vector-based map implementation which retains the order of inserted entries.
 ///
@@ -657,6 +660,18 @@ impl<K, V> VecMap<K, V> {
     pub fn as_slice(&self) -> &[(K, V)] {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(self.base.as_slice()) as *const [(K, V)]) }
+    }
+
+    pub fn as_ref_slice(&self) -> &Slice<K, V> {
+        Slice::from_slice(self.as_entries())
+    }
+
+    pub fn as_mut_slice(&mut self) -> &mut Slice<K, V> {
+        Slice::from_mut_slice(self.as_entries_mut())
+    }
+
+    pub fn into_boxed_slice(self) -> Box<Slice<K, V>> {
+        Slice::from_boxed(self.into_entries().into_boxed_slice())
     }
 
     /// Copies the map entries into a new `Vec<(K, V)>`.

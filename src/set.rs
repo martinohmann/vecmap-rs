@@ -4,8 +4,10 @@ mod impls;
 mod iter;
 #[cfg(feature = "serde")]
 mod serde;
+mod slice;
 
-use super::{Entries, Slot, TryReserveError, VecMap};
+use super::{Entries, TryReserveError, VecMap};
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
@@ -13,6 +15,10 @@ use core::ops::RangeBounds;
 use core::ptr;
 
 pub use self::iter::*;
+pub use self::slice::Slice;
+
+// Type alias to make internal `VecSet` APIs using a `Slot` less verbose.
+type Slot<T> = super::Slot<T, ()>;
 
 /// A vector-based set implementation which retains the order of inserted elements.
 ///
@@ -653,6 +659,18 @@ impl<T> VecSet<T> {
     pub fn as_slice(&self) -> &[T] {
         // SAFETY: `&[(T, ())]` and `&[T]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[(T, ())]>(self.base.as_slice()) as *const [T]) }
+    }
+
+    pub fn as_ref_slice(&self) -> &Slice<T> {
+        Slice::from_slice(self.as_entries())
+    }
+
+    pub fn as_mut_slice(&mut self) -> &mut Slice<T> {
+        Slice::from_mut_slice(self.as_entries_mut())
+    }
+
+    pub fn into_boxed_slice(self) -> Box<Slice<T>> {
+        Slice::from_boxed(self.into_entries().into_boxed_slice())
     }
 
     /// Copies the set elements into a new `Vec<T>`.
@@ -1296,7 +1314,7 @@ where
 }
 
 impl<T> Entries for VecSet<T> {
-    type Entry = Slot<T, ()>;
+    type Entry = Slot<T>;
 
     fn as_entries(&self) -> &[Self::Entry] {
         self.base.as_entries()
