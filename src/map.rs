@@ -1207,6 +1207,35 @@ where
             None => Entry::Vacant(VacantEntry::new(self, key)),
         }
     }
+
+    /// Moves all key-value pairs from `other` into `self`, leaving `other` empty.
+    ///
+    /// This is equivalent to calling [`insert`][Self::insert] for each key-value pair from `other`
+    /// in order, which means that for keys that already exist in `self`, their value is updated in
+    /// the current position.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// // Note: Key (3) is present in both maps.
+    /// let mut a = VecMap::from([(3, "c"), (2, "b"), (1, "a")]);
+    /// let mut b = VecMap::from([(3, "d"), (4, "e"), (5, "f")]);
+    /// let old_capacity = b.capacity();
+    ///
+    /// a.append(&mut b);
+    ///
+    /// assert_eq!(a.len(), 5);
+    /// assert_eq!(b.len(), 0);
+    /// assert_eq!(b.capacity(), old_capacity);
+    ///
+    /// assert!(a.keys().eq(&[3, 2, 1, 4, 5]));
+    /// assert_eq!(a[&3], "d"); // "c" was overwritten.
+    /// ```
+    pub fn append(&mut self, other: &mut VecMap<K, V>) {
+        self.extend(other.drain(..));
+    }
 }
 
 // Iterator adapters.
