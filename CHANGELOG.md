@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.3](https://github.com/martinohmann/vecmap-rs/compare/v0.2.2...v0.2.3) - 2025-01-25
+
+### Added
+
+- add `Vec{Map,Set}::{try_reserve*,reserve_exact}` (#36)
+- add `Vec{Map,Set}::append` (#35)
+
+### Fixed
+
+- *(iter)* map to correct item type in `Debug` impls
+
+### Other
+
+- address new clippy lints
+
 ## [0.2.2](https://github.com/martinohmann/vecmap-rs/compare/v0.2.1...v0.2.2) - 2024-07-28
 
 ### Added
