@@ -8,6 +8,9 @@ use core::slice;
 
 macro_rules! impl_iterator {
     ($ty:ident<$($lt:lifetime,)*$($gen:ident),+>, $item:ty, $map:expr) => {
+        impl_iterator!($ty<$($lt,)*$($gen),+>, $item, $map, $map);
+    };
+    ($ty:ident<$($lt:lifetime,)*$($gen:ident),+>, $item:ty, $map:expr, $debug_map:expr) => {
         impl<$($lt,)*$($gen),+> Iterator for $ty<$($lt,)*$($gen),+> {
             type Item = $item;
 
@@ -39,7 +42,7 @@ macro_rules! impl_iterator {
             T: fmt::Debug,
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                let iter = self.iter.as_slice().iter().map(Slot::key);
+                let iter = self.iter.as_slice().iter().map($debug_map);
                 f.debug_list().entries(iter).finish()
             }
         }
@@ -123,7 +126,7 @@ where
     }
 }
 
-impl_iterator!(IntoIter<T>, T, Slot::into_key);
+impl_iterator!(IntoIter<T>, T, Slot::into_key, Slot::key);
 
 /// A lazy iterator producing elements in the difference of `VecSet`s.
 ///
@@ -429,4 +432,4 @@ impl<'a, T> Drain<'a, T> {
     }
 }
 
-impl_iterator!(Drain<'a, T>, T, |(k, ())| k);
+impl_iterator!(Drain<'a, T>, T, |(k, ())| k, Slot::key);

@@ -7,6 +7,9 @@ use core::slice;
 
 macro_rules! impl_iterator {
     ($ty:ident<$($lt:lifetime,)*$($gen:ident),+>, $item:ty, $map:expr) => {
+        impl_iterator!($ty<$($lt,)*$($gen),+>, $item, $map, $map);
+    };
+    ($ty:ident<$($lt:lifetime,)*$($gen:ident),+>, $item:ty, $map:expr, $debug_map:expr) => {
         impl<$($lt,)*$($gen),+> Iterator for $ty<$($lt,)*$($gen),+> {
             type Item = $item;
 
@@ -39,7 +42,7 @@ macro_rules! impl_iterator {
             V: fmt::Debug,
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                let iter = self.iter.as_slice().iter().map(Slot::refs);
+                let iter = self.iter.as_slice().iter().map($debug_map);
                 f.debug_list().entries(iter).finish()
             }
         }
@@ -121,7 +124,12 @@ impl<'a, K, V> IterMut<'a, K, V> {
     }
 }
 
-impl_iterator!(IterMut<'a, K, V>, (&'a K, &'a mut V), Slot::ref_mut);
+impl_iterator!(
+    IterMut<'a, K, V>,
+    (&'a K, &'a mut V),
+    Slot::ref_mut,
+    Slot::refs
+);
 
 /// A mutable iterator over the entries of a `VecMap`.
 ///
@@ -142,7 +150,12 @@ impl<'a, K, V> IterMut2<'a, K, V> {
     }
 }
 
-impl_iterator!(IterMut2<'a, K, V>, (&'a mut K, &'a mut V), Slot::muts);
+impl_iterator!(
+    IterMut2<'a, K, V>,
+    (&'a mut K, &'a mut V),
+    Slot::muts,
+    Slot::refs
+);
 
 /// An owning iterator over the entries of a `VecMap`.
 ///
@@ -175,7 +188,7 @@ where
     }
 }
 
-impl_iterator!(IntoIter<K, V>, (K, V), Slot::into_key_value);
+impl_iterator!(IntoIter<K, V>, (K, V), Slot::into_key_value, Slot::refs);
 
 /// An iterator over the keys of a `VecMap`.
 ///
@@ -223,7 +236,7 @@ impl<'a, K, V> KeysMut<'a, K, V> {
     }
 }
 
-impl_iterator!(KeysMut<'a, K, V>, &'a mut K, Slot::key_mut);
+impl_iterator!(KeysMut<'a, K, V>, &'a mut K, Slot::key_mut, Slot::key);
 
 /// An owning iterator over the keys of a `VecMap`.
 ///
@@ -255,7 +268,7 @@ where
     }
 }
 
-impl_iterator!(IntoKeys<K, V>, K, Slot::into_key);
+impl_iterator!(IntoKeys<K, V>, K, Slot::into_key, Slot::key);
 
 /// An iterator over the values of a `VecMap`.
 ///
@@ -303,7 +316,7 @@ impl<'a, K, V> ValuesMut<'a, K, V> {
     }
 }
 
-impl_iterator!(ValuesMut<'a, K, V>, &'a mut V, Slot::value_mut);
+impl_iterator!(ValuesMut<'a, K, V>, &'a mut V, Slot::value_mut, Slot::value);
 
 /// An owning iterator over the values of a `VecMap`.
 ///
@@ -335,7 +348,7 @@ where
     }
 }
 
-impl_iterator!(IntoValues<K, V>, V, Slot::into_value);
+impl_iterator!(IntoValues<K, V>, V, Slot::into_value, Slot::value);
 
 /// A draining iterator for `VecMap`.
 ///
@@ -362,4 +375,4 @@ impl<'a, K, V> Drain<'a, K, V> {
     }
 }
 
-impl_iterator!(Drain<'a, K, V>, (K, V), Slot::into_key_value);
+impl_iterator!(Drain<'a, K, V>, (K, V), Slot::into_key_value, Slot::refs);
