@@ -13,6 +13,7 @@ use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::mem;
 use core::ops::RangeBounds;
+use core::ptr;
 
 pub use self::entry::{Entry, OccupiedEntry, VacantEntry};
 pub use self::iter::*;
@@ -551,7 +552,7 @@ impl<K, V> VecMap<K, V> {
     /// ```
     pub fn as_slice(&self) -> &[(K, V)] {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
-        unsafe { &*(self.base.as_slice() as *const [Slot<K, V>] as *const [(K, V)]) }
+        unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(self.base.as_slice()) as *const [(K, V)]) }
     }
 
     /// Copies the map entries into a new `Vec<(K, V)>`.

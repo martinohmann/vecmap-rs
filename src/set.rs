@@ -10,6 +10,7 @@ use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::ops::RangeBounds;
+use core::ptr;
 
 pub use self::iter::*;
 
@@ -200,7 +201,7 @@ impl<T> VecSet<T> {
     where
         F: FnMut(&T) -> bool,
     {
-        self.base.retain(|k, _| f(k));
+        self.base.retain(|k, ()| f(k));
     }
 
     /// Shrinks the capacity of the set as much as possible. It will drop down as much as possible
@@ -533,7 +534,7 @@ impl<T> VecSet<T> {
         K: Ord,
         F: FnMut(&T) -> K,
     {
-        self.base.sort_by_cached_key(|k, _| sort_key(k));
+        self.base.sort_by_cached_key(|k, ()| sort_key(k));
     }
 
     /// Extracts a slice containing the set elements.
@@ -547,7 +548,7 @@ impl<T> VecSet<T> {
     /// ```
     pub fn as_slice(&self) -> &[T] {
         // SAFETY: `&[(T, ())]` and `&[T]` have the same memory layout.
-        unsafe { &*(self.base.as_slice() as *const [(T, ())] as *const [T]) }
+        unsafe { &*(ptr::from_ref::<[(T, ())]>(self.base.as_slice()) as *const [T]) }
     }
 
     /// Copies the set elements into a new `Vec<T>`.
@@ -644,7 +645,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.first(), Some(&"a"));
     /// ```
     pub fn first(&self) -> Option<&T> {
-        self.base.first().map(|(k, _)| k)
+        self.base.first().map(|(k, ())| k)
     }
 
     /// Get the last element.
@@ -661,7 +662,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.last(), None);
     /// ```
     pub fn last(&self) -> Option<&T> {
-        self.base.last().map(|(k, _)| k)
+        self.base.last().map(|(k, ())| k)
     }
 
     /// Returns a reference to the value in the set, if any, that is equal to the given value.
@@ -683,7 +684,7 @@ impl<T> VecSet<T> {
         T: Borrow<Q>,
         Q: ?Sized + Eq,
     {
-        self.base.get_key_value(value).map(|(k, _)| k)
+        self.base.get_key_value(value).map(|(k, ())| k)
     }
 
     /// Return references to the element stored at `index`, if it is present, else `None`.
@@ -699,7 +700,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.get_index(1), None);
     /// ```
     pub fn get_index(&self, index: usize) -> Option<&T> {
-        self.base.get_index(index).map(|(k, _)| k)
+        self.base.get_index(index).map(|(k, ())| k)
     }
 
     /// Returns the index and a reference to the value in the set, if any, that is equal to the
@@ -722,7 +723,7 @@ impl<T> VecSet<T> {
         T: Borrow<Q>,
         Q: ?Sized + Eq,
     {
-        self.base.get_full(value).map(|(index, k, _)| (index, k))
+        self.base.get_full(value).map(|(index, k, ())| (index, k))
     }
 
     /// Return item index, if it exists in the set.

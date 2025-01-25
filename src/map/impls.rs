@@ -105,7 +105,7 @@ where
 {
     fn from_iter<I: IntoIterator<Item = Item>>(iter: I) -> Self {
         let mut map = VecMap::new();
-        map.extend(iter.into_iter());
+        map.extend(iter);
         map
     }
 }
@@ -169,7 +169,7 @@ where
         }
 
         self.iter()
-            .all(|(key, value)| other.get(key).map_or(false, |v| *value == *v))
+            .all(|(key, value)| other.get(key).is_some_and(|v| *value == *v))
     }
 }
 
