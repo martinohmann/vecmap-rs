@@ -970,6 +970,36 @@ where
     pub fn insert(&mut self, value: T) -> bool {
         self.base.insert(value, ()).is_none()
     }
+
+    /// Moves all values from `other` into `self`, leaving `other` empty.
+    ///
+    /// This is equivalent to calling [`insert`][Self::insert] for each value from `other` in
+    /// order, which means that values that already exist in `self` are unchanged in their current
+    /// position.
+    ///
+    /// See also [`union`][Self::union] to iterate the combined values by reference, without
+    /// modifying `self` or `other`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut a = VecSet::from([3, 2, 1]);
+    /// let mut b = VecSet::from([3, 4, 5]);
+    /// let old_capacity = b.capacity();
+    ///
+    /// a.append(&mut b);
+    ///
+    /// assert_eq!(a.len(), 5);
+    /// assert_eq!(b.len(), 0);
+    /// assert_eq!(b.capacity(), old_capacity);
+    ///
+    /// assert!(a.iter().eq(&[3, 2, 1, 4, 5]));
+    /// ```
+    pub fn append(&mut self, other: &mut VecSet<T>) {
+        self.base.append(&mut other.base);
+    }
 }
 
 // Set operations.
