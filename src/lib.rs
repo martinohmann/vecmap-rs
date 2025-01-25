@@ -22,6 +22,7 @@ pub mod set;
 pub use self::map::VecMap;
 #[doc(inline)]
 pub use self::set::VecSet;
+pub use alloc::collections::TryReserveError;
 use alloc::vec::Vec;
 
 // The type used to store entries in a `VecMap`.

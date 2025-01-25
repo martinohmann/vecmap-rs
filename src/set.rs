@@ -5,7 +5,7 @@ mod iter;
 #[cfg(feature = "serde")]
 mod serde;
 
-use super::{Entries, Slot, VecMap};
+use super::{Entries, Slot, TryReserveError, VecMap};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
@@ -182,6 +182,110 @@ impl<T> VecSet<T> {
     /// ```
     pub fn reserve(&mut self, additional: usize) {
         self.base.reserve(additional);
+    }
+
+    /// Reserves the minimum capacity for at least `additional` more elements to be inserted in the
+    /// given `VecSet<T>`. Unlike [`reserve`], this will not deliberately over-allocate to
+    /// speculatively avoid frequent allocations. After calling `reserve_exact`, capacity will be
+    /// greater than or equal to `self.len() + additional`. Does nothing if the capacity is already
+    /// sufficient.
+    ///
+    /// Note that the allocator may give the collection more space than it requests. Therefore,
+    /// capacity can not be relied upon to be precisely minimal. Prefer [`reserve`] if future
+    /// insertions are expected.
+    ///
+    /// [`reserve`]: VecSet::reserve
+    ///
+    /// # Panics
+    ///
+    /// Panics if the new capacity exceeds `isize::MAX` bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from_iter(["a"]);
+    /// set.reserve(10);
+    /// assert!(set.capacity() >= 11);
+    /// ```
+    pub fn reserve_exact(&mut self, additional: usize) {
+        self.base.reserve_exact(additional);
+    }
+
+    /// Tries to reserve capacity for at least `additional` more elements to be inserted in the
+    /// given `VecSet<T>`. The collection may reserve more space to speculatively avoid frequent
+    /// reallocations. After calling `try_reserve`, capacity will be greater than or equal to
+    /// `self.len() + additional` if it returns `Ok(())`. Does nothing if capacity is already
+    /// sufficient. This method preserves the contents even if an error occurs.
+    ///
+    /// # Errors
+    ///
+    /// If the capacity overflows, or the allocator reports a failure, then an error
+    /// is returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::{TryReserveError, VecSet};
+    ///
+    /// fn process_data(data: &[u32]) -> Result<VecSet<u32>, TryReserveError> {
+    ///     let mut output = VecSet::new();
+    ///
+    ///     // Pre-reserve the memory, exiting if we can't
+    ///     output.try_reserve(data.len())?;
+    ///
+    ///     // Now we know this can't OOM in the middle of our complex work
+    ///     output.extend(data.iter().map(|&v| {
+    ///         v * 2 + 5 // very complicated
+    ///     }));
+    ///
+    ///     Ok(output)
+    /// }
+    /// # process_data(&[1, 2, 3]).expect("why is the test harness OOMing?");
+    /// ```
+    pub fn try_reserve(&mut self, additional: usize) -> Result<(), TryReserveError> {
+        self.base.try_reserve(additional)
+    }
+
+    /// Tries to reserve the minimum capacity for at least `additional` elements to be inserted in
+    /// the given `VecSet<T>`. Unlike [`try_reserve`], this will not deliberately over-allocate
+    /// to speculatively avoid frequent allocations. After calling `try_reserve_exact`, capacity
+    /// will be greater than or equal to `self.len() + additional` if it returns `Ok(())`. Does
+    /// nothing if the capacity is already sufficient.
+    ///
+    /// Note that the allocator may give the collection more space than it requests. Therefore,
+    /// capacity can not be relied upon to be precisely minimal. Prefer [`try_reserve`] if future
+    /// insertions are expected.
+    ///
+    /// [`try_reserve`]: VecSet::try_reserve
+    ///
+    /// # Errors
+    ///
+    /// If the capacity overflows, or the allocator reports a failure, then an error is returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::{TryReserveError, VecSet};
+    ///
+    /// fn process_data(data: &[u32]) -> Result<VecSet<u32>, TryReserveError> {
+    ///     let mut output = VecSet::new();
+    ///
+    ///     // Pre-reserve the memory, exiting if we can't
+    ///     output.try_reserve_exact(data.len())?;
+    ///
+    ///     // Now we know this can't OOM in the middle of our complex work
+    ///     output.extend(data.iter().map(|&v| {
+    ///         v * 2 + 5 // very complicated
+    ///     }));
+    ///
+    ///     Ok(output)
+    /// }
+    /// # process_data(&[1, 2, 3]).expect("why is the test harness OOMing?");
+    /// ```
+    pub fn try_reserve_exact(&mut self, additional: usize) -> Result<(), TryReserveError> {
+        self.base.try_reserve_exact(additional)
     }
 
     /// Retains only the elements specified by the predicate.
