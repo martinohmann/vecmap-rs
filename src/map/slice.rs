@@ -1,5 +1,6 @@
 use super::Slot;
 use alloc::boxed::Box;
+use core::ops::Deref;
 use core::ptr;
 
 #[repr(transparent)]
@@ -20,5 +21,18 @@ impl<K, V> Slice<K, V> {
 
     pub(super) fn from_boxed(entries: Box<[Slot<K, V>]>) -> Box<Slice<K, V>> {
         unsafe { Box::from_raw(Box::into_raw(entries) as *mut Slice<K, V>) }
+    }
+
+    fn as_raw_slice(&self) -> &[(K, V)] {
+        // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
+        unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(&self.entries) as *const [(K, V)]) }
+    }
+}
+
+impl<K, V> Deref for Slice<K, V> {
+    type Target = [(K, V)];
+
+    fn deref(&self) -> &Self::Target {
+        self.as_raw_slice()
     }
 }

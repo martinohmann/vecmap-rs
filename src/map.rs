@@ -14,7 +14,7 @@ use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::mem;
-use core::ops::RangeBounds;
+use core::ops::{Deref, RangeBounds};
 use core::ptr;
 
 pub use self::entry::{Entry, OccupiedEntry, VacantEntry};

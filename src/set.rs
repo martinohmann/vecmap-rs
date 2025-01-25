@@ -700,7 +700,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(vec, ["b", "a", "c"]);
     /// ```
     pub fn into_vec(self) -> Vec<T> {
-        // SAFETY: `Vec<Slot<T, ()>>` and `Vec<T>` have the same memory layout.
+        // SAFETY: `Vec<Slot<T>>` and `Vec<T>` have the same memory layout.
         unsafe { super::transmute_vec(self.base.base) }
     }
 
@@ -728,7 +728,7 @@ impl<T> VecSet<T> {
     ///
     /// [slice-sort]: https://doc.rust-lang.org/std/primitive.slice.html#method.sort
     pub unsafe fn from_vec_unchecked(vec: Vec<T>) -> Self {
-        // SAFETY: `Vec<T>` and `Vec<Slot<T, ()>>` have the same memory layout.
+        // SAFETY: `Vec<T>` and `Vec<Slot<T>>` have the same memory layout.
         let base = unsafe { super::transmute_vec(vec) };
         VecSet {
             base: VecMap { base },
