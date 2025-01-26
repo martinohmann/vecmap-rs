@@ -1,6 +1,7 @@
 use super::{Iter, IterMut, Keys, Slot, Values, ValuesMut};
 use core::borrow::Borrow;
 use core::cmp::Ordering;
+use core::fmt;
 use core::ptr;
 
 /// A dynamically-sized slice of key-value pairs in a [`VecMap`][crate::VecMap].
@@ -693,6 +694,44 @@ impl<K, V> Slice<K, V> {
         P: FnMut(&K, &V) -> bool,
     {
         self.as_raw_slice().partition_point(|(k, v)| pred(k, v))
+    }
+}
+
+impl<K, V> Default for &Slice<K, V> {
+    fn default() -> Self {
+        Slice::from_slice(&[])
+    }
+}
+
+impl<K, V> Default for &mut Slice<K, V> {
+    fn default() -> Self {
+        Slice::from_mut_slice(&mut [])
+    }
+}
+
+impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for Slice<K, V> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self).finish()
+    }
+}
+
+impl<K: PartialEq, V: PartialEq> PartialEq for Slice<K, V> {
+    fn eq(&self, other: &Self) -> bool {
+        self.entries.len() == other.entries.len() && self.iter().eq(other)
+    }
+}
+
+impl<K: Eq, V: Eq> Eq for Slice<K, V> {}
+
+impl<K: PartialOrd, V: PartialOrd> PartialOrd for Slice<K, V> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.iter().partial_cmp(other)
+    }
+}
+
+impl<K: Ord, V: Ord> Ord for Slice<K, V> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.iter().cmp(other)
     }
 }
 

@@ -1,4 +1,4 @@
-use super::VecMap;
+use super::{Slice, VecMap};
 use core::fmt;
 use core::marker::PhantomData;
 use serde::de::{self, value::MapDeserializer};
@@ -70,15 +70,32 @@ where
     }
 }
 
+impl<K, V> ser::Serialize for Slice<K, V>
+where
+    K: ser::Serialize + Eq,
+    V: ser::Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: ser::Serializer,
+    {
+        serializer.collect_seq(self)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{assert_ser_tokens, assert_tokens, Token};
 
     #[test]
     fn ser_de_empty() {
         let map = VecMap::<u8, &str>::new();
         assert_tokens(&map, &[Token::Map { len: Some(0) }, Token::MapEnd]);
+        assert_ser_tokens(
+            map.as_slice(),
+            &[Token::Seq { len: Some(0) }, Token::SeqEnd],
+        );
     }
 
     #[test]
@@ -95,6 +112,25 @@ mod test {
                 Token::BorrowedStr("c"),
                 Token::I32(3),
                 Token::MapEnd,
+            ],
+        );
+        assert_ser_tokens(
+            map.as_slice(),
+            &[
+                Token::Seq { len: Some(3) },
+                Token::Tuple { len: 2 },
+                Token::BorrowedStr("a"),
+                Token::I32(1),
+                Token::TupleEnd,
+                Token::Tuple { len: 2 },
+                Token::BorrowedStr("b"),
+                Token::I32(2),
+                Token::TupleEnd,
+                Token::Tuple { len: 2 },
+                Token::BorrowedStr("c"),
+                Token::I32(3),
+                Token::TupleEnd,
+                Token::SeqEnd,
             ],
         );
     }

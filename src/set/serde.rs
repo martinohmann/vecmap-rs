@@ -1,4 +1,4 @@
-use super::VecSet;
+use super::{Slice, VecSet};
 use core::fmt;
 use core::marker::PhantomData;
 use serde::de::{self, value::SeqDeserializer};
@@ -66,15 +66,31 @@ where
     }
 }
 
+impl<T> ser::Serialize for Slice<T>
+where
+    T: ser::Serialize + Eq,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: ser::Serializer,
+    {
+        serializer.collect_seq(self)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{assert_ser_tokens, assert_tokens, Token};
 
     #[test]
     fn ser_de_empty() {
         let set = VecSet::<&str>::new();
         assert_tokens(&set, &[Token::Seq { len: Some(0) }, Token::SeqEnd]);
+        assert_ser_tokens(
+            set.as_slice(),
+            &[Token::Seq { len: Some(0) }, Token::SeqEnd],
+        );
     }
 
     #[test]
@@ -82,6 +98,16 @@ mod test {
         let set = VecSet::from(["a", "b", "c"]);
         assert_tokens(
             &set,
+            &[
+                Token::Seq { len: Some(3) },
+                Token::BorrowedStr("a"),
+                Token::BorrowedStr("b"),
+                Token::BorrowedStr("c"),
+                Token::SeqEnd,
+            ],
+        );
+        assert_ser_tokens(
+            set.as_slice(),
             &[
                 Token::Seq { len: Some(3) },
                 Token::BorrowedStr("a"),
