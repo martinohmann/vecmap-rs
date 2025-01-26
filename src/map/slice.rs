@@ -1,5 +1,6 @@
 use super::{Iter, IterMut, Keys, Slot, Values, ValuesMut};
 use alloc::boxed::Box;
+use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::ops::Deref;
 use core::ptr;
@@ -151,6 +152,273 @@ impl<K, V> Slice<K, V> {
     /// ```
     pub fn values_mut(&mut self) -> ValuesMut<'_, K, V> {
         ValuesMut::new(&mut self.entries)
+    }
+}
+
+// Lookup operations.
+impl<K, V> Slice<K, V> {
+    /// Return `true` if an equivalent to `key` exists in the map.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert(1, "a");
+    /// assert_eq!(map.contains_key(&1), true);
+    /// assert_eq!(map.contains_key(&2), false);
+    /// ```
+    pub fn contains_key<Q>(&self, key: &Q) -> bool
+    where
+        K: Borrow<Q>,
+        Q: Eq + ?Sized,
+    {
+        self.get_index_of(key).is_some()
+    }
+
+    /// Get the first key-value pair.
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
+    /// assert_eq!(map.first(), Some((&"a", &1)));
+    /// ```
+    pub fn first(&self) -> Option<(&K, &V)> {
+        self.entries.first().map(Slot::refs)
+    }
+
+    /// Get the first key-value pair, with mutable access to the value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
+    ///
+    /// if let Some((_, v)) = map.first_mut() {
+    ///     *v = *v + 10;
+    /// }
+    /// assert_eq!(map.first(), Some((&"a", &11)));
+    /// ```
+    pub fn first_mut(&mut self) -> Option<(&K, &mut V)> {
+        self.entries.first_mut().map(Slot::ref_mut)
+    }
+
+    /// Get the last key-value pair.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
+    /// assert_eq!(map.last(), Some((&"b", &2)));
+    /// map.pop();
+    /// map.pop();
+    /// assert_eq!(map.last(), None);
+    /// ```
+    pub fn last(&self) -> Option<(&K, &V)> {
+        self.entries.last().map(Slot::refs)
+    }
+
+    /// Get the last key-value pair, with mutable access to the value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from_iter([("a", 1), ("b", 2)]);
+    ///
+    /// if let Some((_, v)) = map.last_mut() {
+    ///     *v = *v + 10;
+    /// }
+    /// assert_eq!(map.last(), Some((&"b", &12)));
+    /// ```
+    pub fn last_mut(&mut self) -> Option<(&K, &mut V)> {
+        self.entries.last_mut().map(Slot::ref_mut)
+    }
+
+    /// Return a reference to the value stored for `key`, if it is present, else `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert(1, "a");
+    /// assert_eq!(map.get(&1), Some(&"a"));
+    /// assert_eq!(map.get(&2), None);
+    /// ```
+    pub fn get<Q>(&self, key: &Q) -> Option<&V>
+    where
+        K: Borrow<Q>,
+        Q: Eq + ?Sized,
+    {
+        self.get_index_of(key)
+            .map(|index| self.entries[index].value())
+    }
+
+    /// Return a mutable reference to the value stored for `key`, if it is present, else `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert(1, "a");
+    /// if let Some(x) = map.get_mut(&1) {
+    ///     *x = "b";
+    /// }
+    /// assert_eq!(map[&1], "b");
+    /// ```
+    pub fn get_mut<Q>(&mut self, key: &Q) -> Option<&mut V>
+    where
+        K: Borrow<Q>,
+        Q: Eq + ?Sized,
+    {
+        self.get_index_of(key)
+            .map(|index| self.entries[index].value_mut())
+    }
+
+    /// Return references to the key-value pair stored at `index`, if it is present, else `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert(1, "a");
+    /// assert_eq!(map.get_index(0), Some((&1, &"a")));
+    /// assert_eq!(map.get_index(1), None);
+    /// ```
+    pub fn get_index(&self, index: usize) -> Option<(&K, &V)> {
+        self.entries.get(index).map(Slot::refs)
+    }
+
+    /// Return a reference to the key and a mutable reference to the value stored at `index`, if it
+    /// is present, else `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert(1, "a");
+    /// if let Some((_, v)) = map.get_index_mut(0) {
+    ///     *v = "b";
+    /// }
+    /// assert_eq!(map[0], "b");
+    /// ```
+    pub fn get_index_mut(&mut self, index: usize) -> Option<(&K, &mut V)> {
+        self.entries.get_mut(index).map(Slot::ref_mut)
+    }
+
+    /// Return the index and references to the key-value pair stored for `key`, if it is present,
+    /// else `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert(1, "a");
+    /// assert_eq!(map.get_full(&1), Some((0, &1, &"a")));
+    /// assert_eq!(map.get_full(&2), None);
+    /// ```
+    pub fn get_full<Q>(&self, key: &Q) -> Option<(usize, &K, &V)>
+    where
+        K: Borrow<Q>,
+        Q: Eq + ?Sized,
+    {
+        self.get_index_of(key).map(|index| {
+            let (key, value) = self.entries[index].refs();
+            (index, key, value)
+        })
+    }
+
+    /// Return the index, a reference to the key and a mutable reference to the value stored for
+    /// `key`, if it is present, else `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert(1, "a");
+    ///
+    /// if let Some((_, _, v)) = map.get_full_mut(&1) {
+    ///     *v = "b";
+    /// }
+    /// assert_eq!(map.get(&1), Some(&"b"));
+    /// ```
+    pub fn get_full_mut<Q>(&mut self, key: &Q) -> Option<(usize, &K, &mut V)>
+    where
+        K: Borrow<Q>,
+        Q: Eq + ?Sized,
+    {
+        self.get_index_of(key).map(|index| {
+            let (key, value) = self.entries[index].ref_mut();
+            (index, key, value)
+        })
+    }
+
+    /// Return references to the key-value pair stored for `key`, if it is present, else `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert(1, "a");
+    /// assert_eq!(map.get_key_value(&1), Some((&1, &"a")));
+    /// assert_eq!(map.get_key_value(&2), None);
+    /// ```
+    pub fn get_key_value<Q>(&self, key: &Q) -> Option<(&K, &V)>
+    where
+        K: Borrow<Q>,
+        Q: Eq + ?Sized,
+    {
+        self.get_index_of(key)
+            .map(|index| self.entries[index].refs())
+    }
+
+    /// Return item index, if it exists in the map.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert("a", 10);
+    /// map.insert("b", 20);
+    /// assert_eq!(map.get_index_of("a"), Some(0));
+    /// assert_eq!(map.get_index_of("b"), Some(1));
+    /// assert_eq!(map.get_index_of("c"), None);
+    /// ```
+    pub fn get_index_of<Q>(&self, key: &Q) -> Option<usize>
+    where
+        K: Borrow<Q>,
+        Q: Eq + ?Sized,
+    {
+        if self.entries.is_empty() {
+            return None;
+        }
+
+        self.entries
+            .iter()
+            .position(|slot| slot.key().borrow() == key)
     }
 }
 
