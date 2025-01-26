@@ -1,4 +1,5 @@
 use super::{Iter, Slot};
+use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::fmt;
@@ -88,6 +89,23 @@ impl<T> Slice<T> {
     /// ```
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
+    }
+
+    /// Copies the set elements into a new `Vec<T>`.
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from(["b", "a", "c"]);
+    /// let vec = set.to_vec();
+    /// assert_eq!(vec, ["b", "a", "c"]);
+    /// // Here, `set` and `vec` can be modified independently.
+    /// ```
+    pub fn to_vec(&self) -> Vec<T>
+    where
+        T: Clone,
+    {
+        self.iter().cloned().collect()
     }
 }
 

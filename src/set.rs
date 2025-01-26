@@ -430,23 +430,6 @@ impl<T> VecSet<T> {
         Slice::from_mut_slice(self.as_entries_mut())
     }
 
-    /// Copies the set elements into a new `Vec<T>`.
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let set = VecSet::from(["b", "a", "c"]);
-    /// let vec = set.to_vec();
-    /// assert_eq!(vec, ["b", "a", "c"]);
-    /// // Here, `set` and `vec` can be modified independently.
-    /// ```
-    pub fn to_vec(&self) -> Vec<T>
-    where
-        T: Clone,
-    {
-        self.iter().cloned().collect()
-    }
-
     /// Takes ownership of the set and returns its elements as a `Vec<T>`.
     ///
     /// ```

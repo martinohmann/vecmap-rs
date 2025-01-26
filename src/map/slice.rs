@@ -1,4 +1,5 @@
 use super::{Iter, IterMut, Keys, Slot, Values, ValuesMut};
+use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::fmt;
@@ -102,6 +103,24 @@ impl<K, V> Slice<K, V> {
     /// ```
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
+    }
+
+    /// Copies the map entries into a new `Vec<(K, V)>`.
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    /// let vec = map.to_vec();
+    /// assert_eq!(vec, [("b", 2), ("a", 1), ("c", 3)]);
+    /// // Here, `map` and `vec` can be modified independently.
+    /// ```
+    pub fn to_vec(&self) -> Vec<(K, V)>
+    where
+        K: Clone,
+        V: Clone,
+    {
+        self.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
     }
 }
 

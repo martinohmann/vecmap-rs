@@ -442,24 +442,6 @@ impl<K, V> VecMap<K, V> {
         Slice::from_mut_slice(self.as_entries_mut())
     }
 
-    /// Copies the map entries into a new `Vec<(K, V)>`.
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
-    /// let vec = map.to_vec();
-    /// assert_eq!(vec, [("b", 2), ("a", 1), ("c", 3)]);
-    /// // Here, `map` and `vec` can be modified independently.
-    /// ```
-    pub fn to_vec(&self) -> Vec<(K, V)>
-    where
-        K: Clone,
-        V: Clone,
-    {
-        self.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
-    }
-
     /// Takes ownership of the map and returns its entries as a `Vec<(K, V)>`.
     ///
     /// ```
