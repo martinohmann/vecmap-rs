@@ -40,7 +40,10 @@ impl<K, V> Slice<K, V> {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(&self.entries) as *const [(K, V)]) }
     }
+}
 
+// Basics.
+impl<K, V> Slice<K, V> {
     /// Returns the number of entries in the slice, also referred to as its 'length'.
     ///
     /// # Examples

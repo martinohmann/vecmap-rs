@@ -40,7 +40,10 @@ impl<T> Slice<T> {
         // SAFETY: `&[Slot<T>]` and `&[T]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<T>]>(&self.entries) as *const [T]) }
     }
+}
 
+// Basics.
+impl<T> Slice<T> {
     /// Returns the number of entries in the slice, also referred to as its 'length'.
     ///
     /// # Examples
