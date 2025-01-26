@@ -65,7 +65,7 @@ impl<'a, K, V> IntoIterator for &'a VecMap<K, V> {
     type IntoIter = Iter<'a, K, V>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.iter()
+        self.as_slice().iter()
     }
 }
 
@@ -75,15 +75,16 @@ impl<'a, K, V> IntoIterator for &'a mut VecMap<K, V> {
     type IntoIter = IterMut<'a, K, V>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.iter_mut()
+        self.as_mut_slice().iter_mut()
     }
 }
 
-/// An iterator over the entries of a `VecMap`.
+/// An iterator over the entries of a `Slice`.
 ///
-/// This `struct` is created by the [`iter`] method on [`VecMap`]. See its documentation for more.
+/// This `struct` is created by the [`iter`] method on [`Slice`]. See its documentation for more.
 ///
-/// [`iter`]: VecMap::iter
+/// [`Slice`]: crate::map::Slice
+/// [`iter`]: crate::map::Slice::iter
 pub struct Iter<'a, K, V> {
     iter: slice::Iter<'a, Slot<K, V>>,
 }
@@ -106,12 +107,13 @@ impl<K, V> Clone for Iter<'_, K, V> {
 
 impl_iterator!(Iter<'a, K, V>, (&'a K, &'a V), Slot::refs);
 
-/// A mutable iterator over the entries of a `VecMap`.
+/// A mutable iterator over the entries of a `Slice`.
 ///
-/// This `struct` is created by the [`iter_mut`] method on [`VecMap`]. See its documentation for
+/// This `struct` is created by the [`iter_mut`] method on [`Slice`]. See its documentation for
 /// more.
 ///
-/// [`iter_mut`]: VecMap::iter_mut
+/// [`Slice`]: crate::map::Slice
+/// [`iter_mut`]: crate::map::Slice::iter_mut
 pub struct IterMut<'a, K, V> {
     iter: slice::IterMut<'a, Slot<K, V>>,
 }
@@ -190,11 +192,12 @@ where
 
 impl_iterator!(IntoIter<K, V>, (K, V), Slot::into_key_value, Slot::refs);
 
-/// An iterator over the keys of a `VecMap`.
+/// An iterator over the keys of a `Slice`.
 ///
-/// This `struct` is created by the [`keys`] method on [`VecMap`]. See its documentation for more.
+/// This `struct` is created by the [`keys`] method on [`Slice`]. See its documentation for more.
 ///
-/// [`keys`]: VecMap::keys
+/// [`Slice`]: crate::map::Slice
+/// [`keys`]: crate::map::Slice::keys
 pub struct Keys<'a, K, V> {
     iter: slice::Iter<'a, Slot<K, V>>,
 }
@@ -270,12 +273,13 @@ where
 
 impl_iterator!(IntoKeys<K, V>, K, Slot::into_key, Slot::key);
 
-/// An iterator over the values of a `VecMap`.
+/// An iterator over the values of a `Slice`.
 ///
-/// This `struct` is created by the [`values`] method on [`VecMap`]. See its documentation for
+/// This `struct` is created by the [`values`] method on [`Slice`]. See its documentation for
 /// more.
 ///
-/// [`values`]: VecMap::values
+/// [`Slice`]: crate::map::Slice
+/// [`values`]: crate::map::Slice::values
 pub struct Values<'a, K, V> {
     iter: slice::Iter<'a, Slot<K, V>>,
 }
@@ -298,12 +302,13 @@ impl<K, V> Clone for Values<'_, K, V> {
 
 impl_iterator!(Values<'a, K, V>, &'a V, Slot::value);
 
-/// A mutable iterator over the values of a `VecMap`.
+/// A mutable iterator over the values of a `Slice`.
 ///
-/// This `struct` is created by the [`values_mut`] method on [`VecMap`]. See its documentation for
+/// This `struct` is created by the [`values_mut`] method on [`Slice`]. See its documentation for
 /// more.
 ///
-/// [`values_mut`]: VecMap::values_mut
+/// [`Slice`]: crate::map::Slice
+/// [`values_mut`]: crate::map::Slice::values_mut
 pub struct ValuesMut<'a, K, V> {
     iter: slice::IterMut<'a, Slot<K, V>>,
 }

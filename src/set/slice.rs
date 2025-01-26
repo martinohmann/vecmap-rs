@@ -1,4 +1,4 @@
-use super::Slot;
+use super::{Iter, Slot};
 use alloc::boxed::Box;
 use core::ops::Deref;
 use core::ptr;
@@ -33,10 +33,40 @@ impl<T> Slice<T> {
     }
 }
 
+// Iterator adapters.
+impl<T> Slice<T> {
+    /// An iterator visiting all elements in insertion order. The iterator element type is
+    /// `&'a T`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from(["a", "b", "c"]);
+    ///
+    /// for elem in set.iter() {
+    ///     println!("elem: {elem}");
+    /// }
+    /// ```
+    pub fn iter(&self) -> Iter<'_, T> {
+        Iter::new(&self.entries)
+    }
+}
+
 impl<T> Deref for Slice<T> {
     type Target = [T];
 
     fn deref(&self) -> &Self::Target {
         self.as_raw_slice()
+    }
+}
+
+impl<'a, T> IntoIterator for &'a Slice<T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }

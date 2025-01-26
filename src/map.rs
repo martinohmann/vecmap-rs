@@ -14,7 +14,7 @@ use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::mem;
-use core::ops::{Deref, RangeBounds};
+use core::ops::RangeBounds;
 use core::ptr;
 
 pub use self::entry::{Entry, OccupiedEntry, VacantEntry};
@@ -1365,76 +1365,6 @@ where
 
 // Iterator adapters.
 impl<K, V> VecMap<K, V> {
-    /// An iterator visiting all key-value pairs in insertion order. The iterator element type is
-    /// `(&'a K, &'a V)`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let map = VecMap::from([
-    ///     ("a", 1),
-    ///     ("b", 2),
-    ///     ("c", 3),
-    /// ]);
-    ///
-    /// for (key, val) in map.iter() {
-    ///     println!("key: {key} val: {val}");
-    /// }
-    /// ```
-    pub fn iter(&self) -> Iter<'_, K, V> {
-        Iter::new(self.as_entries())
-    }
-
-    /// An iterator visiting all key-value pairs in insertion order, with mutable references to the
-    /// values. The iterator element type is `(&'a K, &'a mut V)`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::from([
-    ///     ("a", 1),
-    ///     ("b", 2),
-    ///     ("c", 3),
-    /// ]);
-    ///
-    /// // Update all values
-    /// for (_, val) in map.iter_mut() {
-    ///     *val *= 2;
-    /// }
-    ///
-    /// for (key, val) in &map {
-    ///     println!("key: {key} val: {val}");
-    /// }
-    /// ```
-    pub fn iter_mut(&mut self) -> IterMut<'_, K, V> {
-        IterMut::new(self.as_entries_mut())
-    }
-
-    /// An iterator visiting all keys in insertion order. The iterator element type is `&'a K`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let map = VecMap::from([
-    ///     ("a", 1),
-    ///     ("b", 2),
-    ///     ("c", 3),
-    /// ]);
-    ///
-    /// for key in map.keys() {
-    ///     println!("{key}");
-    /// }
-    /// ```
-    pub fn keys(&self) -> Keys<'_, K, V> {
-        Keys::new(self.as_entries())
-    }
-
     /// Creates a consuming iterator visiting all the keys in insertion order. The object cannot be
     /// used after calling this. The iterator element type is `K`.
     ///
@@ -1454,53 +1384,6 @@ impl<K, V> VecMap<K, V> {
     /// ```
     pub fn into_keys(self) -> IntoKeys<K, V> {
         IntoKeys::new(self.into_entries())
-    }
-
-    /// An iterator visiting all values in insertion order. The iterator element type is `&'a V`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let map = VecMap::from([
-    ///     ("a", 1),
-    ///     ("b", 2),
-    ///     ("c", 3),
-    /// ]);
-    ///
-    /// for val in map.values() {
-    ///     println!("{val}");
-    /// }
-    /// ```
-    pub fn values(&self) -> Values<'_, K, V> {
-        Values::new(self.as_entries())
-    }
-
-    /// An iterator visiting all values mutably in insertion order. The iterator element type is
-    /// `&'a mut V`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::from([
-    ///     ("a", 1),
-    ///     ("b", 2),
-    ///     ("c", 3),
-    /// ]);
-    ///
-    /// for val in map.values_mut() {
-    ///     *val = *val + 10;
-    /// }
-    ///
-    /// for val in map.values() {
-    ///     println!("{val}");
-    /// }
-    /// ```
-    pub fn values_mut(&mut self) -> ValuesMut<'_, K, V> {
-        ValuesMut::new(self.as_entries_mut())
     }
 
     /// Creates a consuming iterator visiting all the values in insertion order. The object cannot

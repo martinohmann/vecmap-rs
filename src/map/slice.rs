@@ -1,4 +1,4 @@
-use super::Slot;
+use super::{Iter, IterMut, Keys, Slot, Values, ValuesMut};
 use alloc::boxed::Box;
 use core::ops::Deref;
 use core::ptr;
@@ -33,10 +33,148 @@ impl<K, V> Slice<K, V> {
     }
 }
 
+// Iterator adapters.
+impl<K, V> Slice<K, V> {
+    /// An iterator visiting all key-value pairs in insertion order. The iterator element type is
+    /// `(&'a K, &'a V)`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([
+    ///     ("a", 1),
+    ///     ("b", 2),
+    ///     ("c", 3),
+    /// ]);
+    ///
+    /// for (key, val) in map.iter() {
+    ///     println!("key: {key} val: {val}");
+    /// }
+    /// ```
+    pub fn iter(&self) -> Iter<'_, K, V> {
+        Iter::new(&self.entries)
+    }
+
+    /// An iterator visiting all key-value pairs in insertion order, with mutable references to the
+    /// values. The iterator element type is `(&'a K, &'a mut V)`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([
+    ///     ("a", 1),
+    ///     ("b", 2),
+    ///     ("c", 3),
+    /// ]);
+    ///
+    /// // Update all values
+    /// for (_, val) in map.iter_mut() {
+    ///     *val *= 2;
+    /// }
+    ///
+    /// for (key, val) in &map {
+    ///     println!("key: {key} val: {val}");
+    /// }
+    /// ```
+    pub fn iter_mut(&mut self) -> IterMut<'_, K, V> {
+        IterMut::new(&mut self.entries)
+    }
+
+    /// An iterator visiting all keys in insertion order. The iterator element type is `&'a K`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([
+    ///     ("a", 1),
+    ///     ("b", 2),
+    ///     ("c", 3),
+    /// ]);
+    ///
+    /// for key in map.keys() {
+    ///     println!("{key}");
+    /// }
+    /// ```
+    pub fn keys(&self) -> Keys<'_, K, V> {
+        Keys::new(&self.entries)
+    }
+
+    /// An iterator visiting all values in insertion order. The iterator element type is `&'a V`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([
+    ///     ("a", 1),
+    ///     ("b", 2),
+    ///     ("c", 3),
+    /// ]);
+    ///
+    /// for val in map.values() {
+    ///     println!("{val}");
+    /// }
+    /// ```
+    pub fn values(&self) -> Values<'_, K, V> {
+        Values::new(&self.entries)
+    }
+
+    /// An iterator visiting all values mutably in insertion order. The iterator element type is
+    /// `&'a mut V`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([
+    ///     ("a", 1),
+    ///     ("b", 2),
+    ///     ("c", 3),
+    /// ]);
+    ///
+    /// for val in map.values_mut() {
+    ///     *val = *val + 10;
+    /// }
+    ///
+    /// for val in map.values() {
+    ///     println!("{val}");
+    /// }
+    /// ```
+    pub fn values_mut(&mut self) -> ValuesMut<'_, K, V> {
+        ValuesMut::new(&mut self.entries)
+    }
+}
+
 impl<K, V> Deref for Slice<K, V> {
     type Target = [(K, V)];
 
     fn deref(&self) -> &Self::Target {
         self.as_raw_slice()
+    }
+}
+
+impl<'a, K, V> IntoIterator for &'a Slice<K, V> {
+    type Item = (&'a K, &'a V);
+    type IntoIter = Iter<'a, K, V>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+impl<'a, K, V> IntoIterator for &'a mut Slice<K, V> {
+    type Item = (&'a K, &'a mut V);
+    type IntoIter = IterMut<'a, K, V>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
     }
 }

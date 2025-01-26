@@ -507,24 +507,6 @@ impl<T> VecSet<T> {
         Drain::new(self, range)
     }
 
-    /// An iterator visiting all elements in insertion order. The iterator element type is
-    /// `&'a T`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let set = VecSet::from(["a", "b", "c"]);
-    ///
-    /// for elem in set.iter() {
-    ///     println!("elem: {elem}");
-    /// }
-    /// ```
-    pub fn iter(&self) -> Iter<'_, T> {
-        Iter::new(self.as_entries())
-    }
-
     /// Sorts the set.
     ///
     /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))

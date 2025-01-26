@@ -69,11 +69,12 @@ impl<'a, T> IntoIterator for &'a VecSet<T> {
     }
 }
 
-/// An iterator over the elements of a `VecSet`.
+/// An iterator over the elements of a `Slice`.
 ///
-/// This `struct` is created by the [`iter`] method on [`VecSet`]. See its documentation for more.
+/// This `struct` is created by the [`iter`] method on [`Slice`]. See its documentation for more.
 ///
-/// [`iter`]: VecSet::iter
+/// [`Slice`]: crate::set::Slice
+/// [`iter`]: crate::set::Slice::iter
 pub struct Iter<'a, T> {
     iter: slice::Iter<'a, Slot<T>>,
 }
