@@ -2,6 +2,7 @@ use super::{Iter, Slot};
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::fmt;
+use core::ops::Index;
 use core::ptr;
 
 /// A dynamically-sized slice of keys in a [`VecSet`][crate::VecSet].
@@ -500,6 +501,14 @@ impl<T> Slice<T> {
         P: FnMut(&T) -> bool,
     {
         self.as_raw_slice().partition_point(pred)
+    }
+}
+
+impl<T> Index<usize> for Slice<T> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &T {
+        self.get_index(index).expect("Slice: index out of bounds")
     }
 }
 

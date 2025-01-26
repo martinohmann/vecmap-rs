@@ -2,6 +2,7 @@ use super::{Iter, IterMut, Keys, Slot, Values, ValuesMut};
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::fmt;
+use core::ops::{Index, IndexMut};
 use core::ptr;
 
 /// A dynamically-sized slice of key-value pairs in a [`VecMap`][crate::VecMap].
@@ -730,6 +731,44 @@ impl<K, V> Slice<K, V> {
         P: FnMut(&K, &V) -> bool,
     {
         self.as_raw_slice().partition_point(|(k, v)| pred(k, v))
+    }
+}
+
+impl<K, V, Q> Index<&Q> for Slice<K, V>
+where
+    K: Borrow<Q>,
+    Q: Eq + ?Sized,
+{
+    type Output = V;
+
+    fn index(&self, key: &Q) -> &V {
+        self.get(key).expect("Slice: key not found")
+    }
+}
+
+impl<K, V, Q> IndexMut<&Q> for Slice<K, V>
+where
+    K: Borrow<Q>,
+    Q: Eq + ?Sized,
+{
+    fn index_mut(&mut self, key: &Q) -> &mut V {
+        self.get_mut(key).expect("Slice: key not found")
+    }
+}
+
+impl<K, V> Index<usize> for Slice<K, V> {
+    type Output = V;
+
+    fn index(&self, index: usize) -> &V {
+        self.get_index(index).expect("Slice: index out of bounds").1
+    }
+}
+
+impl<K, V> IndexMut<usize> for Slice<K, V> {
+    fn index_mut(&mut self, index: usize) -> &mut V {
+        self.get_index_mut(index)
+            .expect("Slice: index out of bounds")
+            .1
     }
 }
 
