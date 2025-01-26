@@ -3,7 +3,6 @@ use alloc::boxed::Box;
 use core::ops::Deref;
 use core::ptr;
 
-// Transparent wrapper around `[Slot<K, V>]`,
 #[repr(transparent)]
 pub struct Slice<K, V> {
     entries: [Slot<K, V>],
