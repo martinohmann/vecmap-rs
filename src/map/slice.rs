@@ -3,6 +3,7 @@ use alloc::boxed::Box;
 use core::ops::Deref;
 use core::ptr;
 
+// Transparent wrapper around `[Slot<K, V>]`,
 #[repr(transparent)]
 pub struct Slice<K, V> {
     entries: [Slot<K, V>],
@@ -10,14 +11,12 @@ pub struct Slice<K, V> {
 
 impl<K, V> Slice<K, V> {
     pub(super) const fn from_slice(entries: &[Slot<K, V>]) -> &Slice<K, V> {
-        // SAFETY: `&[Slot<K, V>]` and `&Slice<K, V>` have the same memory layout because `Slice<K, V>` is
-        // just a transparent wrapper.
+        // SAFETY: `&[Slot<K, V>]` and `&Slice<K, V>` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(entries) as *const Slice<K, V>) }
     }
 
     pub(super) const fn from_mut_slice(entries: &mut [Slot<K, V>]) -> &mut Slice<K, V> {
-        // SAFETY: `&mut [Slot<K, V>]` and `&mut Slice<K, V>` have the same memory layout because `Slice<K, V>` is
-        // just a transparent wrapper.
+        // SAFETY: `&mut [Slot<K, V>]` and `&mut Slice<K, V>` have the same memory layout.
         unsafe { &mut *(ptr::from_mut::<[Slot<K, V>]>(entries) as *mut Slice<K, V>) }
     }
 
