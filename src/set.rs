@@ -648,6 +648,7 @@ impl<T> VecSet<T> {
         unsafe { &*(ptr::from_ref::<[(T, ())]>(self.base.as_raw_slice()) as *const [T]) }
     }
 
+    /// Returns a slice of all the values in the set.
     pub fn as_slice(&self) -> &Slice<T> {
         Slice::from_slice(self.as_entries())
     }
@@ -656,6 +657,7 @@ impl<T> VecSet<T> {
         Slice::from_mut_slice(self.as_entries_mut())
     }
 
+    /// Converts into a boxed slice of all the values in the set.
     pub fn into_boxed_slice(self) -> Box<Slice<T>> {
         Slice::from_boxed(self.into_entries().into_boxed_slice())
     }

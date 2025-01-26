@@ -668,14 +668,17 @@ impl<K, V> VecMap<K, V> {
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(self.base.as_slice()) as *const [(K, V)]) }
     }
 
+    /// Returns a slice of all the key-value pairs in the map.
     pub fn as_slice(&self) -> &Slice<K, V> {
         Slice::from_slice(self.as_entries())
     }
 
+    /// Returns a mutable slice of all the key-value pairs in the map.
     pub fn as_mut_slice(&mut self) -> &mut Slice<K, V> {
         Slice::from_mut_slice(self.as_entries_mut())
     }
 
+    /// Converts into a boxed slice of all the key-value pairs in the map.
     pub fn into_boxed_slice(self) -> Box<Slice<K, V>> {
         Slice::from_boxed(self.into_entries().into_boxed_slice())
     }
