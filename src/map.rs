@@ -9,7 +9,6 @@ mod serde;
 mod slice;
 
 use super::{Entries, Slot, TryReserveError};
-use alloc::boxed::Box;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::mem;
@@ -437,11 +436,6 @@ impl<K, V> VecMap<K, V> {
     /// Returns a mutable slice of all the key-value pairs in the map.
     pub fn as_mut_slice(&mut self) -> &mut Slice<K, V> {
         Slice::from_mut_slice(self.as_entries_mut())
-    }
-
-    /// Converts into a boxed slice of all the key-value pairs in the map.
-    pub fn into_boxed_slice(self) -> Box<Slice<K, V>> {
-        Slice::from_boxed(self.into_entries().into_boxed_slice())
     }
 
     /// Copies the map entries into a new `Vec<(K, V)>`.

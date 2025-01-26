@@ -7,7 +7,6 @@ mod serde;
 mod slice;
 
 use super::{Entries, TryReserveError, VecMap};
-use alloc::boxed::Box;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::ops::RangeBounds;
@@ -425,11 +424,6 @@ impl<T> VecSet<T> {
     /// Returns a mutable slice of all the values in the set.
     pub fn as_mut_slice(&mut self) -> &mut Slice<T> {
         Slice::from_mut_slice(self.as_entries_mut())
-    }
-
-    /// Converts into a boxed slice of all the values in the set.
-    pub fn into_boxed_slice(self) -> Box<Slice<T>> {
-        Slice::from_boxed(self.into_entries().into_boxed_slice())
     }
 
     /// Copies the set elements into a new `Vec<T>`.

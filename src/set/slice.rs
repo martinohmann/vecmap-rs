@@ -1,5 +1,4 @@
 use super::{Iter, Slot};
-use alloc::boxed::Box;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::ops::Deref;
@@ -22,11 +21,6 @@ impl<T> Slice<T> {
     pub(super) const fn from_mut_slice(entries: &mut [Slot<T>]) -> &mut Slice<T> {
         // SAFETY: `&mut [Slot<T>]` and `&mut Slice<T>` have the same memory layout.
         unsafe { &mut *(ptr::from_mut::<[Slot<T>]>(entries) as *mut Slice<T>) }
-    }
-
-    pub(super) fn from_boxed(entries: Box<[Slot<T>]>) -> Box<Self> {
-        // SAFETY: `A [Slot<T>]` and a `Slice<T>` are essentially the same thing.
-        unsafe { Box::from_raw(Box::into_raw(entries) as *mut Self) }
     }
 
     pub(super) fn as_raw_slice(&self) -> &[T] {
