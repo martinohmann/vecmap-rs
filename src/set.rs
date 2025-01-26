@@ -399,11 +399,33 @@ impl<T> VecSet<T> {
     }
 
     /// Returns a slice of all the values in the set.
+    ///
+    /// This method is automatically called via `VecSet<T>`'s `Deref` implementation.
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from(["b", "a", "c"]);
+    /// let slice = set.as_slice();
+    /// assert!(slice.contains(&"a"));
+    /// assert!(!slice.contains(&"z"));
+    /// ```
     pub fn as_slice(&self) -> &Slice<T> {
         Slice::from_slice(self.as_entries())
     }
 
     /// Returns a mutable slice of all the values in the set.
+    ///
+    /// This method is automatically called via `VecSet<T>`'s `DerefMut` implementation.
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["b", "a", "c"]);
+    /// let slice = set.as_mut_slice();
+    /// slice.swap_indices(0, 1);
+    /// assert_eq!(set.as_raw_slice(), ["a", "b", "c"]);
+    /// ```
     pub fn as_mut_slice(&mut self) -> &mut Slice<T> {
         Slice::from_mut_slice(self.as_entries_mut())
     }

@@ -411,11 +411,33 @@ impl<K, V> VecMap<K, V> {
     }
 
     /// Returns a slice of all the key-value pairs in the map.
+    ///
+    /// This method is automatically called via `VecMap<K, V>`'s `Deref` implementation.
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    /// let slice = map.as_slice();
+    /// assert!(slice.contains_key(&"a"));
+    /// assert!(!slice.contains_key(&"z"));
+    /// ```
     pub fn as_slice(&self) -> &Slice<K, V> {
         Slice::from_slice(self.as_entries())
     }
 
     /// Returns a mutable slice of all the key-value pairs in the map.
+    ///
+    /// This method is automatically called via `VecMap<K, V>`'s `DerefMut` implementation.
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    /// let slice = map.as_mut_slice();
+    /// slice.swap_indices(0, 1);
+    /// assert_eq!(map.as_raw_slice(), [("a", 1), ("b", 2), ("c", 3)]);
+    /// ```
     pub fn as_mut_slice(&mut self) -> &mut Slice<K, V> {
         Slice::from_mut_slice(self.as_entries_mut())
     }
