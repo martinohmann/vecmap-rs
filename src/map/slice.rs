@@ -39,6 +39,42 @@ impl<K, V> Slice<K, V> {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(&self.entries) as *const [(K, V)]) }
     }
+
+    /// Returns the number of entries in the slice, also referred to as its 'length'.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// map.insert(1, "a");
+    /// let slice = map.as_slice();
+    /// assert_eq!(slice.len(), 1);
+    /// ```
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// Returns `true` if the slice contains no entries.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::new();
+    /// let slice = map.as_slice();
+    /// assert!(slice.is_empty());
+    ///
+    /// map.insert(1, "a");
+    ///
+    /// let slice = map.as_slice();
+    /// assert!(!slice.is_empty());
+    /// ```
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
 }
 
 // Iterator adapters.
