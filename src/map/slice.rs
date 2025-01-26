@@ -8,18 +8,21 @@ pub struct Slice<K, V> {
     entries: [Slot<K, V>],
 }
 
-// SAFETY: `Slice<K, V>` is a transparent wrapper around `[Slot<K, V>]`, and reference lifetimes
-// are bound together in function signatures.
 impl<K, V> Slice<K, V> {
     pub(super) const fn from_slice(entries: &[Slot<K, V>]) -> &Slice<K, V> {
+        // SAFETY: `&[Slot<K, V>]` and `&Slice<K, V>` have the same memory layout because `Slice<K, V>` is
+        // just a transparent wrapper.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(entries) as *const Slice<K, V>) }
     }
 
     pub(super) const fn from_mut_slice(entries: &mut [Slot<K, V>]) -> &mut Slice<K, V> {
+        // SAFETY: `&mut [Slot<K, V>]` and `&mut Slice<K, V>` have the same memory layout because `Slice<K, V>` is
+        // just a transparent wrapper.
         unsafe { &mut *(ptr::from_mut::<[Slot<K, V>]>(entries) as *mut Slice<K, V>) }
     }
 
     pub(super) fn from_boxed(entries: Box<[Slot<K, V>]>) -> Box<Slice<K, V>> {
+        // SAFETY: `A [Slot<K, V>]` and a `Slice<K, V>` are essentially the same thing.
         unsafe { Box::from_raw(Box::into_raw(entries) as *mut Slice<K, V>) }
     }
 
