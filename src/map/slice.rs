@@ -3,6 +3,9 @@ use alloc::boxed::Box;
 use core::ops::Deref;
 use core::ptr;
 
+/// A dynamically-sized slice of key-value pairs in a [`VecMap`][crate::VecMap].
+///
+/// This supports indexed operations much like a `[(K, V)]` slice.
 #[repr(transparent)]
 pub struct Slice<K, V> {
     entries: [Slot<K, V>],

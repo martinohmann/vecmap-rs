@@ -3,6 +3,9 @@ use alloc::boxed::Box;
 use core::ops::Deref;
 use core::ptr;
 
+/// A dynamically-sized slice of keys in a [`VecSet`][crate::VecSet].
+///
+/// This supports indexed operations much like a `[T]` slice.
 #[repr(transparent)]
 pub struct Slice<T> {
     entries: [Slot<T>],
