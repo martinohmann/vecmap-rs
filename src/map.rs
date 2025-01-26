@@ -433,7 +433,7 @@ impl<K, V> VecMap<K, V> {
     where
         F: FnMut(&'a K, &'a V) -> Ordering,
     {
-        self.as_slice().binary_search_by(|(k, v)| f(k, v))
+        self.as_raw_slice().binary_search_by(|(k, v)| f(k, v))
     }
 
     /// Search over a sorted map with an extraction function.
@@ -457,7 +457,8 @@ impl<K, V> VecMap<K, V> {
         F: FnMut(&'a K, &'a V) -> B,
         B: Ord,
     {
-        self.as_slice().binary_search_by_key(b, |(k, v)| f(k, v))
+        self.as_raw_slice()
+            .binary_search_by_key(b, |(k, v)| f(k, v))
     }
 
     /// Returns the index of the partition point of a sorted map according to the given predicate
@@ -480,7 +481,7 @@ impl<K, V> VecMap<K, V> {
     where
         P: FnMut(&K, &V) -> bool,
     {
-        self.as_slice().partition_point(|(k, v)| pred(k, v))
+        self.as_raw_slice().partition_point(|(k, v)| pred(k, v))
     }
 
     /// Removes the specified range from the vector in bulk, returning all removed elements as an
@@ -563,7 +564,7 @@ impl<K, V> VecMap<K, V> {
     /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     ///
     /// map.sort_unstable_keys();
-    /// assert_eq!(map.as_slice(), [("a", 1), ("b", 2), ("c", 3)]);
+    /// assert_eq!(map.as_raw_slice(), [("a", 1), ("b", 2), ("c", 3)]);
     /// ```
     pub fn sort_unstable_keys(&mut self)
     where
@@ -650,19 +651,24 @@ impl<K, V> VecMap<K, V> {
 
     /// Extracts a slice containing the map entries.
     ///
+    /// This method provides access to the raw backing [`&[(K, V)]`][core::slice] of the `VecMap<K, V>`.
+    ///
+    /// To leverage additional slicing capabilities of a `VecMap<K, V>` consider using
+    /// [`as_slice`][Self::as_slice] instead.
+    ///
     /// ```
     /// use vecmap::VecMap;
     ///
     /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
-    /// let slice = map.as_slice();
+    /// let slice = map.as_raw_slice();
     /// assert_eq!(slice, [("b", 2), ("a", 1), ("c", 3)]);
     /// ```
-    pub fn as_slice(&self) -> &[(K, V)] {
+    pub fn as_raw_slice(&self) -> &[(K, V)] {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(self.base.as_slice()) as *const [(K, V)]) }
     }
 
-    pub fn as_ref_slice(&self) -> &Slice<K, V> {
+    pub fn as_slice(&self) -> &Slice<K, V> {
         Slice::from_slice(self.as_entries())
     }
 

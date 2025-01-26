@@ -426,7 +426,7 @@ impl<T> VecSet<T> {
     where
         F: FnMut(&'a T) -> Ordering,
     {
-        self.as_slice().binary_search_by(f)
+        self.as_raw_slice().binary_search_by(f)
     }
 
     /// Search over a sorted set with an extraction function.
@@ -450,7 +450,7 @@ impl<T> VecSet<T> {
         F: FnMut(&'a T) -> B,
         B: Ord,
     {
-        self.as_slice().binary_search_by_key(b, f)
+        self.as_raw_slice().binary_search_by_key(b, f)
     }
 
     /// Returns the index of the partition point of a sorted set according to the given predicate
@@ -472,7 +472,7 @@ impl<T> VecSet<T> {
     where
         P: FnMut(&T) -> bool,
     {
-        self.as_slice().partition_point(pred)
+        self.as_raw_slice().partition_point(pred)
     }
 
     /// Removes the specified range from the vector in bulk, returning all removed elements as an
@@ -637,7 +637,7 @@ impl<T> VecSet<T> {
     /// let mut set = VecSet::from(["b", "a", "c"]);
     ///
     /// set.sort_by_cached_key(|k| k.to_string());
-    /// assert_eq!(set.as_slice(), ["a", "b", "c"]);
+    /// assert_eq!(set.as_raw_slice(), ["a", "b", "c"]);
     /// ```
     pub fn sort_by_cached_key<K, F>(&mut self, mut sort_key: F)
     where
@@ -649,19 +649,24 @@ impl<T> VecSet<T> {
 
     /// Extracts a slice containing the set elements.
     ///
+    /// This method provides access to the raw backing [`&[T]`][core::slice] of the `VecSet<T>`.
+    ///
+    /// To leverage additional slicing capabilities of a `VecSet<T>` consider using
+    /// [`as_slice`][Self::as_slice] instead.
+    ///
     /// ```
     /// use vecmap::VecSet;
     ///
     /// let set = VecSet::from(["b", "a", "c"]);
-    /// let slice = set.as_slice();
+    /// let slice = set.as_raw_slice();
     /// assert_eq!(slice, ["b", "a", "c"]);
     /// ```
-    pub fn as_slice(&self) -> &[T] {
+    pub fn as_raw_slice(&self) -> &[T] {
         // SAFETY: `&[(T, ())]` and `&[T]` have the same memory layout.
-        unsafe { &*(ptr::from_ref::<[(T, ())]>(self.base.as_slice()) as *const [T]) }
+        unsafe { &*(ptr::from_ref::<[(T, ())]>(self.base.as_raw_slice()) as *const [T]) }
     }
 
-    pub fn as_ref_slice(&self) -> &Slice<T> {
+    pub fn as_slice(&self) -> &Slice<T> {
         Slice::from_slice(self.as_entries())
     }
 

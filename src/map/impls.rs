@@ -13,7 +13,7 @@ impl<K, V> Deref for VecMap<K, V> {
     type Target = Slice<K, V>;
 
     fn deref(&self) -> &Self::Target {
-        self.as_ref_slice()
+        self.as_slice()
     }
 }
 

@@ -12,7 +12,7 @@ impl<T> Deref for VecSet<T> {
     type Target = Slice<T>;
 
     fn deref(&self) -> &Self::Target {
-        self.as_ref_slice()
+        self.as_slice()
     }
 }
 
