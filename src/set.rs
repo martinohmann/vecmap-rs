@@ -506,128 +506,6 @@ impl<T> VecSet<T> {
         Drain::new(self, range)
     }
 
-    /// Sorts the set.
-    ///
-    /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))
-    /// worst-case.
-    ///
-    /// When applicable, unstable sorting is preferred because it is generally faster than stable
-    /// sorting and it doesn't allocate auxiliary memory. See
-    /// [`sort_unstable`](VecSet::sort_unstable).
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let mut set = VecSet::from(["b", "a", "c"]);
-    ///
-    /// set.sort();
-    /// let vec: Vec<_> = set.into_iter().collect();
-    /// assert_eq!(vec, ["a", "b", "c"]);
-    /// ```
-    pub fn sort(&mut self)
-    where
-        T: Ord,
-    {
-        self.base.sort_keys();
-    }
-
-    /// Sorts the set.
-    ///
-    /// This sort is unstable (i.e., may reorder equal elements), in-place (i.e., does not
-    /// allocate), and *O*(*n* \* log(*n*)) worst-case.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let mut set = VecSet::from(["b", "a", "c"]);
-    ///
-    /// set.sort_unstable();
-    /// let vec: Vec<_> = set.into_iter().collect();
-    /// assert_eq!(vec, ["a", "b", "c"]);
-    /// ```
-    pub fn sort_unstable(&mut self)
-    where
-        T: Ord,
-    {
-        self.base.sort_unstable_keys();
-    }
-
-    /// Sorts the set with a comparator function.
-    ///
-    /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))
-    /// worst-case.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let mut set = VecSet::from(["b", "a", "c"]);
-    ///
-    /// set.sort_by(|a, b| b.cmp(&a));
-    /// let vec: Vec<_> = set.into_iter().collect();
-    /// assert_eq!(vec, ["c", "b", "a"]);
-    /// ```
-    pub fn sort_by<F>(&mut self, mut compare: F)
-    where
-        F: FnMut(&T, &T) -> Ordering,
-    {
-        self.base.sort_by(|a, b| compare(a.0, b.0));
-    }
-
-    /// Sorts the set with a comparator function.
-    ///
-    /// This sort is unstable (i.e., may reorder equal elements), in-place (i.e., does not
-    /// allocate), and *O*(*n* \* log(*n*)) worst-case.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let mut set = VecSet::from(["b", "a", "c"]);
-    ///
-    /// set.sort_unstable_by(|a, b| b.cmp(&a));
-    /// let vec: Vec<_> = set.into_iter().collect();
-    /// assert_eq!(vec, ["c", "b", "a"]);
-    /// ```
-    pub fn sort_unstable_by<F>(&mut self, mut compare: F)
-    where
-        F: FnMut(&T, &T) -> Ordering,
-    {
-        self.base.sort_unstable_by(|a, b| compare(a.0, b.0));
-    }
-
-    /// Sort the set’s values in place using a key extraction function.
-    ///
-    /// During sorting, the function is called at most once per entry, by using temporary storage
-    /// to remember the results of its evaluation. The order of calls to the function is
-    /// unspecified and may change between versions of `vecmap-rs` or the standard library.
-    ///
-    /// See [`slice::sort_by_cached_key`] for more details.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let mut set = VecSet::from(["b", "a", "c"]);
-    ///
-    /// set.sort_by_cached_key(|k| k.to_string());
-    /// assert_eq!(set.as_raw_slice(), ["a", "b", "c"]);
-    /// ```
-    pub fn sort_by_cached_key<K, F>(&mut self, mut sort_key: F)
-    where
-        K: Ord,
-        F: FnMut(&T) -> K,
-    {
-        self.base.sort_by_cached_key(|k, ()| sort_key(k));
-    }
-
     /// Extracts a slice containing the set elements.
     ///
     /// This method provides access to the raw backing [`&[T]`][core::slice] of the `VecSet<T>`.
@@ -649,6 +527,11 @@ impl<T> VecSet<T> {
     /// Returns a slice of all the values in the set.
     pub fn as_slice(&self) -> &Slice<T> {
         Slice::from_slice(self.as_entries())
+    }
+
+    /// Returns a mutable slice of all the values in the set.
+    pub fn as_mut_slice(&mut self) -> &mut Slice<T> {
+        Slice::from_mut_slice(self.as_entries_mut())
     }
 
     /// Converts into a boxed slice of all the values in the set.

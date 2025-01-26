@@ -1,5 +1,6 @@
 use super::{Iter, IterMut, Keys, Slot, Values, ValuesMut};
 use alloc::boxed::Box;
+use core::cmp::Ordering;
 use core::ops::Deref;
 use core::ptr;
 
@@ -150,6 +151,134 @@ impl<K, V> Slice<K, V> {
     /// ```
     pub fn values_mut(&mut self) -> ValuesMut<'_, K, V> {
         ValuesMut::new(&mut self.entries)
+    }
+}
+
+// Sort operations.
+impl<K, V> Slice<K, V> {
+    /// Sorts the map by key.
+    ///
+    /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))
+    /// worst-case.
+    ///
+    /// When applicable, unstable sorting is preferred because it is generally faster than stable
+    /// sorting and it doesn't allocate auxiliary memory. See
+    /// [`sort_unstable_keys`](Self::sort_unstable_keys).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    ///
+    /// map.sort_keys();
+    /// let vec: Vec<_> = map.into_iter().collect();
+    /// assert_eq!(vec, [("a", 1), ("b", 2), ("c", 3)]);
+    /// ```
+    pub fn sort_keys(&mut self)
+    where
+        K: Ord,
+    {
+        self.entries.sort_by(|a, b| a.key().cmp(b.key()));
+    }
+
+    /// Sorts the map by key.
+    ///
+    /// This sort is unstable (i.e., may reorder equal elements), in-place (i.e., does not
+    /// allocate), and *O*(*n* \* log(*n*)) worst-case.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    ///
+    /// map.sort_unstable_keys();
+    /// assert_eq!(map.as_raw_slice(), [("a", 1), ("b", 2), ("c", 3)]);
+    /// ```
+    pub fn sort_unstable_keys(&mut self)
+    where
+        K: Ord,
+    {
+        self.entries.sort_unstable_by(|a, b| a.key().cmp(b.key()));
+    }
+
+    /// Sorts the map with a comparator function.
+    ///
+    /// This sort is stable (i.e., does not reorder equal elements) and *O*(*n* \* log(*n*))
+    /// worst-case.
+    ///
+    /// # Examples
+    ///
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    ///
+    /// map.sort_by(|(k1, _), (k2, _)| k2.cmp(&k1));
+    /// let vec: Vec<_> = map.into_iter().collect();
+    /// assert_eq!(vec, [("c", 3), ("b", 2), ("a", 1)]);
+    /// ```
+    pub fn sort_by<F>(&mut self, mut compare: F)
+    where
+        F: FnMut((&K, &V), (&K, &V)) -> Ordering,
+    {
+        self.entries.sort_by(|a, b| compare(a.refs(), b.refs()));
+    }
+
+    /// Sorts the map with a comparator function.
+    ///
+    /// This sort is unstable (i.e., may reorder equal elements), in-place (i.e., does not
+    /// allocate), and *O*(*n* \* log(*n*)) worst-case.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    ///
+    /// map.sort_unstable_by(|(k1, _), (k2, _)| k2.cmp(&k1));
+    /// let vec: Vec<_> = map.into_iter().collect();
+    /// assert_eq!(vec, [("c", 3), ("b", 2), ("a", 1)]);
+    /// ```
+    pub fn sort_unstable_by<F>(&mut self, mut compare: F)
+    where
+        F: FnMut((&K, &V), (&K, &V)) -> Ordering,
+    {
+        self.entries
+            .sort_unstable_by(|a, b| compare(a.refs(), b.refs()));
+    }
+
+    /// Sort the map’s key-value pairs in place using a sort-key extraction function.
+    ///
+    /// During sorting, the function is called at most once per entry, by using temporary storage
+    /// to remember the results of its evaluation. The order of calls to the function is
+    /// unspecified and may change between versions of `vecmap-rs` or the standard library.
+    ///
+    /// See [`slice::sort_by_cached_key`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    ///
+    /// map.sort_by_cached_key(|_, v| v.to_string());
+    /// let vec: Vec<_> = map.into_iter().collect();
+    /// assert_eq!(vec, [("a", 1), ("b", 2), ("c", 3)]);
+    /// ```
+    pub fn sort_by_cached_key<T, F>(&mut self, mut sort_key: F)
+    where
+        T: Ord,
+        F: FnMut(&K, &V) -> T,
+    {
+        self.entries
+            .sort_by_cached_key(|a| sort_key(a.key(), a.value()));
     }
 }
 
