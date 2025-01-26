@@ -653,10 +653,6 @@ impl<T> VecSet<T> {
         Slice::from_slice(self.as_entries())
     }
 
-    pub fn as_mut_slice(&mut self) -> &mut Slice<T> {
-        Slice::from_mut_slice(self.as_entries_mut())
-    }
-
     /// Converts into a boxed slice of all the values in the set.
     pub fn into_boxed_slice(self) -> Box<Slice<T>> {
         Slice::from_boxed(self.into_entries().into_boxed_slice())

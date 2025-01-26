@@ -17,11 +17,6 @@ impl<T> Slice<T> {
         unsafe { &*(ptr::from_ref::<[Slot<T>]>(entries) as *const Self) }
     }
 
-    pub(super) const fn from_mut_slice(entries: &mut [Slot<T>]) -> &mut Self {
-        // SAFETY: `&mut [Slot<T>]` and `&mut Slice<T>` have the same memory layout.
-        unsafe { &mut *(ptr::from_mut::<[Slot<T>]>(entries) as *mut Self) }
-    }
-
     pub(super) fn from_boxed(entries: Box<[Slot<T>]>) -> Box<Self> {
         // SAFETY: `A [Slot<T>]` and a `Slice<T>` are essentially the same thing.
         unsafe { Box::from_raw(Box::into_raw(entries) as *mut Self) }

@@ -1,6 +1,6 @@
 use super::{Slice, VecSet};
 use alloc::vec::Vec;
-use core::ops::{BitAnd, BitOr, BitXor, Deref, DerefMut, Index, Sub};
+use core::ops::{BitAnd, BitOr, BitXor, Deref, Index, Sub};
 
 impl<T> Default for VecSet<T> {
     fn default() -> Self {
@@ -13,12 +13,6 @@ impl<T> Deref for VecSet<T> {
 
     fn deref(&self) -> &Self::Target {
         self.as_slice()
-    }
-}
-
-impl<T> DerefMut for VecSet<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.as_mut_slice()
     }
 }
 
