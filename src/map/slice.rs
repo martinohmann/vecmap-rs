@@ -13,7 +13,6 @@ pub struct Slice<K, V> {
     entries: [Slot<K, V>],
 }
 
-// Conversion operations.
 impl<K, V> Slice<K, V> {
     pub(super) const fn from_slice(entries: &[Slot<K, V>]) -> &Slice<K, V> {
         // SAFETY: `&[Slot<K, V>]` and `&Slice<K, V>` have the same memory layout.
@@ -40,10 +39,35 @@ impl<K, V> Slice<K, V> {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(&self.entries) as *const [(K, V)]) }
     }
-}
 
-// Basics.
-impl<K, V> Slice<K, V> {
+    /// Returns an empty slice.
+    ///
+    /// ```
+    /// use vecmap::map::{Slice, VecMap};
+    ///
+    /// let map: VecMap<u32, &str> = VecMap::new();
+    /// let slice: &Slice<u32, &str> = Slice::new();
+    /// assert!(slice.is_empty());
+    /// assert_eq!(slice, map.as_slice());
+    /// ```
+    pub const fn new<'a>() -> &'a Self {
+        Slice::from_slice(&[])
+    }
+
+    /// Returns an empty mutable slice.
+    ///
+    /// ```
+    /// use vecmap::map::{Slice, VecMap};
+    ///
+    /// let mut map: VecMap<u32, &str> = VecMap::new();
+    /// let slice: &mut Slice<u32, &str> = Slice::new_mut();
+    /// assert!(slice.is_empty());
+    /// assert_eq!(slice, map.as_mut_slice());
+    /// ```
+    pub const fn new_mut<'a>() -> &'a mut Self {
+        Slice::from_mut_slice(&mut [])
+    }
+
     /// Returns the number of entries in the slice, also referred to as its 'length'.
     ///
     /// # Examples
@@ -777,13 +801,13 @@ impl<K, V> IndexMut<usize> for Slice<K, V> {
 
 impl<K, V> Default for &Slice<K, V> {
     fn default() -> Self {
-        Slice::from_slice(&[])
+        Slice::new()
     }
 }
 
 impl<K, V> Default for &mut Slice<K, V> {
     fn default() -> Self {
-        Slice::from_mut_slice(&mut [])
+        Slice::new_mut()
     }
 }
 

@@ -13,7 +13,6 @@ pub struct Slice<T> {
     entries: [Slot<T>],
 }
 
-// Conversion operations.
 impl<T> Slice<T> {
     pub(super) const fn from_slice(entries: &[Slot<T>]) -> &Self {
         // SAFETY: `&[Slot<T>]` and `&Slice<T>` have the same memory layout.
@@ -40,10 +39,21 @@ impl<T> Slice<T> {
         // SAFETY: `&[Slot<T>]` and `&[T]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<T>]>(&self.entries) as *const [T]) }
     }
-}
 
-// Basics.
-impl<T> Slice<T> {
+    /// Returns an empty slice.
+    ///
+    /// ```
+    /// use vecmap::set::{Slice, VecSet};
+    ///
+    /// let set: VecSet<u32> = VecSet::new();
+    /// let slice: &Slice<u32> = Slice::new();
+    /// assert!(slice.is_empty());
+    /// assert_eq!(slice, set.as_slice());
+    /// ```
+    pub const fn new<'a>() -> &'a Self {
+        Slice::from_slice(&[])
+    }
+
     /// Returns the number of entries in the slice, also referred to as its 'length'.
     ///
     /// # Examples
@@ -517,7 +527,7 @@ impl<T> Index<usize> for Slice<T> {
 
 impl<T> Default for &Slice<T> {
     fn default() -> Self {
-        Slice::from_slice(&[])
+        Slice::new()
     }
 }
 
