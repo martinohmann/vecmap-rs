@@ -12,7 +12,6 @@ use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::ops::RangeBounds;
-use core::ptr;
 
 pub use self::iter::*;
 pub use self::slice::Slice;
@@ -644,8 +643,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(slice, ["b", "a", "c"]);
     /// ```
     pub fn as_raw_slice(&self) -> &[T] {
-        // SAFETY: `&[(T, ())]` and `&[T]` have the same memory layout.
-        unsafe { &*(ptr::from_ref::<[(T, ())]>(self.base.as_raw_slice()) as *const [T]) }
+        self.as_slice().as_raw_slice()
     }
 
     /// Returns a slice of all the values in the set.

@@ -22,7 +22,7 @@ impl<T> Slice<T> {
         unsafe { Box::from_raw(Box::into_raw(entries) as *mut Self) }
     }
 
-    fn as_raw_slice(&self) -> &[T] {
+    pub(super) fn as_raw_slice(&self) -> &[T] {
         // SAFETY: `&[Slot<T>]` and `&[T]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<T>]>(&self.entries) as *const [T]) }
     }

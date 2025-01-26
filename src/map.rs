@@ -15,7 +15,6 @@ use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::mem;
 use core::ops::RangeBounds;
-use core::ptr;
 
 pub use self::entry::{Entry, OccupiedEntry, VacantEntry};
 pub use self::iter::*;
@@ -664,8 +663,7 @@ impl<K, V> VecMap<K, V> {
     /// assert_eq!(slice, [("b", 2), ("a", 1), ("c", 3)]);
     /// ```
     pub fn as_raw_slice(&self) -> &[(K, V)] {
-        // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
-        unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(self.base.as_slice()) as *const [(K, V)]) }
+        self.as_slice().as_raw_slice()
     }
 
     /// Returns a slice of all the key-value pairs in the map.

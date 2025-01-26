@@ -27,7 +27,7 @@ impl<K, V> Slice<K, V> {
         unsafe { Box::from_raw(Box::into_raw(entries) as *mut Slice<K, V>) }
     }
 
-    fn as_raw_slice(&self) -> &[(K, V)] {
+    pub(super) fn as_raw_slice(&self) -> &[(K, V)] {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(&self.entries) as *const [(K, V)]) }
     }
