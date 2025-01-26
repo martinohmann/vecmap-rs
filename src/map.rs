@@ -152,24 +152,6 @@ impl<K, V> VecMap<K, V> {
         self.base.truncate(len);
     }
 
-    /// Reverses the order of entries in the map, in place.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # extern crate alloc;
-    /// # use alloc::vec::Vec;
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::from_iter([("a", 1), ("b", 2), ("c", 3)]);
-    /// map.reverse();
-    /// let reversed: Vec<(&str, u8)> = map.into_iter().collect();
-    /// assert_eq!(reversed, Vec::from_iter([("c", 3), ("b", 2), ("a", 1)]));
-    /// ```
-    pub fn reverse(&mut self) {
-        self.base.reverse();
-    }
-
     /// Reserves capacity for at least `additional` more elements to be inserted in the given
     /// `VecMap<K, V>`. The collection may reserve more space to speculatively avoid frequent
     /// reallocations. After calling `reserve`, capacity will be greater than or equal to
@@ -690,30 +672,6 @@ impl<K, V> VecMap<K, V> {
     /// ```
     pub fn swap_remove_index(&mut self, index: usize) -> (K, V) {
         self.base.swap_remove(index).into_key_value()
-    }
-
-    /// Swaps the position of two key-value pairs in the map.
-    ///
-    /// # Arguments
-    ///
-    /// * a - The index of the first element
-    /// * b - The index of the second element
-    ///
-    /// # Panics
-    ///
-    /// Panics if `a` or `b` are out of bounds.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3), ("d", 4)]);
-    /// map.swap_indices(1, 3);
-    /// assert_eq!(map.to_vec(), [("a", 1), ("d", 4), ("c", 3), ("b", 2)]);
-    /// ```
-    pub fn swap_indices(&mut self, a: usize, b: usize) {
-        self.base.swap(a, b);
     }
 }
 

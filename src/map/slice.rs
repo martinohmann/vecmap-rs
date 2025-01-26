@@ -422,6 +422,51 @@ impl<K, V> Slice<K, V> {
     }
 }
 
+// Mutation operations.
+impl<K, V> Slice<K, V> {
+    /// Reverses the order of entries in the map, in place.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate alloc;
+    /// # use alloc::vec::Vec;
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from_iter([("a", 1), ("b", 2), ("c", 3)]);
+    /// map.reverse();
+    /// let reversed: Vec<(&str, u8)> = map.into_iter().collect();
+    /// assert_eq!(reversed, Vec::from_iter([("c", 3), ("b", 2), ("a", 1)]));
+    /// ```
+    pub fn reverse(&mut self) {
+        self.entries.reverse();
+    }
+
+    /// Swaps the position of two key-value pairs in the map.
+    ///
+    /// # Arguments
+    ///
+    /// * a - The index of the first element
+    /// * b - The index of the second element
+    ///
+    /// # Panics
+    ///
+    /// Panics if `a` or `b` are out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3), ("d", 4)]);
+    /// map.swap_indices(1, 3);
+    /// assert_eq!(map.to_vec(), [("a", 1), ("d", 4), ("c", 3), ("b", 2)]);
+    /// ```
+    pub fn swap_indices(&mut self, a: usize, b: usize) {
+        self.entries.swap(a, b);
+    }
+}
+
 // Sort operations.
 impl<K, V> Slice<K, V> {
     /// Sorts the map by key.

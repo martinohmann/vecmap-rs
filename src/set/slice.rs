@@ -199,6 +199,48 @@ impl<T> Slice<T> {
     }
 }
 
+// Mutation operations.
+impl<T> Slice<T> {
+    /// Reverses the order of entries in the set, in place.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from_iter(["a", "b", "c"]);
+    /// set.reverse();
+    /// assert_eq!(set, VecSet::from_iter(["c", "b", "a"]));
+    /// ```
+    pub fn reverse(&mut self) {
+        self.entries.reverse();
+    }
+
+    /// Swaps the position of two elements in the set.
+    ///
+    /// # Arguments
+    ///
+    /// * a - The index of the first element
+    /// * b - The index of the second element
+    ///
+    /// # Panics
+    ///
+    /// Panics if `a` or `b` are out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["a", "b", "c", "d"]);
+    /// set.swap_indices(1, 3);
+    /// assert_eq!(set.to_vec(), ["a", "d", "c", "b"]);
+    /// ```
+    pub fn swap_indices(&mut self, a: usize, b: usize) {
+        self.entries.swap(a, b);
+    }
+}
+
 // Sort operations.
 impl<T> Slice<T> {
     /// Sorts the set.

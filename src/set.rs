@@ -151,21 +151,6 @@ impl<T> VecSet<T> {
         self.base.truncate(len);
     }
 
-    /// Reverses the order of entries in the set, in place.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let mut set = VecSet::from_iter(["a", "b", "c"]);
-    /// set.reverse();
-    /// assert_eq!(set, VecSet::from_iter(["c", "b", "a"]));
-    /// ```
-    pub fn reverse(&mut self) {
-        self.base.reverse();
-    }
-
     /// Reserves capacity for at least `additional` more elements to be inserted in the given
     /// `VecSet<T>`. The collection may reserve more space to speculatively avoid frequent
     /// reallocations. After calling `reserve`, capacity will be greater than or equal to
@@ -628,30 +613,6 @@ impl<T> VecSet<T> {
     /// ```
     pub fn swap_remove_index(&mut self, index: usize) -> T {
         self.base.swap_remove_index(index).0
-    }
-
-    /// Swaps the position of two elements in the set.
-    ///
-    /// # Arguments
-    ///
-    /// * a - The index of the first element
-    /// * b - The index of the second element
-    ///
-    /// # Panics
-    ///
-    /// Panics if `a` or `b` are out of bounds.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let mut set = VecSet::from(["a", "b", "c", "d"]);
-    /// set.swap_indices(1, 3);
-    /// assert_eq!(set.to_vec(), ["a", "d", "c", "b"]);
-    /// ```
-    pub fn swap_indices(&mut self, a: usize, b: usize) {
-        self.base.swap_indices(a, b);
     }
 
     /// Removes and returns the value in the set, if any, that is equal to the given one.
