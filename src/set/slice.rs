@@ -36,7 +36,7 @@ impl<T> Slice<T> {
     /// let slice = set.as_raw_slice();
     /// assert_eq!(slice, ["b", "a", "c"]);
     /// ```
-    pub fn as_raw_slice(&self) -> &[T] {
+    pub const fn as_raw_slice(&self) -> &[T] {
         // SAFETY: `&[Slot<T>]` and `&[T]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<T>]>(&self.entries) as *const [T]) }
     }
@@ -67,7 +67,7 @@ impl<T> Slice<T> {
     /// let slice = set.as_slice();
     /// assert_eq!(slice.len(), 1);
     /// ```
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.entries.len()
     }
 
@@ -87,7 +87,7 @@ impl<T> Slice<T> {
     /// let slice = set.as_slice();
     /// assert!(!slice.is_empty());
     /// ```
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
 

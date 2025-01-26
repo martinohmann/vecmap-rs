@@ -36,7 +36,7 @@ impl<K, V> Slice<K, V> {
     /// let slice = map.as_raw_slice();
     /// assert_eq!(slice, [("b", 2), ("a", 1), ("c", 3)]);
     /// ```
-    pub fn as_raw_slice(&self) -> &[(K, V)] {
+    pub const fn as_raw_slice(&self) -> &[(K, V)] {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(&self.entries) as *const [(K, V)]) }
     }
@@ -81,7 +81,7 @@ impl<K, V> Slice<K, V> {
     /// let slice = map.as_slice();
     /// assert_eq!(slice.len(), 1);
     /// ```
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.entries.len()
     }
 
@@ -101,7 +101,7 @@ impl<K, V> Slice<K, V> {
     /// let slice = map.as_slice();
     /// assert!(!slice.is_empty());
     /// ```
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
 
