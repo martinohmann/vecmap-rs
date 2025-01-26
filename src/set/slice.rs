@@ -1,7 +1,6 @@
 use super::{Iter, Slot};
 use core::borrow::Borrow;
 use core::cmp::Ordering;
-use core::ops::Deref;
 use core::ptr;
 
 /// A dynamically-sized slice of keys in a [`VecSet`][crate::VecSet].
@@ -12,6 +11,7 @@ pub struct Slice<T> {
     entries: [Slot<T>],
 }
 
+// Conversion operations.
 impl<T> Slice<T> {
     pub(super) const fn from_slice(entries: &[Slot<T>]) -> &Self {
         // SAFETY: `&[Slot<T>]` and `&Slice<T>` have the same memory layout.
@@ -23,7 +23,18 @@ impl<T> Slice<T> {
         unsafe { &mut *(ptr::from_mut::<[Slot<T>]>(entries) as *mut Slice<T>) }
     }
 
-    pub(super) fn as_raw_slice(&self) -> &[T] {
+    /// Extracts a slice containing the set elements.
+    ///
+    /// This method provides access to the raw backing [`&[T]`][core::slice] of the `Slice<T>`.
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from(["b", "a", "c"]);
+    /// let slice = set.as_raw_slice();
+    /// assert_eq!(slice, ["b", "a", "c"]);
+    /// ```
+    pub fn as_raw_slice(&self) -> &[T] {
         // SAFETY: `&[Slot<T>]` and `&[T]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<T>]>(&self.entries) as *const [T]) }
     }
@@ -452,14 +463,6 @@ impl<T> Slice<T> {
         P: FnMut(&T) -> bool,
     {
         self.as_raw_slice().partition_point(pred)
-    }
-}
-
-impl<T> Deref for Slice<T> {
-    type Target = [T];
-
-    fn deref(&self) -> &Self::Target {
-        self.as_raw_slice()
     }
 }
 

@@ -410,24 +410,6 @@ impl<K, V> VecMap<K, V> {
         index
     }
 
-    /// Extracts a slice containing the map entries.
-    ///
-    /// This method provides access to the raw backing [`&[(K, V)]`][core::slice] of the `VecMap<K, V>`.
-    ///
-    /// To leverage additional slicing capabilities of a `VecMap<K, V>` consider using
-    /// [`as_slice`][Self::as_slice] instead.
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
-    /// let slice = map.as_raw_slice();
-    /// assert_eq!(slice, [("b", 2), ("a", 1), ("c", 3)]);
-    /// ```
-    pub fn as_raw_slice(&self) -> &[(K, V)] {
-        self.as_slice().as_raw_slice()
-    }
-
     /// Returns a slice of all the key-value pairs in the map.
     pub fn as_slice(&self) -> &Slice<K, V> {
         Slice::from_slice(self.as_entries())

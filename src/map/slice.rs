@@ -1,7 +1,6 @@
 use super::{Iter, IterMut, Keys, Slot, Values, ValuesMut};
 use core::borrow::Borrow;
 use core::cmp::Ordering;
-use core::ops::Deref;
 use core::ptr;
 
 /// A dynamically-sized slice of key-value pairs in a [`VecMap`][crate::VecMap].
@@ -12,6 +11,7 @@ pub struct Slice<K, V> {
     entries: [Slot<K, V>],
 }
 
+// Conversion operations.
 impl<K, V> Slice<K, V> {
     pub(super) const fn from_slice(entries: &[Slot<K, V>]) -> &Slice<K, V> {
         // SAFETY: `&[Slot<K, V>]` and `&Slice<K, V>` have the same memory layout.
@@ -23,7 +23,18 @@ impl<K, V> Slice<K, V> {
         unsafe { &mut *(ptr::from_mut::<[Slot<K, V>]>(entries) as *mut Slice<K, V>) }
     }
 
-    pub(super) fn as_raw_slice(&self) -> &[(K, V)] {
+    /// Extracts a slice containing the map entries.
+    ///
+    /// This method provides access to the raw backing [`&[(K, V)]`][core::slice] of the `Slice<K, V>`.
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    /// let slice = map.as_raw_slice();
+    /// assert_eq!(slice, [("b", 2), ("a", 1), ("c", 3)]);
+    /// ```
+    pub fn as_raw_slice(&self) -> &[(K, V)] {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(&self.entries) as *const [(K, V)]) }
     }
@@ -682,14 +693,6 @@ impl<K, V> Slice<K, V> {
         P: FnMut(&K, &V) -> bool,
     {
         self.as_raw_slice().partition_point(|(k, v)| pred(k, v))
-    }
-}
-
-impl<K, V> Deref for Slice<K, V> {
-    type Target = [(K, V)];
-
-    fn deref(&self) -> &Self::Target {
-        self.as_raw_slice()
     }
 }
 

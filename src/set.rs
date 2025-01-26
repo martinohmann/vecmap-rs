@@ -398,24 +398,6 @@ impl<T> VecSet<T> {
         Drain::new(self, range)
     }
 
-    /// Extracts a slice containing the set elements.
-    ///
-    /// This method provides access to the raw backing [`&[T]`][core::slice] of the `VecSet<T>`.
-    ///
-    /// To leverage additional slicing capabilities of a `VecSet<T>` consider using
-    /// [`as_slice`][Self::as_slice] instead.
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let set = VecSet::from(["b", "a", "c"]);
-    /// let slice = set.as_raw_slice();
-    /// assert_eq!(slice, ["b", "a", "c"]);
-    /// ```
-    pub fn as_raw_slice(&self) -> &[T] {
-        self.as_slice().as_raw_slice()
-    }
-
     /// Returns a slice of all the values in the set.
     pub fn as_slice(&self) -> &Slice<T> {
         Slice::from_slice(self.as_entries())
