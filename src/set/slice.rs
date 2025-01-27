@@ -495,11 +495,11 @@ impl<T> Slice<T> {
     /// assert_eq!(set.binary_search_by(|probe| probe.cmp(&"c")), Err(2));
     /// assert_eq!(set.binary_search_by(|probe| probe.cmp(&"z")), Err(3));
     /// ```
-    pub fn binary_search_by<'a, F>(&'a self, f: F) -> Result<usize, usize>
+    pub fn binary_search_by<'a, F>(&'a self, mut f: F) -> Result<usize, usize>
     where
         F: FnMut(&'a T) -> Ordering,
     {
-        self.as_std_slice().binary_search_by(f)
+        self.entries.binary_search_by(|slot| f(slot.key()))
     }
 
     /// Search over a sorted set with an extraction function.
@@ -518,12 +518,12 @@ impl<T> Slice<T> {
     /// assert_eq!(map.binary_search_by_key(&"z", |&(k, _)| k), Err(3));
     /// assert_eq!(map.binary_search_by_key(&4, |&(_, v)| v), Ok(2));
     /// ```
-    pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, f: F) -> Result<usize, usize>
+    pub fn binary_search_by_key<'a, B, F>(&'a self, b: &B, mut f: F) -> Result<usize, usize>
     where
         F: FnMut(&'a T) -> B,
         B: Ord,
     {
-        self.as_std_slice().binary_search_by_key(b, f)
+        self.entries.binary_search_by_key(b, |slot| f(slot.key()))
     }
 
     /// Returns the index of the partition point of a sorted set according to the given predicate
@@ -541,11 +541,11 @@ impl<T> Slice<T> {
     /// assert_eq!(map.partition_point(|&v| v > 100), 0);
     /// assert_eq!(map.partition_point(|&v| v < 100), 3);
     /// ```
-    pub fn partition_point<P>(&self, pred: P) -> usize
+    pub fn partition_point<P>(&self, mut pred: P) -> usize
     where
         P: FnMut(&T) -> bool,
     {
-        self.as_std_slice().partition_point(pred)
+        self.entries.partition_point(|slot| pred(slot.key()))
     }
 }
 

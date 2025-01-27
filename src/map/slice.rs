@@ -728,7 +728,8 @@ impl<K, V> Slice<K, V> {
     where
         F: FnMut(&'a K, &'a V) -> Ordering,
     {
-        self.as_std_slice().binary_search_by(|(k, v)| f(k, v))
+        self.entries
+            .binary_search_by(|slot| f(slot.key(), slot.value()))
     }
 
     /// Search over a sorted map with an extraction function.
@@ -752,8 +753,8 @@ impl<K, V> Slice<K, V> {
         F: FnMut(&'a K, &'a V) -> B,
         B: Ord,
     {
-        self.as_std_slice()
-            .binary_search_by_key(b, |(k, v)| f(k, v))
+        self.entries
+            .binary_search_by_key(b, |slot| f(slot.key(), slot.value()))
     }
 
     /// Returns the index of the partition point of a sorted map according to the given predicate
@@ -776,7 +777,8 @@ impl<K, V> Slice<K, V> {
     where
         P: FnMut(&K, &V) -> bool,
     {
-        self.as_std_slice().partition_point(|(k, v)| pred(k, v))
+        self.entries
+            .partition_point(|slot| pred(slot.key(), slot.value()))
     }
 }
 
