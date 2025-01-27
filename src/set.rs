@@ -424,7 +424,7 @@ impl<T> VecSet<T> {
     /// let mut set = VecSet::from(["b", "a", "c"]);
     /// let slice = set.as_mut_slice();
     /// slice.swap_indices(0, 1);
-    /// assert_eq!(set.as_raw_slice(), ["a", "b", "c"]);
+    /// assert_eq!(set.as_std_slice(), ["a", "b", "c"]);
     /// ```
     pub fn as_mut_slice(&mut self) -> &mut Slice<T> {
         Slice::from_mut_slice(self.as_entries_mut())
