@@ -55,6 +55,20 @@ impl<T> Slice<T> {
         Slice::from_slice(&[])
     }
 
+    /// Returns an empty mutable slice.
+    ///
+    /// ```
+    /// use vecmap::set::{Slice, VecSet};
+    ///
+    /// let mut set: VecSet<u32> = VecSet::new();
+    /// let slice: &mut Slice<u32> = Slice::new_mut();
+    /// assert!(slice.is_empty());
+    /// assert_eq!(slice, set.as_mut_slice());
+    /// ```
+    pub const fn new_mut<'a>() -> &'a mut Self {
+        Slice::from_mut_slice(&mut [])
+    }
+
     /// Returns the number of entries in the slice, also referred to as its 'length'.
     ///
     /// # Examples
@@ -546,6 +560,12 @@ impl<T> Index<usize> for Slice<T> {
 impl<T> Default for &Slice<T> {
     fn default() -> Self {
         Slice::new()
+    }
+}
+
+impl<T> Default for &mut Slice<T> {
+    fn default() -> Self {
+        Slice::new_mut()
     }
 }
 
