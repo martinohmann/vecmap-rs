@@ -212,5 +212,10 @@ mod test {
             VecMap::from([("a", 1), ("b", 2)]),
             VecMap::from([("b", 2), ("a", 1)])
         );
+        // When using the slice API order is checked too.
+        assert_ne!(
+            VecMap::from([("a", 1), ("b", 2)]).as_slice(),
+            VecMap::from([("b", 2), ("a", 1)]).as_mut_slice()
+        );
     }
 }
