@@ -1,6 +1,5 @@
 use super::{Iter, IterMut, Keys, Slot, Values, ValuesMut};
 use alloc::vec::Vec;
-use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::fmt;
 use core::ops::{Index, IndexMut};
@@ -33,8 +32,8 @@ impl<K, V> Slice<K, V> {
     /// use vecmap::VecMap;
     ///
     /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
-    /// let slice = map.as_std_slice();
-    /// assert_eq!(slice, [("b", 2), ("a", 1), ("c", 3)]);
+    /// let slice = map.as_slice();
+    /// assert_eq!(slice.as_std_slice(), [("b", 2), ("a", 1), ("c", 3)]);
     /// ```
     pub const fn as_std_slice(&self) -> &[(K, V)] {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
@@ -246,26 +245,6 @@ impl<K, V> Slice<K, V> {
 
 // Lookup operations.
 impl<K, V> Slice<K, V> {
-    /// Return `true` if an equivalent to `key` exists in the map.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::new();
-    /// map.insert(1, "a");
-    /// assert_eq!(map.contains_key(&1), true);
-    /// assert_eq!(map.contains_key(&2), false);
-    /// ```
-    pub fn contains_key<Q>(&self, key: &Q) -> bool
-    where
-        K: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.get_index_of(key).is_some()
-    }
-
     /// Get the first key-value pair.
     ///
     /// ```
@@ -331,50 +310,6 @@ impl<K, V> Slice<K, V> {
         self.entries.last_mut().map(Slot::ref_mut)
     }
 
-    /// Return a reference to the value stored for `key`, if it is present, else `None`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::new();
-    /// map.insert(1, "a");
-    /// assert_eq!(map.get(&1), Some(&"a"));
-    /// assert_eq!(map.get(&2), None);
-    /// ```
-    pub fn get<Q>(&self, key: &Q) -> Option<&V>
-    where
-        K: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.get_index_of(key)
-            .map(|index| self.entries[index].value())
-    }
-
-    /// Return a mutable reference to the value stored for `key`, if it is present, else `None`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::new();
-    /// map.insert(1, "a");
-    /// if let Some(x) = map.get_mut(&1) {
-    ///     *x = "b";
-    /// }
-    /// assert_eq!(map[&1], "b");
-    /// ```
-    pub fn get_mut<Q>(&mut self, key: &Q) -> Option<&mut V>
-    where
-        K: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.get_index_of(key)
-            .map(|index| self.entries[index].value_mut())
-    }
-
     /// Return references to the key-value pair stored at `index`, if it is present, else `None`.
     ///
     /// # Examples
@@ -408,106 +343,6 @@ impl<K, V> Slice<K, V> {
     /// ```
     pub fn get_index_mut(&mut self, index: usize) -> Option<(&K, &mut V)> {
         self.entries.get_mut(index).map(Slot::ref_mut)
-    }
-
-    /// Return the index and references to the key-value pair stored for `key`, if it is present,
-    /// else `None`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::new();
-    /// map.insert(1, "a");
-    /// assert_eq!(map.get_full(&1), Some((0, &1, &"a")));
-    /// assert_eq!(map.get_full(&2), None);
-    /// ```
-    pub fn get_full<Q>(&self, key: &Q) -> Option<(usize, &K, &V)>
-    where
-        K: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.get_index_of(key).map(|index| {
-            let (key, value) = self.entries[index].refs();
-            (index, key, value)
-        })
-    }
-
-    /// Return the index, a reference to the key and a mutable reference to the value stored for
-    /// `key`, if it is present, else `None`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::new();
-    /// map.insert(1, "a");
-    ///
-    /// if let Some((_, _, v)) = map.get_full_mut(&1) {
-    ///     *v = "b";
-    /// }
-    /// assert_eq!(map.get(&1), Some(&"b"));
-    /// ```
-    pub fn get_full_mut<Q>(&mut self, key: &Q) -> Option<(usize, &K, &mut V)>
-    where
-        K: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.get_index_of(key).map(|index| {
-            let (key, value) = self.entries[index].ref_mut();
-            (index, key, value)
-        })
-    }
-
-    /// Return references to the key-value pair stored for `key`, if it is present, else `None`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::new();
-    /// map.insert(1, "a");
-    /// assert_eq!(map.get_key_value(&1), Some((&1, &"a")));
-    /// assert_eq!(map.get_key_value(&2), None);
-    /// ```
-    pub fn get_key_value<Q>(&self, key: &Q) -> Option<(&K, &V)>
-    where
-        K: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.get_index_of(key)
-            .map(|index| self.entries[index].refs())
-    }
-
-    /// Return item index, if it exists in the map.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecMap;
-    ///
-    /// let mut map = VecMap::new();
-    /// map.insert("a", 10);
-    /// map.insert("b", 20);
-    /// assert_eq!(map.get_index_of("a"), Some(0));
-    /// assert_eq!(map.get_index_of("b"), Some(1));
-    /// assert_eq!(map.get_index_of("c"), None);
-    /// ```
-    pub fn get_index_of<Q>(&self, key: &Q) -> Option<usize>
-    where
-        K: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        if self.entries.is_empty() {
-            return None;
-        }
-
-        self.entries
-            .iter()
-            .position(|slot| slot.key().borrow() == key)
     }
 }
 
@@ -598,7 +433,7 @@ impl<K, V> Slice<K, V> {
     /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     ///
     /// map.sort_unstable_keys();
-    /// assert_eq!(map.as_std_slice(), [("a", 1), ("b", 2), ("c", 3)]);
+    /// assert_eq!(map.as_slice(), &[("a", 1), ("b", 2), ("c", 3)]);
     /// ```
     pub fn sort_unstable_keys(&mut self)
     where
@@ -782,28 +617,6 @@ impl<K, V> Slice<K, V> {
     }
 }
 
-impl<K, V, Q> Index<&Q> for Slice<K, V>
-where
-    K: Borrow<Q>,
-    Q: Eq + ?Sized,
-{
-    type Output = V;
-
-    fn index(&self, key: &Q) -> &V {
-        self.get(key).expect("Slice: key not found")
-    }
-}
-
-impl<K, V, Q> IndexMut<&Q> for Slice<K, V>
-where
-    K: Borrow<Q>,
-    Q: Eq + ?Sized,
-{
-    fn index_mut(&mut self, key: &Q) -> &mut V {
-        self.get_mut(key).expect("Slice: key not found")
-    }
-}
-
 impl<K, V> Index<usize> for Slice<K, V> {
     type Output = V;
 
@@ -840,7 +653,19 @@ impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for Slice<K, V> {
 
 impl<K: PartialEq, V: PartialEq> PartialEq for Slice<K, V> {
     fn eq(&self, other: &Self) -> bool {
-        self.entries.len() == other.entries.len() && self.iter().eq(other)
+        self.as_std_slice() == other.as_std_slice()
+    }
+}
+
+impl<K: PartialEq, V: PartialEq, const N: usize> PartialEq<[(K, V); N]> for Slice<K, V> {
+    fn eq(&self, other: &[(K, V); N]) -> bool {
+        self.as_std_slice() == other
+    }
+}
+
+impl<K: PartialEq, V: PartialEq> PartialEq<[(K, V)]> for Slice<K, V> {
+    fn eq(&self, other: &[(K, V)]) -> bool {
+        self.as_std_slice() == other
     }
 }
 

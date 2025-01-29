@@ -1,6 +1,5 @@
 use super::{Iter, Slot};
 use alloc::vec::Vec;
-use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::fmt;
 use core::ops::Index;
@@ -33,8 +32,8 @@ impl<T> Slice<T> {
     /// use vecmap::VecSet;
     ///
     /// let set = VecSet::from(["b", "a", "c"]);
-    /// let slice = set.as_std_slice();
-    /// assert_eq!(slice, ["b", "a", "c"]);
+    /// let slice = set.as_slice();
+    /// assert_eq!(slice.as_std_slice(), ["b", "a", "c"]);
     /// ```
     pub const fn as_std_slice(&self) -> &[T] {
         // SAFETY: `&[Slot<T>]` and `&[T]` have the same memory layout.
@@ -146,26 +145,6 @@ impl<T> Slice<T> {
 
 // Lookup operations.
 impl<T> Slice<T> {
-    /// Return `true` if an equivalent to `key` exists in the set.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let mut set = VecSet::new();
-    /// set.insert(1);
-    /// assert_eq!(set.contains(&1), true);
-    /// assert_eq!(set.contains(&2), false);
-    /// ```
-    pub fn contains<Q>(&self, value: &Q) -> bool
-    where
-        T: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        self.get_index_of(value).is_some()
-    }
-
     /// Get the first element.
     ///
     /// ```
@@ -195,29 +174,6 @@ impl<T> Slice<T> {
         self.entries.last().map(Slot::key)
     }
 
-    /// Returns a reference to the value in the set, if any, that is equal to the given value.
-    ///
-    /// The value may be any borrowed form of the set's value type, but [`Eq`] on the borrowed form
-    /// *must* match those for the value type.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let set = VecSet::from([1, 2, 3]);
-    /// assert_eq!(set.get(&2), Some(&2));
-    /// assert_eq!(set.get(&4), None);
-    /// ```
-    pub fn get<Q>(&self, value: &Q) -> Option<&T>
-    where
-        T: Borrow<Q>,
-        Q: ?Sized + Eq,
-    {
-        self.get_index_of(value)
-            .map(|index| self.entries[index].key())
-    }
-
     /// Return references to the element stored at `index`, if it is present, else `None`.
     ///
     /// # Examples
@@ -232,58 +188,6 @@ impl<T> Slice<T> {
     /// ```
     pub fn get_index(&self, index: usize) -> Option<&T> {
         self.entries.get(index).map(Slot::key)
-    }
-
-    /// Returns the index and a reference to the value in the set, if any, that is equal to the
-    /// given value.
-    ///
-    /// The value may be any borrowed form of the set's value type, but [`Eq`] on the borrowed form
-    /// *must* match those for the value type.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let set = VecSet::from([1, 2, 3]);
-    /// assert_eq!(set.get_full(&2), Some((1, &2)));
-    /// assert_eq!(set.get_full(&4), None);
-    /// ```
-    pub fn get_full<Q>(&self, value: &Q) -> Option<(usize, &T)>
-    where
-        T: Borrow<Q>,
-        Q: ?Sized + Eq,
-    {
-        self.get_index_of(value)
-            .map(|index| (index, self.entries[index].key()))
-    }
-
-    /// Return item index, if it exists in the set.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use vecmap::VecSet;
-    ///
-    /// let mut set = VecSet::new();
-    /// set.insert("a");
-    /// set.insert("b");
-    /// assert_eq!(set.get_index_of("a"), Some(0));
-    /// assert_eq!(set.get_index_of("b"), Some(1));
-    /// assert_eq!(set.get_index_of("c"), None);
-    /// ```
-    pub fn get_index_of<Q>(&self, value: &Q) -> Option<usize>
-    where
-        T: Borrow<Q>,
-        Q: Eq + ?Sized,
-    {
-        if self.entries.is_empty() {
-            return None;
-        }
-
-        self.entries
-            .iter()
-            .position(|slot| slot.key().borrow() == value)
     }
 }
 
@@ -442,9 +346,9 @@ impl<T> Slice<T> {
     /// use vecmap::VecSet;
     ///
     /// let mut set = VecSet::from(["b", "a", "c"]);
-    ///
-    /// set.sort_by_cached_key(|k| k.to_string());
-    /// assert_eq!(set.as_std_slice(), ["a", "b", "c"]);
+    /// let slice = set.as_mut_slice();
+    /// slice.sort_by_cached_key(|k| k.to_string());
+    /// assert_eq!(slice, &["a", "b", "c"]);
     /// ```
     pub fn sort_by_cached_key<K, F>(&mut self, mut sort_key: F)
     where
@@ -577,7 +481,19 @@ impl<T: fmt::Debug> fmt::Debug for Slice<T> {
 
 impl<T: PartialEq> PartialEq for Slice<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.entries.len() == other.entries.len() && self.iter().eq(other)
+        self.as_std_slice() == other.as_std_slice()
+    }
+}
+
+impl<T: PartialEq, const N: usize> PartialEq<[T; N]> for Slice<T> {
+    fn eq(&self, other: &[T; N]) -> bool {
+        self.as_std_slice() == other
+    }
+}
+
+impl<T: PartialEq> PartialEq<[T]> for Slice<T> {
+    fn eq(&self, other: &[T]) -> bool {
+        self.as_std_slice() == other
     }
 }
 

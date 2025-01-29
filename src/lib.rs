@@ -167,7 +167,7 @@ fn issue_18() {
         assert_eq!(mem::align_of::<Slot<K, V>>(), mem::align_of::<(K, V)>());
 
         let map = VecMap::from(slice);
-        assert_eq!(map.as_std_slice(), slice);
+        assert_eq!(map.as_slice(), slice);
     }
 
     test(&[(1i64, String::from("foo")), (2, String::from("bar"))]);

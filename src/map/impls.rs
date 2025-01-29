@@ -1,25 +1,11 @@
-use super::{Slice, VecMap};
+use super::VecMap;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
-use core::ops::{Deref, DerefMut, Index, IndexMut};
+use core::ops::{Index, IndexMut};
 
 impl<K, V> Default for VecMap<K, V> {
     fn default() -> Self {
         VecMap::new()
-    }
-}
-
-impl<K, V> Deref for VecMap<K, V> {
-    type Target = Slice<K, V>;
-
-    fn deref(&self) -> &Self::Target {
-        self.as_slice()
-    }
-}
-
-impl<K, V> DerefMut for VecMap<K, V> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.as_mut_slice()
     }
 }
 
