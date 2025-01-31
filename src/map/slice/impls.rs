@@ -60,9 +60,29 @@ impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for Slice<K, V> {
     }
 }
 
+macro_rules! impl_partial_eq_std_slice {
+    ($ty:ty) => {
+        impl<K: PartialEq, V: PartialEq, const N: usize> PartialEq<[(K, V); N]> for $ty {
+            fn eq(&self, other: &[(K, V); N]) -> bool {
+                self.as_std_slice().eq(other)
+            }
+        }
+
+        impl<K: PartialEq, V: PartialEq> PartialEq<[(K, V)]> for $ty {
+            fn eq(&self, other: &[(K, V)]) -> bool {
+                self.as_std_slice().eq(other)
+            }
+        }
+    };
+}
+
+impl_partial_eq_std_slice!(Slice<K, V>);
+impl_partial_eq_std_slice!(&Slice<K, V>);
+impl_partial_eq_std_slice!(&mut Slice<K, V>);
+
 impl<K: PartialEq, V: PartialEq> PartialEq for Slice<K, V> {
     fn eq(&self, other: &Self) -> bool {
-        self.entries.len() == other.entries.len() && self.iter().eq(other)
+        self.as_std_slice().eq(other.as_std_slice())
     }
 }
 
@@ -95,5 +115,30 @@ impl<'a, K, V> IntoIterator for &'a mut Slice<K, V> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter_mut()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::vecmap;
+
+    #[test]
+    fn eq() {
+        let mut map = vecmap! {"a" => 1, "b" => 2, "c" => 3};
+        let mut map_clone = map.clone();
+
+        assert_eq!(map, map_clone);
+        assert_eq!(map.as_slice(), map_clone.as_slice());
+        assert_eq!(map.as_slice(), &[("a", 1), ("b", 2), ("c", 3)]);
+        assert_eq!(map.as_slice(), [("a", 1), ("b", 2), ("c", 3)]);
+        assert_eq!(map.as_mut_slice(), [("a", 1), ("b", 2), ("c", 3)]);
+
+        map_clone.swap_indices(0, 2);
+
+        assert_eq!(map, map_clone);
+        assert_ne!(map.as_slice(), map_clone.as_slice());
+        assert_ne!(map.as_slice(), &[("c", 3), ("b", 2), ("a", 1)]);
+        assert_ne!(map.as_slice(), [("c", 3), ("b", 2), ("a", 1)]);
+        assert_ne!(map.as_mut_slice(), [("c", 3), ("b", 2), ("a", 1)]);
     }
 }
