@@ -33,8 +33,7 @@ impl<K, V> Slice<K, V> {
     /// use vecmap::VecMap;
     ///
     /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
-    /// let slice = map.as_std_slice();
-    /// assert_eq!(slice, [("b", 2), ("a", 1), ("c", 3)]);
+    /// assert_eq!(map.as_std_slice(), [("b", 2), ("a", 1), ("c", 3)]);
     /// ```
     pub const fn as_std_slice(&self) -> &[(K, V)] {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
@@ -598,7 +597,7 @@ impl<K, V> Slice<K, V> {
     /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     ///
     /// map.sort_unstable_keys();
-    /// assert_eq!(map.as_std_slice(), [("a", 1), ("b", 2), ("c", 3)]);
+    /// assert_eq!(map.as_slice(), [("a", 1), ("b", 2), ("c", 3)]);
     /// ```
     pub fn sort_unstable_keys(&mut self)
     where

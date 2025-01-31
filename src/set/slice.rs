@@ -33,8 +33,7 @@ impl<T> Slice<T> {
     /// use vecmap::VecSet;
     ///
     /// let set = VecSet::from(["b", "a", "c"]);
-    /// let slice = set.as_std_slice();
-    /// assert_eq!(slice, ["b", "a", "c"]);
+    /// assert_eq!(set.as_std_slice(), ["b", "a", "c"]);
     /// ```
     pub const fn as_std_slice(&self) -> &[T] {
         // SAFETY: `&[Slot<T>]` and `&[T]` have the same memory layout.
@@ -444,7 +443,7 @@ impl<T> Slice<T> {
     /// let mut set = VecSet::from(["b", "a", "c"]);
     ///
     /// set.sort_by_cached_key(|k| k.to_string());
-    /// assert_eq!(set.as_std_slice(), ["a", "b", "c"]);
+    /// assert_eq!(set.as_slice(), ["a", "b", "c"]);
     /// ```
     pub fn sort_by_cached_key<K, F>(&mut self, mut sort_key: F)
     where

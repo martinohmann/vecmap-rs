@@ -436,7 +436,7 @@ impl<K, V> VecMap<K, V> {
     /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
     /// let slice = map.as_mut_slice();
     /// slice.swap_indices(0, 1);
-    /// assert_eq!(map.as_std_slice(), [("a", 1), ("b", 2), ("c", 3)]);
+    /// assert_eq!(slice, [("a", 1), ("b", 2), ("c", 3)]);
     /// ```
     pub fn as_mut_slice(&mut self) -> &mut Slice<K, V> {
         Slice::from_mut_slice(self.as_entries_mut())
