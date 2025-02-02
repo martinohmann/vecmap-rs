@@ -8,7 +8,7 @@ mod mutable_keys;
 mod serde;
 mod slice;
 
-use super::{Entries, Slot, TryReserveError};
+use super::{try_simplify_range, Entries, Slot, TryReserveError};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
@@ -914,6 +914,53 @@ impl<K, V> VecMap<K, V> {
     /// ```
     pub fn get_index_mut(&mut self, index: usize) -> Option<(&K, &mut V)> {
         self.base.get_mut(index).map(Slot::ref_mut)
+    }
+
+    /// Returns a map slice of values in the given range of indices.
+    ///
+    /// Valid indices are `0 <= index < self.len()`.
+    ///
+    /// Computes in **O(1)** time.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("a", 1), ("b", 2), ("c", 3), ("d", 4)]);
+    /// assert_eq!(map.get_range(1..3).unwrap(), [("b", 2), ("c", 3)]);
+    /// ```
+    pub fn get_range<R>(&self, range: R) -> Option<&MapSlice<K, V>>
+    where
+        R: RangeBounds<usize>,
+    {
+        let entries = self.as_entries();
+        let range = try_simplify_range(range, entries.len())?;
+        entries.get(range).map(MapSlice::from_slice)
+    }
+
+    /// Returns a mutable map slice of key-value pairs in the given range of indices.
+    ///
+    /// Valid indices are `0 <= index < self.len()`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3), ("d", 4)]);
+    /// let slice = map.get_range_mut(1..3).unwrap();
+    /// assert_eq!(slice, [("b", 2), ("c", 3)]);
+    /// slice.reverse();
+    /// assert_eq!(slice, [("c", 3), ("b", 2)]);
+    /// ```
+    pub fn get_range_mut<R>(&mut self, range: R) -> Option<&mut MapSlice<K, V>>
+    where
+        R: RangeBounds<usize>,
+    {
+        let entries = self.as_entries_mut();
+        let range = try_simplify_range(range, entries.len())?;
+        entries.get_mut(range).map(MapSlice::from_mut_slice)
     }
 
     /// Return the index and references to the key-value pair stored for `key`, if it is present,

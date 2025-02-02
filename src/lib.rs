@@ -25,6 +25,7 @@ pub use self::map::VecMap;
 pub use self::set::VecSet;
 pub use alloc::collections::TryReserveError;
 use alloc::vec::Vec;
+use core::ops::{Bound, Range, RangeBounds};
 
 // The type used to store entries in a `VecMap`.
 //
@@ -102,6 +103,28 @@ trait Entries {
     fn as_entries_mut(&mut self) -> &mut [Self::Entry];
 
     fn into_entries(self) -> Vec<Self::Entry>;
+}
+
+// Simplifies `RangeBounds` to a `Range`.
+fn try_simplify_range<R>(range: R, len: usize) -> Option<Range<usize>>
+where
+    R: RangeBounds<usize>,
+{
+    let start = match range.start_bound() {
+        Bound::Unbounded => 0,
+        Bound::Included(&i) if i <= len => i,
+        Bound::Excluded(&i) if i < len => i + 1,
+        _ => return None,
+    };
+
+    let end = match range.end_bound() {
+        Bound::Unbounded => len,
+        Bound::Excluded(&i) if i <= len => i,
+        Bound::Included(&i) if i < len => i + 1,
+        _ => return None,
+    };
+
+    (start > end).then(|| start..end)
 }
 
 /// Deduplicate elements in an unsorted vector.

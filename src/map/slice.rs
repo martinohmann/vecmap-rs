@@ -1,9 +1,11 @@
 mod impls;
 
 use super::{Iter, IterMut, Keys, Slot, Values, ValuesMut};
+use crate::try_simplify_range;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
+use core::ops::RangeBounds;
 use core::ptr;
 
 /// A dynamically-sized slice of key-value pairs in a [`VecMap`][crate::VecMap].
@@ -167,6 +169,30 @@ impl<K, V> MapSlice<K, V> {
     /// is present, else `None`.
     pub fn get_index_mut(&mut self, index: usize) -> Option<(&K, &mut V)> {
         self.entries.get_mut(index).map(Slot::ref_mut)
+    }
+
+    /// Returns a map slice of values in the given range of indices.
+    ///
+    /// Valid indices are `0 <= index < self.len()`.
+    ///
+    /// Computes in **O(1)** time.
+    pub fn get_range<R>(&self, range: R) -> Option<&Self>
+    where
+        R: RangeBounds<usize>,
+    {
+        let range = try_simplify_range(range, self.entries.len())?;
+        self.entries.get(range).map(MapSlice::from_slice)
+    }
+
+    /// Returns a mutable map slice of key-value pairs in the given range of indices.
+    ///
+    /// Valid indices are `0 <= index < self.len()`.
+    pub fn get_range_mut<R>(&mut self, range: R) -> Option<&mut Self>
+    where
+        R: RangeBounds<usize>,
+    {
+        let range = try_simplify_range(range, self.entries.len())?;
+        self.entries.get_mut(range).map(MapSlice::from_mut_slice)
     }
 
     /// Return the index and references to the key-value pair stored for `key`, if it is present,

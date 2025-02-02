@@ -1,8 +1,9 @@
 use super::{Iter, IterMut, MapSlice};
+use crate::VecMap;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::fmt;
-use core::ops::{Index, IndexMut};
+use core::ops::{self, Bound, Index, IndexMut};
 
 impl<K, V, Q> Index<&Q> for MapSlice<K, V>
 where
@@ -43,6 +44,51 @@ impl<K, V> IndexMut<usize> for MapSlice<K, V> {
             .1
     }
 }
+
+// We can't have `impl<I: RangeBounds<usize>> Index<I>` because that conflicts
+// both upstream with `Index<usize>` and downstream with `Index<&Q>`.
+// Instead, we repeat the implementations for all the core range types.
+macro_rules! impl_index {
+    ($($range:ty),*) => {$(
+        impl<K, V> Index<$range> for VecMap<K, V> {
+            type Output = MapSlice<K, V>;
+
+            fn index(&self, range: $range) -> &Self::Output {
+                self.get_range(range).expect("VecMap: range out of bounds")
+            }
+        }
+
+        impl<K, V> IndexMut<$range> for VecMap<K, V> {
+            fn index_mut(&mut self, range: $range) -> &mut Self::Output {
+                self.get_range_mut(range).expect("VecMap: range out of bounds")
+            }
+        }
+
+        impl<K, V> Index<$range> for MapSlice<K, V> {
+            type Output = MapSlice<K, V>;
+
+            fn index(&self, range: $range) -> &Self::Output {
+                self.get_range(range).expect("MapSlice: range out of bounds")
+            }
+        }
+
+        impl<K, V> IndexMut<$range> for MapSlice<K, V> {
+            fn index_mut(&mut self, range: $range) -> &mut Self::Output {
+                self.get_range_mut(range).expect("MapSlice: range out of bounds")
+            }
+        }
+    )*}
+}
+
+impl_index!(
+    ops::Range<usize>,
+    ops::RangeFrom<usize>,
+    ops::RangeFull,
+    ops::RangeInclusive<usize>,
+    ops::RangeTo<usize>,
+    ops::RangeToInclusive<usize>,
+    (Bound<usize>, Bound<usize>)
+);
 
 impl<K, V> Default for &MapSlice<K, V> {
     fn default() -> Self {
