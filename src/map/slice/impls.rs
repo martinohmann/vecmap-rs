@@ -48,8 +48,8 @@ impl<K, V> IndexMut<usize> for MapSlice<K, V> {
 // We can't have `impl<I: RangeBounds<usize>> Index<I>` because that conflicts
 // both upstream with `Index<usize>` and downstream with `Index<&Q>`.
 // Instead, we repeat the implementations for all the core range types.
-macro_rules! impl_index {
-    ($($range:ty),*) => {$(
+macro_rules! impl_index_range {
+    ($range:ty) => {
         impl<K, V> Index<$range> for VecMap<K, V> {
             type Output = MapSlice<K, V>;
 
@@ -60,7 +60,8 @@ macro_rules! impl_index {
 
         impl<K, V> IndexMut<$range> for VecMap<K, V> {
             fn index_mut(&mut self, range: $range) -> &mut Self::Output {
-                self.get_range_mut(range).expect("VecMap: range out of bounds")
+                self.get_range_mut(range)
+                    .expect("VecMap: range out of bounds")
             }
         }
 
@@ -68,27 +69,27 @@ macro_rules! impl_index {
             type Output = MapSlice<K, V>;
 
             fn index(&self, range: $range) -> &Self::Output {
-                self.get_range(range).expect("MapSlice: range out of bounds")
+                self.get_range(range)
+                    .expect("MapSlice: range out of bounds")
             }
         }
 
         impl<K, V> IndexMut<$range> for MapSlice<K, V> {
             fn index_mut(&mut self, range: $range) -> &mut Self::Output {
-                self.get_range_mut(range).expect("MapSlice: range out of bounds")
+                self.get_range_mut(range)
+                    .expect("MapSlice: range out of bounds")
             }
         }
-    )*}
+    };
 }
 
-impl_index!(
-    ops::Range<usize>,
-    ops::RangeFrom<usize>,
-    ops::RangeFull,
-    ops::RangeInclusive<usize>,
-    ops::RangeTo<usize>,
-    ops::RangeToInclusive<usize>,
-    (Bound<usize>, Bound<usize>)
-);
+impl_index_range!(ops::Range<usize>);
+impl_index_range!(ops::RangeFrom<usize>);
+impl_index_range!(ops::RangeFull);
+impl_index_range!(ops::RangeInclusive<usize>);
+impl_index_range!(ops::RangeTo<usize>);
+impl_index_range!(ops::RangeToInclusive<usize>);
+impl_index_range!((Bound<usize>, Bound<usize>));
 
 impl<K, V> Default for &MapSlice<K, V> {
     fn default() -> Self {

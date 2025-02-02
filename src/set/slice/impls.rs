@@ -16,8 +16,8 @@ impl<T> Index<usize> for SetSlice<T> {
 // We can't have `impl<I: RangeBounds<usize>> Index<I>` because that conflicts
 // both upstream with `Index<usize>` and downstream with `Index<&Q>`.
 // Instead, we repeat the implementations for all the core range types.
-macro_rules! impl_index {
-    ($($range:ty),*) => {$(
+macro_rules! impl_index_range {
+    ($range:ty) => {
         impl<T> Index<$range> for VecSet<T> {
             type Output = SetSlice<T>;
 
@@ -30,21 +30,20 @@ macro_rules! impl_index {
             type Output = SetSlice<T>;
 
             fn index(&self, range: $range) -> &Self::Output {
-                self.get_range(range).expect("SetSlice: range out of bounds")
+                self.get_range(range)
+                    .expect("SetSlice: range out of bounds")
             }
         }
-    )*}
+    };
 }
 
-impl_index!(
-    ops::Range<usize>,
-    ops::RangeFrom<usize>,
-    ops::RangeFull,
-    ops::RangeInclusive<usize>,
-    ops::RangeTo<usize>,
-    ops::RangeToInclusive<usize>,
-    (Bound<usize>, Bound<usize>)
-);
+impl_index_range!(ops::Range<usize>);
+impl_index_range!(ops::RangeFrom<usize>);
+impl_index_range!(ops::RangeFull);
+impl_index_range!(ops::RangeInclusive<usize>);
+impl_index_range!(ops::RangeTo<usize>);
+impl_index_range!(ops::RangeToInclusive<usize>);
+impl_index_range!((Bound<usize>, Bound<usize>));
 
 impl<T> Default for &SetSlice<T> {
     fn default() -> Self {
