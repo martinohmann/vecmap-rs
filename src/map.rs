@@ -6,6 +6,7 @@ mod iter;
 mod mutable_keys;
 #[cfg(feature = "serde")]
 mod serde;
+mod slice;
 
 use super::{Entries, Slot, TryReserveError};
 use alloc::vec::Vec;
@@ -18,6 +19,7 @@ use core::ptr;
 pub use self::entry::{Entry, OccupiedEntry, VacantEntry};
 pub use self::iter::*;
 pub use self::mutable_keys::MutableKeys;
+pub use self::slice::MapSlice;
 
 /// A vector-based map implementation which retains the order of inserted entries.
 ///
@@ -657,6 +659,38 @@ impl<K, V> VecMap<K, V> {
     pub fn as_slice(&self) -> &[(K, V)] {
         // SAFETY: `&[Slot<K, V>]` and `&[(K, V)]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[Slot<K, V>]>(self.base.as_slice()) as *const [(K, V)]) }
+    }
+
+    /// Returns a slice of all the key-value pairs in the map.
+    ///
+    /// This method is automatically called via `VecMap<K, V>`'s `Deref` implementation.
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    /// let slice = map.as_map_slice();
+    /// assert!(slice.contains_key(&"a"));
+    /// assert!(!slice.contains_key(&"z"));
+    /// ```
+    pub fn as_map_slice(&self) -> &MapSlice<K, V> {
+        MapSlice::from_slice(self.as_entries())
+    }
+
+    /// Returns a mutable slice of all the key-value pairs in the map.
+    ///
+    /// This method is automatically called via `VecMap<K, V>`'s `DerefMut` implementation.
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map = VecMap::from([("b", 2), ("a", 1), ("c", 3)]);
+    /// let slice = map.as_mut_map_slice();
+    /// slice.swap_indices(0, 1);
+    /// assert_eq!(slice, [("a", 1), ("b", 2), ("c", 3)]);
+    /// ```
+    pub fn as_mut_map_slice(&mut self) -> &mut MapSlice<K, V> {
+        MapSlice::from_mut_slice(self.as_entries_mut())
     }
 
     /// Copies the map entries into a new `Vec<(K, V)>`.

@@ -9,6 +9,7 @@
     clippy::must_use_candidate,
     clippy::return_self_not_must_use
 )]
+#![deny(clippy::missing_safety_doc, clippy::undocumented_unsafe_blocks)]
 #![no_std]
 
 extern crate alloc;
