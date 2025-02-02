@@ -715,7 +715,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(vec, ["b", "a", "c"]);
     /// ```
     pub fn into_vec(self) -> Vec<T> {
-        // SAFETY: `Vec<Slot<T, ()>>` and `Vec<T>` have the same memory layout.
+        // SAFETY: `Vec<Slot<T>>` and `Vec<T>` have the same memory layout.
         unsafe { super::transmute_vec(self.base.base) }
     }
 
