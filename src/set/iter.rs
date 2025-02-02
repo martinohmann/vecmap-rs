@@ -75,11 +75,11 @@ impl<'a, T> IntoIterator for &'a VecSet<T> {
 ///
 /// [`iter`]: VecSet::iter
 pub struct Iter<'a, T> {
-    iter: slice::Iter<'a, Slot<T, ()>>,
+    iter: slice::Iter<'a, Slot<T>>,
 }
 
 impl<'a, T> Iter<'a, T> {
-    pub(super) fn new(entries: &'a [Slot<T, ()>]) -> Iter<'a, T> {
+    pub(super) fn new(entries: &'a [Slot<T>]) -> Iter<'a, T> {
         Iter {
             iter: entries.iter(),
         }
@@ -104,11 +104,11 @@ impl_iterator!(Iter<'a, T>, &'a T, Slot::key);
 /// [`into_iter`]: IntoIterator::into_iter
 /// [`IntoIterator`]: core::iter::IntoIterator
 pub struct IntoIter<T> {
-    iter: vec::IntoIter<Slot<T, ()>>,
+    iter: vec::IntoIter<Slot<T>>,
 }
 
 impl<T> IntoIter<T> {
-    pub(super) fn new(entries: Vec<Slot<T, ()>>) -> IntoIter<T> {
+    pub(super) fn new(entries: Vec<Slot<T>>) -> IntoIter<T> {
         IntoIter {
             iter: entries.into_iter(),
         }
