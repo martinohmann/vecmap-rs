@@ -62,7 +62,7 @@ impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for MapSlice<K, V> {
     }
 }
 
-macro_rules! impl_partial_eq_std_slice {
+macro_rules! impl_partial_eq_slice {
     ($ty:ty) => {
         impl<K: PartialEq, V: PartialEq, const N: usize> PartialEq<[(K, V); N]> for $ty {
             fn eq(&self, other: &[(K, V); N]) -> bool {
@@ -78,9 +78,9 @@ macro_rules! impl_partial_eq_std_slice {
     };
 }
 
-impl_partial_eq_std_slice!(MapSlice<K, V>);
-impl_partial_eq_std_slice!(&MapSlice<K, V>);
-impl_partial_eq_std_slice!(&mut MapSlice<K, V>);
+impl_partial_eq_slice!(MapSlice<K, V>);
+impl_partial_eq_slice!(&MapSlice<K, V>);
+impl_partial_eq_slice!(&mut MapSlice<K, V>);
 
 impl<K: PartialEq, V: PartialEq> PartialEq for MapSlice<K, V> {
     fn eq(&self, other: &Self) -> bool {
