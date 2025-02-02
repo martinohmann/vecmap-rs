@@ -124,7 +124,7 @@ where
         _ => return None,
     };
 
-    (start > end).then(|| start..end)
+    (start <= end).then(|| start..end)
 }
 
 /// Deduplicate elements in an unsorted vector.
