@@ -114,7 +114,9 @@ impl<'a, T> IntoIterator for &'a SetSlice<T> {
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use crate::vecset;
+    use alloc::vec::Vec;
 
     #[test]
     fn eq() {
@@ -134,5 +136,49 @@ mod test {
         assert_ne!(set.as_set_slice(), &[3, 2, 1]);
         assert_ne!(set.as_set_slice(), [3, 2, 1]);
         assert_ne!(set.as_mut_set_slice(), [3, 2, 1]);
+    }
+
+    #[test]
+    fn slice_index() {
+        fn check(vec_slice: &[i32], set_slice: &SetSlice<i32>, sub_slice: &SetSlice<i32>) {
+            assert_eq!(set_slice, sub_slice);
+            assert_eq!(set_slice, vec_slice);
+        }
+
+        let vec: Vec<i32> = (0..10).map(|i| i * i).collect();
+        let set: VecSet<i32> = vec.iter().cloned().collect();
+        let slice = set.as_set_slice();
+
+        // RangeFull
+        check(&vec[..], &set[..], &slice[..]);
+
+        for i in 0usize..10 {
+            // Index
+            assert_eq!(vec[i], set[i]);
+            assert_eq!(vec[i], slice[i]);
+
+            // RangeFrom
+            check(&vec[i..], &set[i..], &slice[i..]);
+
+            // RangeTo
+            check(&vec[..i], &set[..i], &slice[..i]);
+
+            // RangeToInclusive
+            check(&vec[..=i], &set[..=i], &slice[..=i]);
+
+            // (Bound<usize>, Bound<usize>)
+            let bounds = (Bound::Excluded(i), Bound::Unbounded);
+            check(&vec[i + 1..], &set[bounds], &slice[bounds]);
+
+            for j in i..=10 {
+                // Range
+                check(&vec[i..j], &set[i..j], &slice[i..j]);
+            }
+
+            for j in i..10 {
+                // RangeInclusive
+                check(&vec[i..=j], &set[i..=j], &slice[i..=j]);
+            }
+        }
     }
 }
