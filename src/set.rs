@@ -4,6 +4,7 @@ mod impls;
 mod iter;
 #[cfg(feature = "serde")]
 mod serde;
+mod slice;
 
 use super::{Entries, TryReserveError, VecMap};
 use alloc::vec::Vec;
@@ -13,6 +14,7 @@ use core::ops::RangeBounds;
 use core::ptr;
 
 pub use self::iter::*;
+pub use self::slice::SetSlice;
 
 // Type alias to make internal `VecSet` APIs using a `Slot` less verbose.
 type Slot<T> = super::Slot<T, ()>;
@@ -656,6 +658,34 @@ impl<T> VecSet<T> {
     pub fn as_slice(&self) -> &[T] {
         // SAFETY: `&[(T, ())]` and `&[T]` have the same memory layout.
         unsafe { &*(ptr::from_ref::<[(T, ())]>(self.base.as_slice()) as *const [T]) }
+    }
+
+    /// Returns a slice of all the values in the set.
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from(["b", "a", "c"]);
+    /// let slice = set.as_set_slice();
+    /// assert!(slice.contains(&"a"));
+    /// assert!(!slice.contains(&"z"));
+    /// ```
+    pub fn as_set_slice(&self) -> &SetSlice<T> {
+        SetSlice::from_slice(self.as_entries())
+    }
+
+    /// Returns a mutable slice of all the values in the set.
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let mut set = VecSet::from(["b", "a", "c"]);
+    /// let slice = set.as_mut_set_slice();
+    /// slice.swap_indices(0, 1);
+    /// assert_eq!(slice, ["a", "b", "c"]);
+    /// ```
+    pub fn as_mut_set_slice(&mut self) -> &mut SetSlice<T> {
+        SetSlice::from_mut_slice(self.as_entries_mut())
     }
 
     /// Copies the set elements into a new `Vec<T>`.
