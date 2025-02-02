@@ -1,7 +1,8 @@
 use super::{Iter, SetSlice};
+use crate::VecSet;
 use core::cmp::Ordering;
 use core::fmt;
-use core::ops::Index;
+use core::ops::{self, Bound, Index};
 
 impl<T> Index<usize> for SetSlice<T> {
     type Output = T;
@@ -11,6 +12,39 @@ impl<T> Index<usize> for SetSlice<T> {
             .expect("SetSlice: index out of bounds")
     }
 }
+
+// We can't have `impl<I: RangeBounds<usize>> Index<I>` because that conflicts
+// both upstream with `Index<usize>` and downstream with `Index<&Q>`.
+// Instead, we repeat the implementations for all the core range types.
+macro_rules! impl_index {
+    ($($range:ty),*) => {$(
+        impl<T> Index<$range> for VecSet<T> {
+            type Output = SetSlice<T>;
+
+            fn index(&self, range: $range) -> &Self::Output {
+                self.get_range(range).expect("VecSet: range out of bounds")
+            }
+        }
+
+        impl<T> Index<$range> for SetSlice<T> {
+            type Output = SetSlice<T>;
+
+            fn index(&self, range: $range) -> &Self::Output {
+                self.get_range(range).expect("SetSlice: range out of bounds")
+            }
+        }
+    )*}
+}
+
+impl_index!(
+    ops::Range<usize>,
+    ops::RangeFrom<usize>,
+    ops::RangeFull,
+    ops::RangeInclusive<usize>,
+    ops::RangeTo<usize>,
+    ops::RangeToInclusive<usize>,
+    (Bound<usize>, Bound<usize>)
+);
 
 impl<T> Default for &SetSlice<T> {
     fn default() -> Self {

@@ -6,7 +6,7 @@ mod iter;
 mod serde;
 mod slice;
 
-use super::{Entries, TryReserveError, VecMap};
+use super::{try_simplify_range, Entries, TryReserveError, VecMap};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
@@ -838,6 +838,29 @@ impl<T> VecSet<T> {
     /// ```
     pub fn get_index(&self, index: usize) -> Option<&T> {
         self.base.get_index(index).map(|(k, ())| k)
+    }
+
+    /// Returns a set slice of values in the given range of indices.
+    ///
+    /// Valid indices are `0 <= index < self.len()`.
+    ///
+    /// Computes in **O(1)** time.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecSet;
+    ///
+    /// let set = VecSet::from([1, 2, 3, 4, 5]);
+    /// assert_eq!(set.get_range(1..3).unwrap(), [2, 3]);
+    /// ```
+    pub fn get_range<R>(&self, range: R) -> Option<&SetSlice<T>>
+    where
+        R: RangeBounds<usize>,
+    {
+        let entries = self.as_entries();
+        let range = try_simplify_range(range, entries.len())?;
+        entries.get(range).map(SetSlice::from_slice)
     }
 
     /// Returns the index and a reference to the value in the set, if any, that is equal to the

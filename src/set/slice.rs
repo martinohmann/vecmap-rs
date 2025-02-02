@@ -1,9 +1,11 @@
 mod impls;
 
 use super::{Iter, Slot};
+use crate::try_simplify_range;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
+use core::ops::RangeBounds;
 use core::ptr;
 
 /// A dynamically-sized slice of keys in a [`VecSet`][crate::VecSet].
@@ -123,6 +125,19 @@ impl<T> SetSlice<T> {
     /// Return references to the element stored at `index`, if it is present, else `None`.
     pub fn get_index(&self, index: usize) -> Option<&T> {
         self.entries.get(index).map(Slot::key)
+    }
+
+    /// Returns a set slice of values in the given range of indices.
+    ///
+    /// Valid indices are `0 <= index < self.len()`.
+    ///
+    /// Computes in **O(1)** time.
+    pub fn get_range<R>(&self, range: R) -> Option<&Self>
+    where
+        R: RangeBounds<usize>,
+    {
+        let range = try_simplify_range(range, self.entries.len())?;
+        self.entries.get(range).map(SetSlice::from_slice)
     }
 
     /// Returns the index and a reference to the value in the set slice, if any, that is equal to
