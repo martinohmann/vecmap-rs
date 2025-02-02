@@ -663,8 +663,6 @@ impl<K, V> VecMap<K, V> {
 
     /// Returns a slice of all the key-value pairs in the map.
     ///
-    /// This method is automatically called via `VecMap<K, V>`'s `Deref` implementation.
-    ///
     /// ```
     /// use vecmap::VecMap;
     ///
@@ -678,8 +676,6 @@ impl<K, V> VecMap<K, V> {
     }
 
     /// Returns a mutable slice of all the key-value pairs in the map.
-    ///
-    /// This method is automatically called via `VecMap<K, V>`'s `DerefMut` implementation.
     ///
     /// ```
     /// use vecmap::VecMap;
