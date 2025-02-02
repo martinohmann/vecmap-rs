@@ -5,7 +5,7 @@ mod iter;
 #[cfg(feature = "serde")]
 mod serde;
 
-use super::{Entries, Slot, TryReserveError, VecMap};
+use super::{Entries, TryReserveError, VecMap};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
@@ -13,6 +13,9 @@ use core::ops::RangeBounds;
 use core::ptr;
 
 pub use self::iter::*;
+
+// Type alias to make internal `VecSet` APIs using a `Slot` less verbose.
+type Slot<T> = super::Slot<T, ()>;
 
 /// A vector-based set implementation which retains the order of inserted elements.
 ///
@@ -1296,7 +1299,7 @@ where
 }
 
 impl<T> Entries for VecSet<T> {
-    type Entry = Slot<T, ()>;
+    type Entry = Slot<T>;
 
     fn as_entries(&self) -> &[Self::Entry] {
         self.base.as_entries()
