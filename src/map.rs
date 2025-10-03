@@ -1305,7 +1305,7 @@ where
     /// assert_eq!(letters[&'u'], 1);
     /// assert_eq!(letters.get(&'y'), None);
     /// ```
-    pub fn entry(&mut self, key: K) -> Entry<K, V> {
+    pub fn entry(&mut self, key: K) -> Entry<'_, K, V> {
         match self.get_index_of(&key) {
             Some(index) => Entry::Occupied(OccupiedEntry::new(self, key, index)),
             None => Entry::Vacant(VacantEntry::new(self, key)),
