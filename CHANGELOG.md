@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.4](https://github.com/martinohmann/vecmap-rs/compare/v0.2.3...v0.2.4) - 2025-10-04
+
+### Fixed
+
+- *(docs)* prevent docs.rs build failures due to removed feature
+
+### Other
+
+- address new clippy lints
+
 ## [0.2.3](https://github.com/martinohmann/vecmap-rs/compare/v0.2.2...v0.2.3) - 2025-01-25
 
 ### Added
