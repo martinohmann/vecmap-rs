@@ -1,5 +1,4 @@
-use super::{Entries, Slot, VecSet};
-use crate::map;
+use super::{Entries, VecSet};
 use alloc::vec::{self, Vec};
 use core::fmt;
 use core::iter::{Chain, FusedIterator};
@@ -75,11 +74,11 @@ impl<'a, T> IntoIterator for &'a VecSet<T> {
 ///
 /// [`iter`]: VecSet::iter
 pub struct Iter<'a, T> {
-    iter: slice::Iter<'a, Slot<T, ()>>,
+    iter: slice::Iter<'a, T>,
 }
 
 impl<'a, T> Iter<'a, T> {
-    pub(super) fn new(entries: &'a [Slot<T, ()>]) -> Iter<'a, T> {
+    pub(super) fn new(entries: &'a [T]) -> Iter<'a, T> {
         Iter {
             iter: entries.iter(),
         }
@@ -94,7 +93,7 @@ impl<T> Clone for Iter<'_, T> {
     }
 }
 
-impl_iterator!(Iter<'a, T>, &'a T, Slot::key);
+impl_iterator!(Iter<'a, T>, &'a T, |x| x);
 
 /// An owning iterator over the elements of a `VecSet`.
 ///
@@ -104,11 +103,11 @@ impl_iterator!(Iter<'a, T>, &'a T, Slot::key);
 /// [`into_iter`]: IntoIterator::into_iter
 /// [`IntoIterator`]: core::iter::IntoIterator
 pub struct IntoIter<T> {
-    iter: vec::IntoIter<Slot<T, ()>>,
+    iter: vec::IntoIter<T>,
 }
 
 impl<T> IntoIter<T> {
-    pub(super) fn new(entries: Vec<Slot<T, ()>>) -> IntoIter<T> {
+    pub(super) fn new(entries: Vec<T>) -> IntoIter<T> {
         IntoIter {
             iter: entries.into_iter(),
         }
@@ -126,7 +125,7 @@ where
     }
 }
 
-impl_iterator!(IntoIter<T>, T, Slot::into_key, Slot::key);
+impl_iterator!(IntoIter<T>, T, |x| x);
 
 /// A lazy iterator producing elements in the difference of `VecSet`s.
 ///
@@ -418,7 +417,7 @@ where
 ///
 /// [`drain`]: VecSet::drain
 pub struct Drain<'a, T> {
-    iter: map::Drain<'a, T, ()>,
+    iter: vec::Drain<'a, T>,
 }
 
 impl<'a, T> Drain<'a, T> {
@@ -432,4 +431,4 @@ impl<'a, T> Drain<'a, T> {
     }
 }
 
-impl_iterator!(Drain<'a, T>, T, |(k, ())| k, Slot::key);
+impl_iterator!(Drain<'a, T>, T, |x| x);
