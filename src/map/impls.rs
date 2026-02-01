@@ -57,19 +57,8 @@ where
     where
         I: IntoIterator<Item = (K, V)>,
     {
-        let iter = iterable.into_iter();
-        let reserve = if self.is_empty() {
-            iter.size_hint().0
-        } else {
-            // Round up but make sure we don’t overflow when size_hint ==
-            // usize::MAX.
-            let size_hint = iter.size_hint().0;
-            size_hint / 2 + size_hint % 2
-        };
-        self.reserve(reserve);
-        iter.for_each(move |(k, v)| {
-            self.insert(k, v);
-        });
+        self.base
+            .extend(iterable.into_iter().map(|(k, v)| crate::Slot::new(k, v)));
     }
 }
 
@@ -164,12 +153,7 @@ where
     V: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        if self.len() != other.len() {
-            return false;
-        }
-
-        self.iter()
-            .all(|(key, value)| other.get(key).is_some_and(|v| *value == *v))
+        self.base == other.base
     }
 }
 

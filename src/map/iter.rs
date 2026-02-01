@@ -369,10 +369,6 @@ impl<'a, K, V> Drain<'a, K, V> {
             iter: map.base.drain(range),
         }
     }
-
-    pub(crate) fn as_slice(&self) -> &[Slot<K, V>] {
-        self.iter.as_slice()
-    }
 }
 
 impl_iterator!(Drain<'a, K, V>, (K, V), Slot::into_key_value, Slot::refs);

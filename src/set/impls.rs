@@ -25,16 +25,7 @@ where
     where
         I: IntoIterator<Item = T>,
     {
-        let iter = iterable.into_iter();
-        let reserve = if self.is_empty() {
-            iter.size_hint().0
-        } else {
-            iter.size_hint().0.div_ceil(2)
-        };
-        self.reserve(reserve);
-        iter.for_each(move |elem| {
-            self.insert(elem);
-        });
+        self.base.extend(iterable);
     }
 }
 
@@ -46,7 +37,7 @@ where
     where
         I: IntoIterator<Item = &'a T>,
     {
-        self.extend(iterable.into_iter().copied());
+        self.base.extend(iterable.into_iter().copied());
     }
 }
 
@@ -58,11 +49,9 @@ where
     where
         I: IntoIterator<Item = T>,
     {
-        let iter = iter.into_iter();
-        let lower = iter.size_hint().0;
-        let mut map = VecSet::with_capacity(lower);
-        map.extend(iter);
-        map
+        VecSet {
+            base: iter.into_iter().collect(),
+        }
     }
 }
 
@@ -76,10 +65,10 @@ where
     /// conversion preserves order of elements while at the same time having to
     /// make sure no duplicate elements exist. To avoid it, sort and deduplicate
     /// the vector and use [`VecSet::from_vec_unchecked`] instead.
-    fn from(mut vec: Vec<T>) -> Self {
-        crate::dedup(&mut vec, |rhs, lhs| rhs == lhs);
-        // SAFETY: We've just deduplicated the elements.
-        unsafe { Self::from_vec_unchecked(vec) }
+    fn from(vec: Vec<T>) -> Self {
+        VecSet {
+            base: vec.into(),
+        }
     }
 }
 
@@ -88,7 +77,9 @@ where
     T: Clone + Eq,
 {
     fn from(slice: &[T]) -> Self {
-        VecSet::from_iter(slice.to_vec())
+        VecSet {
+            base: slice.into(),
+        }
     }
 }
 
@@ -97,7 +88,9 @@ where
     T: Clone + Eq,
 {
     fn from(slice: &mut [T]) -> Self {
-        VecSet::from_iter(slice.to_vec())
+        VecSet {
+            base: slice.into(),
+        }
     }
 }
 
@@ -106,7 +99,7 @@ where
     T: Eq,
 {
     fn from(arr: [T; N]) -> Self {
-        VecSet::from_iter(arr)
+        VecSet { base: arr.into() }
     }
 }
 
@@ -115,11 +108,7 @@ where
     T: Eq,
 {
     fn eq(&self, other: &VecSet<T>) -> bool {
-        if self.len() != other.len() {
-            return false;
-        }
-
-        self.iter().all(|key| other.contains(key))
+        self.base == other.base
     }
 }
 

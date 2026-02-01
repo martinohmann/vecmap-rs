@@ -14,6 +14,7 @@ extern crate alloc;
 
 #[macro_use]
 mod macros;
+mod keyed;
 pub mod map;
 pub mod set;
 
@@ -32,6 +33,13 @@ use alloc::vec::Vec;
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct Slot<K, V> {
     data: (K, V),
+}
+
+impl<K, V> keyed::Keyed<K> for Slot<K, V> {
+    #[inline]
+    fn key(&self) -> &K {
+        &self.data.0
+    }
 }
 
 impl<K, V> Slot<K, V> {
