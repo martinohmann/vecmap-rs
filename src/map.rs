@@ -1490,12 +1490,7 @@ impl<K, V> Entries for VecMap<K, V> {
     }
 
     fn as_entries_mut(&mut self) -> &mut [Self::Entry] {
-        unsafe {
-            core::slice::from_raw_parts_mut(
-                self.base.as_slice().as_ptr().cast_mut(),
-                self.base.len(),
-            )
-        }
+        self.base.as_mut_slice()
     }
 
     fn into_entries(self) -> Vec<Self::Entry> {

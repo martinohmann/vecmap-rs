@@ -33,6 +33,20 @@ where
     }
 }
 
+impl<K, V> Index<usize> for KeyedVecSet<K, V> {
+    type Output = V;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.base[index]
+    }
+}
+
+impl<K, V> IndexMut<usize> for KeyedVecSet<K, V> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.base[index]
+    }
+}
+
 impl<K, V> Extend<V> for KeyedVecSet<K, V>
 where
     V: Keyed<K>,

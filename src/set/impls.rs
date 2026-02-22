@@ -50,7 +50,7 @@ where
         I: IntoIterator<Item = T>,
     {
         VecSet {
-            base: iter.into_iter().collect(),
+            base: super::KeyedVecSet::from_iter(iter),
         }
     }
 }
@@ -66,9 +66,7 @@ where
     /// make sure no duplicate elements exist. To avoid it, sort and deduplicate
     /// the vector and use [`VecSet::from_vec_unchecked`] instead.
     fn from(vec: Vec<T>) -> Self {
-        VecSet {
-            base: vec.into(),
-        }
+        VecSet { base: vec.into() }
     }
 }
 
@@ -77,9 +75,7 @@ where
     T: Clone + Eq,
 {
     fn from(slice: &[T]) -> Self {
-        VecSet {
-            base: slice.into(),
-        }
+        VecSet { base: slice.into() }
     }
 }
 
@@ -88,9 +84,7 @@ where
     T: Clone + Eq,
 {
     fn from(slice: &mut [T]) -> Self {
-        VecSet {
-            base: slice.into(),
-        }
+        VecSet { base: slice.into() }
     }
 }
 

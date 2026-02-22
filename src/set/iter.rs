@@ -6,15 +6,12 @@ use core::ops::RangeBounds;
 use core::slice;
 
 macro_rules! impl_iterator {
-    ($ty:ident<$($lt:lifetime,)*$($gen:ident),+>, $item:ty, $map:expr) => {
-        impl_iterator!($ty<$($lt,)*$($gen),+>, $item, $map, $map);
-    };
-    ($ty:ident<$($lt:lifetime,)*$($gen:ident),+>, $item:ty, $map:expr, $debug_map:expr) => {
+    ($ty:ident<$($lt:lifetime,)*$($gen:ident),+>, $item:ty) => {
         impl<$($lt,)*$($gen),+> Iterator for $ty<$($lt,)*$($gen),+> {
             type Item = $item;
 
             fn next(&mut self) -> Option<Self::Item> {
-                self.iter.next().map($map)
+                self.iter.next()
             }
 
             fn size_hint(&self) -> (usize, Option<usize>) {
@@ -24,7 +21,7 @@ macro_rules! impl_iterator {
 
         impl<$($lt,)*$($gen),+> DoubleEndedIterator for $ty<$($lt,)*$($gen),+> {
             fn next_back(&mut self) -> Option<Self::Item> {
-                self.iter.next_back().map($map)
+                self.iter.next_back()
             }
         }
 
@@ -41,7 +38,7 @@ macro_rules! impl_iterator {
             T: fmt::Debug,
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                let iter = self.iter.as_slice().iter().map($debug_map);
+                let iter = self.iter.as_slice().iter();
                 f.debug_list().entries(iter).finish()
             }
         }
@@ -93,7 +90,7 @@ impl<T> Clone for Iter<'_, T> {
     }
 }
 
-impl_iterator!(Iter<'a, T>, &'a T, |x| x);
+impl_iterator!(Iter<'a, T>, &'a T);
 
 /// An owning iterator over the elements of a `VecSet`.
 ///
@@ -125,7 +122,7 @@ where
     }
 }
 
-impl_iterator!(IntoIter<T>, T, |x| x);
+impl_iterator!(IntoIter<T>, T);
 
 /// A lazy iterator producing elements in the difference of `VecSet`s.
 ///
@@ -431,4 +428,4 @@ impl<'a, T> Drain<'a, T> {
     }
 }
 
-impl_iterator!(Drain<'a, T>, T, |x| x);
+impl_iterator!(Drain<'a, T>, T);

@@ -141,11 +141,7 @@ impl<K, V> MutableKeys for VecMap<K, V> {
         Q: Eq + ?Sized,
     {
         self.get_index_of(key).map(|index| {
-            let (key, value) = self
-                .base
-                .get_index_mut(index)
-                .expect("index should exist")
-                .muts();
+            let (key, value) = self.base[index].muts();
             (index, key, value)
         })
     }

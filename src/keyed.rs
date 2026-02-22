@@ -12,7 +12,7 @@ use alloc::vec::{self, Vec};
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::mem;
-use core::ops::{Index, IndexMut, RangeBounds};
+use core::ops::RangeBounds;
 use core::slice;
 
 /// Key accessor for elements which have their own keys, used for `KeyedVecSet`.
@@ -64,7 +64,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// use vecmap::keyed::KeyedVecSet;
     ///
     /// let set: KeyedVecSet<i32, (i32, &str)> = KeyedVecSet::new();
-    /// ```ignore
+    /// ```
     pub const fn new() -> Self {
         KeyedVecSet {
             base: Vec::new(),
@@ -83,7 +83,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// let set: KeyedVecSet<i32, (i32, &str)> = KeyedVecSet::with_capacity(10);
     /// assert_eq!(set.len(), 0);
     /// assert!(set.capacity() >= 10);
-    /// ```ignore
+    /// ```
     pub fn with_capacity(capacity: usize) -> Self {
         KeyedVecSet {
             base: Vec::with_capacity(capacity),
@@ -100,7 +100,7 @@ impl<K, V> KeyedVecSet<K, V> {
     ///
     /// let set: KeyedVecSet<i32, (i32, &str)> = KeyedVecSet::with_capacity(10);
     /// assert!(set.capacity() >= 10);
-    /// ```ignore
+    /// ```
     pub fn capacity(&self) -> usize {
         self.base.capacity()
     }
@@ -123,7 +123,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// assert_eq!(a.len(), 0);
     /// a.insert(Entry(1, "a"));
     /// assert_eq!(a.len(), 1);
-    /// ```ignore
+    /// ```
     pub fn len(&self) -> usize {
         self.base.len()
     }
@@ -146,7 +146,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// assert!(a.is_empty());
     /// a.insert(Entry(1, "a"));
     /// assert!(!a.is_empty());
-    /// ```ignore
+    /// ```
     pub fn is_empty(&self) -> bool {
         self.base.is_empty()
     }
@@ -169,7 +169,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// a.insert(Entry(1, "a"));
     /// a.clear();
     /// assert!(a.is_empty());
-    /// ```ignore
+    /// ```
     pub fn clear(&mut self) {
         self.base.clear();
     }
@@ -197,7 +197,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry("d", 4));
     /// map.truncate(2);
     /// assert_eq!(map.len(), 2);
-    /// ```ignore
+    /// ```
     pub fn truncate(&mut self, len: usize) {
         self.base.truncate(len);
     }
@@ -224,7 +224,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// assert_eq!(map.get_index(0), Some(&Entry(3, "c")));
     /// assert_eq!(map.get_index(1), Some(&Entry(2, "b")));
     /// assert_eq!(map.get_index(2), Some(&Entry(1, "a")));
-    /// ```ignore
+    /// ```
     pub fn reverse(&mut self) {
         self.base.reverse();
     }
@@ -246,7 +246,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// let mut set: KeyedVecSet<i32, (i32, &str)> = KeyedVecSet::new();
     /// set.reserve(10);
     /// assert!(set.capacity() >= 10);
-    /// ```ignore
+    /// ```
     pub fn reserve(&mut self, additional: usize) {
         self.base.reserve(additional);
     }
@@ -270,7 +270,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// let mut set: KeyedVecSet<i32, (i32, &str)> = KeyedVecSet::new();
     /// set.reserve_exact(10);
     /// assert!(set.capacity() >= 10);
-    /// ```ignore
+    /// ```
     pub fn reserve_exact(&mut self, additional: usize) {
         self.base.reserve_exact(additional);
     }
@@ -293,7 +293,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// let mut set: KeyedVecSet<i32, (i32, &str)> = KeyedVecSet::new();
     /// set.try_reserve(10).expect("should reserve");
     /// assert!(set.capacity() >= 10);
-    /// ```ignore
+    /// ```
     pub fn try_reserve(&mut self, additional: usize) -> Result<(), TryReserveError> {
         self.base.try_reserve(additional)
     }
@@ -320,7 +320,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// let mut set: KeyedVecSet<i32, (i32, &str)> = KeyedVecSet::new();
     /// set.try_reserve_exact(10).expect("should reserve");
     /// assert!(set.capacity() >= 10);
-    /// ```ignore
+    /// ```
     pub fn try_reserve_exact(&mut self, additional: usize) -> Result<(), TryReserveError> {
         self.base.try_reserve_exact(additional)
     }
@@ -346,7 +346,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry(2, "b"));
     /// map.shrink_to_fit();
     /// assert!(map.capacity() >= 2);
-    /// ```ignore
+    /// ```
     pub fn shrink_to_fit(&mut self) {
         self.base.shrink_to_fit();
     }
@@ -374,7 +374,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry(2, "b"));
     /// map.shrink_to(4);
     /// assert!(map.capacity() >= 4);
-    /// ```ignore
+    /// ```
     pub fn shrink_to(&mut self, min_capacity: usize) {
         self.base.shrink_to(min_capacity);
     }
@@ -408,7 +408,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// let map2 = map.split_off(1);
     /// assert_eq!(map.len(), 1);
     /// assert_eq!(map2.len(), 2);
-    /// ```ignore
+    /// ```
     pub fn split_off(&mut self, at: usize) -> KeyedVecSet<K, V> {
         KeyedVecSet {
             base: self.base.split_off(at),
@@ -446,7 +446,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// let drained: Vec<_> = map.drain(1..).collect();
     /// assert_eq!(drained, vec![Entry(2, "b"), Entry(3, "c")]);
     /// assert_eq!(map.len(), 1);
-    /// ```ignore
+    /// ```
     pub fn drain<R>(&mut self, range: R) -> vec::Drain<'_, V>
     where
         R: RangeBounds<usize>,
@@ -474,7 +474,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry(3, "c"));
     /// map.retain(|entry| entry.0 % 2 == 1);
     /// assert_eq!(map.len(), 2);
-    /// ```ignore
+    /// ```
     pub fn retain<F>(&mut self, f: F)
     where
         F: FnMut(&V) -> bool,
@@ -505,7 +505,7 @@ impl<K, V> KeyedVecSet<K, V> {
     ///     entry.0 % 2 == 1
     /// });
     /// assert_eq!(map.len(), 2);
-    /// ```ignore
+    /// ```
     pub fn retain_mut<F>(&mut self, f: F)
     where
         F: FnMut(&mut V) -> bool,
@@ -533,7 +533,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry(2, "b"));
     /// map.sort_by(|a, b| a.0.cmp(&b.0));
     /// assert_eq!(map.get_index(0), Some(&Entry(1, "a")));
-    /// ```ignore
+    /// ```
     pub fn sort_by<F>(&mut self, compare: F)
     where
         F: FnMut(&V, &V) -> Ordering,
@@ -561,7 +561,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry(2, "b"));
     /// map.sort_unstable_by(|a, b| a.0.cmp(&b.0));
     /// assert_eq!(map.get_index(0), Some(&Entry(1, "a")));
-    /// ```ignore
+    /// ```
     pub fn sort_unstable_by<F>(&mut self, compare: F)
     where
         F: FnMut(&V, &V) -> Ordering,
@@ -595,7 +595,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry(2, "b"));
     /// map.sort_by_cached_key(|entry| entry.0);
     /// assert_eq!(map.get_index(0), Some(&Entry(1, "a")));
-    /// ```ignore
+    /// ```
     pub fn sort_by_cached_key<T, F>(&mut self, sort_key: F)
     where
         T: Ord,
@@ -633,7 +633,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.swap_indices(0, 1);
     /// assert_eq!(map.get_index(0), Some(&Entry(2, "b")));
     /// assert_eq!(map.get_index(1), Some(&Entry(1, "a")));
-    /// ```ignore
+    /// ```
     pub fn swap_indices(&mut self, a: usize, b: usize) {
         self.base.swap(a, b);
     }
@@ -657,7 +657,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry(2, "b"));
     /// let slice = map.as_slice();
     /// assert_eq!(slice.len(), 2);
-    /// ```ignore
+    /// ```
     pub fn as_slice(&self) -> &[V] {
         self.base.as_slice()
     }
@@ -682,7 +682,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// let slice = map.as_mut_slice();
     /// slice[0] = Entry(3, "c");
     /// assert_eq!(map.get_index(0), Some(&Entry(3, "c")));
-    /// ```ignore
+    /// ```
     pub fn as_mut_slice(&mut self) -> &mut [V] {
         self.base.as_mut_slice()
     }
@@ -706,7 +706,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry(2, "b"));
     /// let vec = map.to_vec();
     /// assert_eq!(vec, vec![Entry(1, "a"), Entry(2, "b")]);
-    /// ```ignore
+    /// ```
     pub fn to_vec(&self) -> Vec<V>
     where
         V: Clone,
@@ -733,7 +733,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry(2, "b"));
     /// let vec = map.into_vec();
     /// assert_eq!(vec, vec![Entry(1, "a"), Entry(2, "b")]);
-    /// ```ignore
+    /// ```
     pub fn into_vec(self) -> Vec<V> {
         self.base
     }
@@ -782,7 +782,7 @@ where
     /// assert_eq!(map.get_index_of("a"), Some(0));
     /// assert_eq!(map.get_index_of("b"), Some(1));
     /// assert_eq!(map.get_index_of("c"), None);
-    /// ```ignore
+    /// ```
     pub fn get_index_of<Q>(&self, key: &Q) -> Option<usize>
     where
         K: Borrow<Q>,
@@ -812,7 +812,7 @@ where
     /// map.insert(Entry(1, "a"));
     /// assert_eq!(map.contains_key(&1), true);
     /// assert_eq!(map.contains_key(&2), false);
-    /// ```ignore
+    /// ```
     pub fn contains_key<Q>(&self, key: &Q) -> bool
     where
         K: Borrow<Q>,
@@ -839,7 +839,7 @@ where
     /// map.insert(Entry(1, "a"));
     /// assert_eq!(map.get(&1), Some(&Entry(1, "a")));
     /// assert_eq!(map.get(&2), None);
-    /// ```ignore
+    /// ```
     pub fn get<Q>(&self, key: &Q) -> Option<&V>
     where
         K: Borrow<Q>,
@@ -866,7 +866,7 @@ where
     /// map.insert(Entry(1, "a"));
     /// assert_eq!(map.get_full(&1), Some((0, &Entry(1, "a"))));
     /// assert_eq!(map.get_full(&2), None);
-    /// ```ignore
+    /// ```
     pub fn get_full<Q>(&self, key: &Q) -> Option<(usize, &V)>
     where
         K: Borrow<Q>,
@@ -896,7 +896,7 @@ where
     ///     *entry = Entry(1, "b");
     /// }
     /// assert_eq!(map.get(&1), Some(&Entry(1, "b")));
-    /// ```ignore
+    /// ```
     pub fn get_mut<Q>(&mut self, key: &Q) -> Option<&mut V>
     where
         K: Borrow<Q>,
@@ -923,7 +923,7 @@ where
     /// map.insert(Entry(1, "a"));
     /// assert_eq!(map.get_index(0), Some(&Entry(1, "a")));
     /// assert_eq!(map.get_index(1), None);
-    /// ```ignore
+    /// ```
     pub fn get_index(&self, index: usize) -> Option<&V> {
         self.base.get(index)
     }
@@ -948,7 +948,7 @@ where
     ///     *entry = Entry(2, "b");
     /// }
     /// assert_eq!(map.get_index(0), Some(&Entry(2, "b")));
-    /// ```ignore
+    /// ```
     pub fn get_index_mut(&mut self, index: usize) -> Option<&mut V> {
         self.base.get_mut(index)
     }
@@ -971,7 +971,7 @@ where
     /// map.insert(Entry(1, "a"));
     /// map.insert(Entry(2, "b"));
     /// assert_eq!(map.first(), Some(&Entry(1, "a")));
-    /// ```ignore
+    /// ```
     pub fn first(&self) -> Option<&V> {
         self.base.first()
     }
@@ -997,7 +997,7 @@ where
     ///     *entry = Entry(3, "c");
     /// }
     /// assert_eq!(map.first(), Some(&Entry(3, "c")));
-    /// ```ignore
+    /// ```
     pub fn first_mut(&mut self) -> Option<&mut V> {
         self.base.first_mut()
     }
@@ -1020,7 +1020,7 @@ where
     /// map.insert(Entry(1, "a"));
     /// map.insert(Entry(2, "b"));
     /// assert_eq!(map.last(), Some(&Entry(2, "b")));
-    /// ```ignore
+    /// ```
     pub fn last(&self) -> Option<&V> {
         self.base.last()
     }
@@ -1046,7 +1046,7 @@ where
     ///     *entry = Entry(3, "c");
     /// }
     /// assert_eq!(map.last(), Some(&Entry(3, "c")));
-    /// ```ignore
+    /// ```
     pub fn last_mut(&mut self) -> Option<&mut V> {
         self.base.last_mut()
     }
@@ -1075,7 +1075,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// assert_eq!(map.pop(), Some(Entry("a", 1)));
     /// assert!(map.is_empty());
     /// assert_eq!(map.pop(), None);
-    /// ```ignore
+    /// ```
     pub fn pop(&mut self) -> Option<V> {
         self.base.pop()
     }
@@ -1104,7 +1104,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// map.insert(Entry(3, "c"));
     /// assert_eq!(map.remove_index(1), Entry(2, "b"));
     /// assert_eq!(map.len(), 2);
-    /// ```ignore
+    /// ```
     pub fn remove_index(&mut self, index: usize) -> V {
         self.base.remove(index)
     }
@@ -1136,7 +1136,7 @@ impl<K, V> KeyedVecSet<K, V> {
     /// assert_eq!(map.swap_remove_index(1), Entry(2, "b"));
     /// assert_eq!(map.len(), 2);
     /// // Note: Entry(3, "c") moved to index 1
-    /// ```ignore
+    /// ```
     pub fn swap_remove_index(&mut self, index: usize) -> V {
         self.base.swap_remove(index)
     }
@@ -1169,7 +1169,7 @@ where
     /// map.insert(Entry(3, "c"));
     /// assert_eq!(map.remove(&2), Some(Entry(2, "b")));
     /// assert_eq!(map.remove(&2), None);
-    /// ```ignore
+    /// ```
     pub fn remove<Q>(&mut self, key: &Q) -> Option<V>
     where
         K: Borrow<Q>,
@@ -1203,7 +1203,7 @@ where
     /// assert_eq!(map.swap_remove(&2), Some(Entry(2, "b")));
     /// assert_eq!(map.swap_remove(&2), None);
     /// // Note: element order changed - Entry(4, "d") moved to index 1
-    /// ```ignore
+    /// ```
     pub fn swap_remove<Q>(&mut self, key: &Q) -> Option<V>
     where
         K: Borrow<Q>,
@@ -1255,7 +1255,7 @@ where
     ///
     /// map.insert(Entry(37, "b"));
     /// assert_eq!(map.insert(Entry(37, "c")), Some(Entry(37, "b")));
-    /// ```ignore
+    /// ```
     pub fn insert(&mut self, value: V) -> Option<V> {
         self.insert_full(value).1
     }
@@ -1285,7 +1285,7 @@ where
     /// assert_eq!(map.insert_full(Entry("a", 1)), (0, None));
     /// assert_eq!(map.insert_full(Entry("b", 2)), (1, None));
     /// assert_eq!(map.insert_full(Entry("b", 3)), (1, Some(Entry("b", 2))));
-    /// ```ignore
+    /// ```
     pub fn insert_full(&mut self, value: V) -> (usize, Option<V>) {
         let key = value.key();
         if let Some(index) = self.get_index_of(key) {
@@ -1327,7 +1327,7 @@ where
     /// assert_eq!(map.insert_at(0, Entry("a", 1)), None);
     /// assert_eq!(map.insert_at(1, Entry("b", 2)), None);
     /// assert_eq!(map.insert_at(0, Entry("b", 3)), Some((1, Entry("b", 2))));
-    /// ```ignore
+    /// ```
     pub fn insert_at(&mut self, index: usize, value: V) -> Option<(usize, V)> {
         let key = value.key();
         if let Some(old_index) = self.get_index_of(key) {
@@ -1379,7 +1379,7 @@ where
     /// assert_eq!(a.len(), 5);
     /// assert_eq!(b.len(), 0);
     /// assert_eq!(b.capacity(), old_capacity);
-    /// ```ignore
+    /// ```
     pub fn append(&mut self, other: &mut KeyedVecSet<K, V>) {
         self.reserve(other.len());
         for value in other.drain(..) {
@@ -1411,23 +1411,8 @@ impl<K, V> KeyedVecSet<K, V> {
     /// assert_eq!(iter.next(), Some(&Entry(1, "a")));
     /// assert_eq!(iter.next(), Some(&Entry(2, "b")));
     /// assert_eq!(iter.next(), None);
-    /// ```ignore
+    /// ```
     pub fn iter(&self) -> slice::Iter<'_, V> {
         self.base.iter()
-    }
-}
-
-// Index trait
-impl<K, V> Index<usize> for KeyedVecSet<K, V> {
-    type Output = V;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.base[index]
-    }
-}
-
-impl<K, V> IndexMut<usize> for KeyedVecSet<K, V> {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.base[index]
     }
 }
