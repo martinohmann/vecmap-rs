@@ -147,7 +147,7 @@ impl<K, V> MutableKeys for VecMap<K, V> {
     }
 
     fn get_index_mut2(&mut self, index: usize) -> Option<(&mut K, &mut V)> {
-        self.base.get_mut(index).map(Slot::muts)
+        self.base.get_index_mut(index).map(Slot::muts)
     }
 
     fn retain2<F>(&mut self, mut f: F)

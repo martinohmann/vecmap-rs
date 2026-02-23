@@ -5,12 +5,11 @@ mod iter;
 #[cfg(feature = "serde")]
 mod serde;
 
-use super::{Entries, Slot, TryReserveError, VecMap};
+use super::{keyed::KeyedVecSet, Entries, TryReserveError};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::ops::RangeBounds;
-use core::ptr;
 
 pub use self::iter::*;
 
@@ -19,7 +18,7 @@ pub use self::iter::*;
 /// Internally it is represented as a `Vec<T>` to support keys that are neither `Hash` nor `Ord`.
 #[derive(Clone, Debug)]
 pub struct VecSet<T> {
-    base: VecMap<T, ()>,
+    base: KeyedVecSet<T, T>,
 }
 
 impl<T> VecSet<T> {
@@ -34,7 +33,7 @@ impl<T> VecSet<T> {
     /// ```
     pub const fn new() -> Self {
         VecSet {
-            base: VecMap::new(),
+            base: KeyedVecSet::new(),
         }
     }
 
@@ -52,7 +51,7 @@ impl<T> VecSet<T> {
     /// ```
     pub fn with_capacity(capacity: usize) -> Self {
         VecSet {
-            base: VecMap::with_capacity(capacity),
+            base: KeyedVecSet::with_capacity(capacity),
         }
     }
 
@@ -301,11 +300,11 @@ impl<T> VecSet<T> {
     /// set.retain(|&e| e % 2 == 0);
     /// assert_eq!(set.len(), 4);
     /// ```
-    pub fn retain<F>(&mut self, mut f: F)
+    pub fn retain<F>(&mut self, f: F)
     where
         F: FnMut(&T) -> bool,
     {
-        self.base.retain(|k, ()| f(k));
+        self.base.retain(f);
     }
 
     /// Shrinks the capacity of the set as much as possible. It will drop down as much as possible
@@ -543,7 +542,7 @@ impl<T> VecSet<T> {
     where
         T: Ord,
     {
-        self.base.sort_keys();
+        self.base.sort_by(core::cmp::Ord::cmp);
     }
 
     /// Sorts the set.
@@ -566,7 +565,7 @@ impl<T> VecSet<T> {
     where
         T: Ord,
     {
-        self.base.sort_unstable_keys();
+        self.base.sort_unstable_by(core::cmp::Ord::cmp);
     }
 
     /// Sorts the set with a comparator function.
@@ -585,11 +584,11 @@ impl<T> VecSet<T> {
     /// let vec: Vec<_> = set.into_iter().collect();
     /// assert_eq!(vec, ["c", "b", "a"]);
     /// ```
-    pub fn sort_by<F>(&mut self, mut compare: F)
+    pub fn sort_by<F>(&mut self, compare: F)
     where
         F: FnMut(&T, &T) -> Ordering,
     {
-        self.base.sort_by(|a, b| compare(a.0, b.0));
+        self.base.sort_by(compare);
     }
 
     /// Sorts the set with a comparator function.
@@ -608,11 +607,11 @@ impl<T> VecSet<T> {
     /// let vec: Vec<_> = set.into_iter().collect();
     /// assert_eq!(vec, ["c", "b", "a"]);
     /// ```
-    pub fn sort_unstable_by<F>(&mut self, mut compare: F)
+    pub fn sort_unstable_by<F>(&mut self, compare: F)
     where
         F: FnMut(&T, &T) -> Ordering,
     {
-        self.base.sort_unstable_by(|a, b| compare(a.0, b.0));
+        self.base.sort_unstable_by(compare);
     }
 
     /// Sort the set’s values in place using a key extraction function.
@@ -633,12 +632,12 @@ impl<T> VecSet<T> {
     /// set.sort_by_cached_key(|k| k.to_string());
     /// assert_eq!(set.as_slice(), ["a", "b", "c"]);
     /// ```
-    pub fn sort_by_cached_key<K, F>(&mut self, mut sort_key: F)
+    pub fn sort_by_cached_key<K, F>(&mut self, sort_key: F)
     where
         K: Ord,
         F: FnMut(&T) -> K,
     {
-        self.base.sort_by_cached_key(|k, ()| sort_key(k));
+        self.base.sort_by_cached_key(sort_key);
     }
 
     /// Extracts a slice containing the set elements.
@@ -651,8 +650,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(slice, ["b", "a", "c"]);
     /// ```
     pub fn as_slice(&self) -> &[T] {
-        // SAFETY: `&[(T, ())]` and `&[T]` have the same memory layout.
-        unsafe { &*(ptr::from_ref::<[(T, ())]>(self.base.as_slice()) as *const [T]) }
+        self.base.as_slice()
     }
 
     /// Copies the set elements into a new `Vec<T>`.
@@ -669,7 +667,7 @@ impl<T> VecSet<T> {
     where
         T: Clone,
     {
-        self.iter().cloned().collect()
+        self.base.to_vec()
     }
 
     /// Takes ownership of the set and returns its elements as a `Vec<T>`.
@@ -682,8 +680,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(vec, ["b", "a", "c"]);
     /// ```
     pub fn into_vec(self) -> Vec<T> {
-        // SAFETY: `Vec<Slot<T, ()>>` and `Vec<T>` have the same memory layout.
-        unsafe { super::transmute_vec(self.base.base) }
+        self.base.into_vec()
     }
 
     /// Takes ownership of provided vector and converts it into `VecSet`.
@@ -710,10 +707,8 @@ impl<T> VecSet<T> {
     ///
     /// [slice-sort]: https://doc.rust-lang.org/std/primitive.slice.html#method.sort
     pub unsafe fn from_vec_unchecked(vec: Vec<T>) -> Self {
-        // SAFETY: `Vec<T>` and `Vec<Slot<T, ()>>` have the same memory layout.
-        let base = unsafe { super::transmute_vec(vec) };
         VecSet {
-            base: VecMap { base },
+            base: unsafe { KeyedVecSet::from_vec_unchecked(vec) },
         }
     }
 }
@@ -749,7 +744,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.first(), Some(&"a"));
     /// ```
     pub fn first(&self) -> Option<&T> {
-        self.base.first().map(|(k, ())| k)
+        self.base.first()
     }
 
     /// Get the last element.
@@ -766,7 +761,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.last(), None);
     /// ```
     pub fn last(&self) -> Option<&T> {
-        self.base.last().map(|(k, ())| k)
+        self.base.last()
     }
 
     /// Returns a reference to the value in the set, if any, that is equal to the given value.
@@ -788,7 +783,7 @@ impl<T> VecSet<T> {
         T: Borrow<Q>,
         Q: ?Sized + Eq,
     {
-        self.base.get_key_value(value).map(|(k, ())| k)
+        self.base.get(value)
     }
 
     /// Return references to the element stored at `index`, if it is present, else `None`.
@@ -804,7 +799,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.get_index(1), None);
     /// ```
     pub fn get_index(&self, index: usize) -> Option<&T> {
-        self.base.get_index(index).map(|(k, ())| k)
+        self.base.get_index(index)
     }
 
     /// Returns the index and a reference to the value in the set, if any, that is equal to the
@@ -827,7 +822,7 @@ impl<T> VecSet<T> {
         T: Borrow<Q>,
         Q: ?Sized + Eq,
     {
-        self.base.get_full(value).map(|(index, k, ())| (index, k))
+        self.base.get_full(value)
     }
 
     /// Return item index, if it exists in the set.
@@ -869,7 +864,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(set.pop(), None);
     /// ```
     pub fn pop(&mut self) -> Option<T> {
-        self.base.pop().map(|(k, ())| k)
+        self.base.pop()
     }
 
     /// Remove the element equivalent to `value`.
@@ -918,7 +913,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(v, VecSet::from(["a", "c"]));
     /// ```
     pub fn remove_index(&mut self, index: usize) -> T {
-        self.base.remove_index(index).0
+        self.base.remove_index(index)
     }
 
     /// Remove the element equivalent to `value`.
@@ -970,7 +965,7 @@ impl<T> VecSet<T> {
     /// assert_eq!(v, VecSet::from(["baz", "bar"]));
     /// ```
     pub fn swap_remove_index(&mut self, index: usize) -> T {
-        self.base.swap_remove_index(index).0
+        self.base.swap_remove_index(index)
     }
 
     /// Swaps the position of two elements in the set.
@@ -1019,7 +1014,7 @@ impl<T> VecSet<T> {
         T: Borrow<Q>,
         Q: ?Sized + Eq,
     {
-        self.base.remove_entry(value).map(|(k, ())| k)
+        self.base.remove(value)
     }
 
     /// Removes and returns the value in the set, if any, that is equal to the given one.
@@ -1044,7 +1039,7 @@ impl<T> VecSet<T> {
         T: Borrow<Q>,
         Q: ?Sized + Eq,
     {
-        self.base.swap_remove_entry(value).map(|(k, ())| k)
+        self.base.swap_remove(value)
     }
 }
 
@@ -1072,7 +1067,7 @@ where
     /// assert_eq!(set.len(), 1);
     /// ```
     pub fn insert(&mut self, value: T) -> bool {
-        self.base.insert(value, ()).is_none()
+        self.base.insert(value).is_none()
     }
 
     /// Moves all values from `other` into `self`, leaving `other` empty.
@@ -1296,17 +1291,17 @@ where
 }
 
 impl<T> Entries for VecSet<T> {
-    type Entry = Slot<T, ()>;
+    type Entry = T;
 
     fn as_entries(&self) -> &[Self::Entry] {
-        self.base.as_entries()
+        self.base.as_slice()
     }
 
     fn as_entries_mut(&mut self) -> &mut [Self::Entry] {
-        self.base.as_entries_mut()
+        self.base.as_mut_slice()
     }
 
     fn into_entries(self) -> Vec<Self::Entry> {
-        self.base.into_entries()
+        self.base.into_vec()
     }
 }
