@@ -7,7 +7,7 @@ mod mutable_keys;
 #[cfg(feature = "serde")]
 mod serde;
 
-use super::{keyed::KeyedVecSet, Entries, Slot, TryReserveError};
+use super::{Entries, Slot, TryReserveError, keyed::KeyedVecSet};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;
