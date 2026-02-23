@@ -123,7 +123,7 @@ where
     K: Eq,
 {
     fn from(slice: &[V]) -> Self {
-        KeyedVecSet::from_iter(slice.iter().cloned())
+        slice.iter().cloned().collect()
     }
 }
 
@@ -133,7 +133,7 @@ where
     K: Eq,
 {
     fn from(slice: &mut [V]) -> Self {
-        KeyedVecSet::from_iter(slice.iter().cloned())
+        slice.iter().cloned().collect()
     }
 }
 

@@ -69,7 +69,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{Token, assert_tokens};
 
     #[test]
     fn ser_de_empty() {

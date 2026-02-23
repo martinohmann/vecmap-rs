@@ -5,7 +5,7 @@ mod iter;
 #[cfg(feature = "serde")]
 mod serde;
 
-use super::{keyed::KeyedVecSet, Entries, TryReserveError};
+use super::{Entries, TryReserveError, keyed::KeyedVecSet};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cmp::Ordering;

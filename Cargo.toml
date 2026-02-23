@@ -9,7 +9,7 @@ documentation = "https://docs.rs/vecmap-rs/"
 keywords = ["vector", "map", "set", "vec", "no-std"]
 categories = ["data-structures", "no-std"]
 readme = "README.md"
-edition = "2021"
+edition = "2024"
 exclude = [
     ".github/",
 ]
