@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.5](https://github.com/martinohmann/vecmap-rs/compare/v0.2.4...v0.2.5) - 2026-03-01
+
+### Added
+
+- add KeyedVecSet as internal abstraction layer ([#58](https://github.com/martinohmann/vecmap-rs/pull/58))
+
+### Other
+
+- *(deps)* update marcoieni/release-plz-action digest to f708778 ([#61](https://github.com/martinohmann/vecmap-rs/pull/61))
+- *(deps)* update actions/checkout digest to de0fac2
+- upgrade to edition 2024 ([#60](https://github.com/martinohmann/vecmap-rs/pull/60))
+
 ## [0.2.4](https://github.com/martinohmann/vecmap-rs/compare/v0.2.3...v0.2.4) - 2025-10-04
 
 ### Fixed
