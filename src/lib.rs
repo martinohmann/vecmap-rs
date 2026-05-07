@@ -17,11 +17,18 @@ mod macros;
 mod keyed;
 pub mod map;
 pub mod set;
+mod sorted_keyed;
+pub mod sorted_map;
+pub mod sorted_set;
 
 #[doc(inline)]
 pub use self::map::VecMap;
 #[doc(inline)]
 pub use self::set::VecSet;
+#[doc(inline)]
+pub use self::sorted_map::SortedVecMap;
+#[doc(inline)]
+pub use self::sorted_set::SortedVecSet;
 pub use alloc::collections::TryReserveError;
 use alloc::vec::Vec;
 
