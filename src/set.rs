@@ -1067,7 +1067,12 @@ where
     /// assert_eq!(set.len(), 1);
     /// ```
     pub fn insert(&mut self, value: T) -> bool {
-        self.base.insert(value).is_none()
+        if self.contains(&value) {
+            false
+        } else {
+            self.base.push(value);
+            true
+        }
     }
 
     /// Moves all values from `other` into `self`, leaving `other` empty.
@@ -1097,7 +1102,10 @@ where
     /// assert!(a.iter().eq(&[3, 2, 1, 4, 5]));
     /// ```
     pub fn append(&mut self, other: &mut VecSet<T>) {
-        self.base.append(&mut other.base);
+        self.reserve(other.len());
+        for value in other.drain(..) {
+            self.insert(value);
+        }
     }
 }
 
