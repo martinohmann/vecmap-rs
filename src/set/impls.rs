@@ -25,7 +25,9 @@ where
     where
         I: IntoIterator<Item = T>,
     {
-        self.base.extend(iterable);
+        iterable.into_iter().for_each(|value| {
+            self.insert(value);
+        });
     }
 }
 
@@ -49,9 +51,9 @@ where
     where
         I: IntoIterator<Item = T>,
     {
-        VecSet {
-            base: super::KeyedVecSet::from_iter(iter),
-        }
+        let mut set = VecSet::new();
+        set.extend(iter);
+        set
     }
 }
 
@@ -61,12 +63,19 @@ where
 {
     /// Constructs set from a vector.
     ///
+    /// When the input contains equal elements, the first occurrence is kept and
+    /// later equal values are ignored — the same rule as
+    /// [`insert`][VecSet::insert], [`extend`][Extend::extend], and
+    /// [`FromIterator`].
+    ///
     /// **Note**: This conversion has a quadratic complexity because the
     /// conversion preserves order of elements while at the same time having to
     /// make sure no duplicate elements exist. To avoid it, sort and deduplicate
     /// the vector and use [`VecSet::from_vec_unchecked`] instead.
-    fn from(vec: Vec<T>) -> Self {
-        VecSet { base: vec.into() }
+    fn from(mut vec: Vec<T>) -> Self {
+        crate::dedup_keep_first(&mut vec, |lhs, rhs| lhs == rhs);
+        // SAFETY: We've just deduplicated the elements.
+        unsafe { Self::from_vec_unchecked(vec) }
     }
 }
 
@@ -75,7 +84,7 @@ where
     T: Clone + Eq,
 {
     fn from(slice: &[T]) -> Self {
-        VecSet { base: slice.into() }
+        slice.iter().cloned().collect()
     }
 }
 
@@ -84,7 +93,7 @@ where
     T: Clone + Eq,
 {
     fn from(slice: &mut [T]) -> Self {
-        VecSet { base: slice.into() }
+        slice.iter().cloned().collect()
     }
 }
 
@@ -93,7 +102,7 @@ where
     T: Eq,
 {
     fn from(arr: [T; N]) -> Self {
-        VecSet { base: arr.into() }
+        VecSet::from_iter(arr)
     }
 }
 
@@ -163,5 +172,75 @@ where
     /// Values are collected in the same order that they appear in `self`.
     fn sub(self, other: &VecSet<T>) -> Self::Output {
         self.difference(other).cloned().collect()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    extern crate alloc;
+    use alloc::vec;
+
+    #[derive(Clone, Debug)]
+    #[allow(dead_code)]
+    struct Item(i32, &'static str);
+
+    impl Eq for Item {}
+
+    impl PartialEq for Item {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+
+    fn set_via_inserts(items: &[Item]) -> VecSet<Item> {
+        let mut set = VecSet::new();
+        for item in items {
+            set.insert(item.clone());
+        }
+        set
+    }
+
+    #[test]
+    fn constructor_parity_with_insert() {
+        let input = vec![Item(1, "first"), Item(2, "b"), Item(1, "second")];
+        let expected = set_via_inserts(&[Item(1, "first"), Item(2, "b"), Item(1, "second")]);
+
+        assert_eq!(VecSet::from(input.clone()), expected);
+        assert_eq!(input.into_iter().collect::<VecSet<_>>(), expected);
+        assert_eq!(
+            VecSet::from([Item(1, "first"), Item(2, "b"), Item(1, "second")]),
+            expected
+        );
+        assert_eq!(expected.as_slice(), &[Item(1, "first"), Item(2, "b")]);
+    }
+
+    #[test]
+    fn insert_rejects_duplicate_without_replacing() {
+        let mut set = VecSet::new();
+        assert!(set.insert(Item(1, "first")));
+        assert!(!set.insert(Item(1, "second")));
+        assert_eq!(set.as_slice(), &[Item(1, "first")]);
+    }
+
+    #[test]
+    fn extend_parity_with_insert() {
+        let mut via_extend = VecSet::new();
+        via_extend.extend([Item(1, "first"), Item(2, "b"), Item(1, "second")]);
+
+        let via_insert = set_via_inserts(&[Item(1, "first"), Item(2, "b"), Item(1, "second")]);
+        assert_eq!(via_extend, via_insert);
+    }
+
+    #[test]
+    fn append_parity_with_insert() {
+        let mut base = set_via_inserts(&[Item(1, "first")]);
+        let mut extra = VecSet::from(vec![Item(1, "second"), Item(2, "b")]);
+
+        base.append(&mut extra);
+
+        let expected = set_via_inserts(&[Item(1, "first"), Item(1, "second"), Item(2, "b")]);
+        assert_eq!(base, expected);
+        assert!(extra.is_empty());
     }
 }
