@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.0](https://github.com/martinohmann/vecmap-rs/compare/v0.2.5...v0.3.0) - 2026-10-26
+
+### Added
+
+- add `.insert_entry()` to `Entry` and `VacantEntry` ([#79](https://github.com/martinohmann/vecmap-rs/pull/79))
+
+### Fixed
+
+- [**breaking**] align duplicate handling across construction paths ([#77](https://github.com/martinohmann/vecmap-rs/pull/77))
+
+### Other
+
+- *(deps)* update github actions ([#78](https://github.com/martinohmann/vecmap-rs/pull/78))
+- *(deps)* update dtolnay/rust-toolchain digest to 4360b52 ([#74](https://github.com/martinohmann/vecmap-rs/pull/74))
+- *(deps)* update marcoieni/release-plz-action digest to 2eb1d8b ([#75](https://github.com/martinohmann/vecmap-rs/pull/75))
+- *(deps)* update actions/checkout action to v7.0.1
+- *(deps)* update actions/checkout digest to 3d3c42e
+
 ## [0.2.5](https://github.com/martinohmann/vecmap-rs/compare/v0.2.4...v0.2.5) - 2026-07-01
 
 ### Added
