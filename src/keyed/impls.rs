@@ -106,12 +106,17 @@ where
 {
     /// Constructs set from a vector of values.
     ///
+    /// When the input contains duplicate keys, the first insertion position is
+    /// kept and the last associated value wins — the same rule as
+    /// [`insert`][KeyedVecSet::insert], [`extend`][Extend::extend], and
+    /// [`FromIterator`].
+    ///
     /// **Note**: This conversion has a quadratic complexity because the
     /// conversion preserves order of elements while at the same time having to
     /// make sure no duplicate keys exist. To avoid it, sort and deduplicate
     /// the vector and use [`KeyedVecSet::from_vec_unchecked`] instead.
     fn from(mut vec: Vec<V>) -> Self {
-        crate::dedup(&mut vec, |rhs, lhs| rhs.key() == lhs.key());
+        crate::dedup_keep_last_value(&mut vec, |lhs, rhs| lhs.key() == rhs.key());
         // SAFETY: We've just deduplicated the elements.
         unsafe { Self::from_vec_unchecked(vec) }
     }
@@ -225,7 +230,39 @@ mod test {
         let set =
             KeyedVecSet::<i32, Entry>::from(vec![Entry(1, "a"), Entry(2, "b"), Entry(1, "c")]);
         assert_eq!(set.len(), 2);
-        assert_eq!(set[&1], Entry(1, "a"));
+        assert_eq!(set[&1], Entry(1, "c"));
+    }
+
+    fn set_via_inserts(entries: &[Entry]) -> KeyedVecSet<i32, Entry> {
+        let mut set = KeyedVecSet::new();
+        for entry in entries {
+            set.insert(entry.clone());
+        }
+        set
+    }
+
+    #[test]
+    fn constructor_parity_with_insert() {
+        let input = vec![Entry(1, "a"), Entry(2, "b"), Entry(1, "c")];
+        let expected = set_via_inserts(&[Entry(1, "a"), Entry(2, "b"), Entry(1, "c")]);
+
+        assert_eq!(KeyedVecSet::from(input.clone()), expected);
+        assert_eq!(input.into_iter().collect::<KeyedVecSet<_, _>>(), expected);
+        assert_eq!(
+            KeyedVecSet::from([Entry(1, "a"), Entry(2, "b"), Entry(1, "c")]),
+            expected
+        );
+        assert_eq!(expected.get(&1), Some(&Entry(1, "c")));
+        assert_eq!(expected.as_slice(), &[Entry(1, "c"), Entry(2, "b")]);
+    }
+
+    #[test]
+    fn extend_parity_with_insert() {
+        let mut via_extend = KeyedVecSet::new();
+        via_extend.extend(vec![Entry(1, "a"), Entry(2, "b"), Entry(1, "c")]);
+
+        let via_insert = set_via_inserts(&[Entry(1, "a"), Entry(2, "b"), Entry(1, "c")]);
+        assert_eq!(via_extend, via_insert);
     }
 
     #[test]

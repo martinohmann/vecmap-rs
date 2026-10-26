@@ -110,12 +110,32 @@ trait Entries {
     fn into_entries(self) -> Vec<Self::Entry>;
 }
 
-/// Deduplicate elements in an unsorted vector.
-fn dedup<T>(vec: &mut Vec<T>, eq_fn: impl Fn(&T, &T) -> bool) {
+/// Deduplicate elements in an unsorted vector, keeping the first occurrence of
+/// each equivalence class.
+fn dedup_keep_first<T>(vec: &mut Vec<T>, eq_fn: impl Fn(&T, &T) -> bool) {
     let mut out = 1;
     let len = vec.len();
     for i in 1..len {
         if (0..i).all(|j| !eq_fn(&vec[i], &vec[j])) {
+            vec.swap(out, i);
+            out += 1;
+        }
+    }
+    vec.truncate(out);
+}
+
+/// Deduplicate by equivalence, keeping the first occurrence's position but the
+/// last occurrence's value.
+fn dedup_keep_last_value<T>(vec: &mut Vec<T>, eq_fn: impl Fn(&T, &T) -> bool) {
+    if vec.len() <= 1 {
+        return;
+    }
+    let mut out = 1;
+    let len = vec.len();
+    for i in 1..len {
+        if let Some(j) = (0..out).find(|&j| eq_fn(&vec[i], &vec[j])) {
+            vec.swap(i, j);
+        } else {
             vec.swap(out, i);
             out += 1;
         }
@@ -136,10 +156,10 @@ unsafe fn transmute_vec<T, U>(mut vec: Vec<T>) -> Vec<U> {
 }
 
 #[test]
-fn test_dedup() {
+fn test_dedup_keep_first() {
     fn test(want: &[u32], arr: &[u32]) {
         let mut vec = arr.to_vec();
-        dedup(&mut vec, |i, j| i == j);
+        dedup_keep_first(&mut vec, |i, j| i == j);
         assert_eq!(want, vec.as_slice());
     }
 
@@ -149,6 +169,59 @@ fn test_dedup() {
     test(&[1], &[1, 1, 1]);
     test(&[3, 1, 2], &[3, 1, 2]);
     test(&[3, 1, 2], &[3, 1, 2, 1, 2, 3]);
+}
+
+#[test]
+fn test_dedup_keep_first_preserves_first_payload() {
+    #[derive(Clone, Debug)]
+    #[allow(dead_code)]
+    struct Item(i32, &'static str);
+
+    impl Eq for Item {}
+
+    impl PartialEq for Item {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+
+    let mut vec = Vec::from([Item(1, "first"), Item(2, "b"), Item(1, "second")]);
+    dedup_keep_first(&mut vec, |a, b| a == b);
+    assert_eq!(vec, [Item(1, "first"), Item(2, "b")]);
+}
+
+#[test]
+fn test_dedup_keep_last_value() {
+    fn test(want: &[(char, i32)], arr: &[(char, i32)]) {
+        let mut vec = arr.to_vec();
+        dedup_keep_last_value(&mut vec, |lhs, rhs| lhs.0 == rhs.0);
+        assert_eq!(want, vec.as_slice());
+    }
+
+    test(&[], &[]);
+    test(&[('a', 1)], &[('a', 1)]);
+    test(&[('a', 3)], &[('a', 1), ('a', 2), ('a', 3)]);
+    test(&[('a', 3), ('b', 2)], &[('a', 1), ('b', 2), ('a', 3)]);
+    test(&[('b', 2), ('a', 1)], &[('b', 2), ('a', 1)]);
+}
+
+#[test]
+fn test_dedup_keep_last_value_preserves_last_payload() {
+    #[derive(Clone, Debug)]
+    #[allow(dead_code)]
+    struct Entry(i32, &'static str);
+
+    impl Eq for Entry {}
+
+    impl PartialEq for Entry {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+
+    let mut vec = Vec::from([Entry(1, "a"), Entry(2, "b"), Entry(1, "c")]);
+    dedup_keep_last_value(&mut vec, |lhs, rhs| lhs.0 == rhs.0);
+    assert_eq!(vec, [Entry(1, "c"), Entry(2, "b")]);
 }
 
 // https://github.com/martinohmann/vecmap-rs/issues/18

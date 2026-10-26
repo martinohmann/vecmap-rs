@@ -105,12 +105,17 @@ where
 {
     /// Constructs map from a vector of `(key → value)` pairs.
     ///
+    /// When the input contains duplicate keys, the first insertion position is
+    /// kept and the last associated value wins — the same rule as
+    /// [`insert`][VecMap::insert], [`extend`][Extend::extend], and
+    /// [`FromIterator`].
+    ///
     /// **Note**: This conversion has a quadratic complexity because the
     /// conversion preserves order of elements while at the same time having to
     /// make sure no duplicate keys exist. To avoid it, sort and deduplicate
     /// the vector and use [`VecMap::from_vec_unchecked`] instead.
     fn from(mut vec: Vec<(K, V)>) -> Self {
-        crate::dedup(&mut vec, |rhs, lhs| rhs.0 == lhs.0);
+        crate::dedup_keep_last_value(&mut vec, |lhs, rhs| lhs.0 == rhs.0);
         // SAFETY: We've just deduplicated the elements.
         unsafe { Self::from_vec_unchecked(vec) }
     }
@@ -167,6 +172,37 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
+    extern crate alloc;
+    use alloc::vec;
+
+    fn map_via_inserts<'a>(pairs: &[(&'a str, i32)]) -> VecMap<&'a str, i32> {
+        let mut map = VecMap::new();
+        for &(key, value) in pairs {
+            map.insert(key, value);
+        }
+        map
+    }
+
+    #[test]
+    fn constructor_parity_with_insert() {
+        let input = vec![("a", 1), ("b", 2), ("a", 3)];
+        let expected = map_via_inserts(&[("a", 1), ("b", 2), ("a", 3)]);
+
+        assert_eq!(VecMap::from(input.clone()), expected);
+        assert_eq!(input.into_iter().collect::<VecMap<_, _>>(), expected);
+        assert_eq!(VecMap::from([("a", 1), ("b", 2), ("a", 3)]), expected);
+        assert_eq!(expected.get(&"a"), Some(&3));
+        assert_eq!(expected.as_slice(), &[("a", 3), ("b", 2)]);
+    }
+
+    #[test]
+    fn extend_parity_with_insert() {
+        let mut via_extend = VecMap::new();
+        via_extend.extend([("a", 1), ("b", 2), ("a", 3)]);
+
+        let via_insert = map_via_inserts(&[("a", 1), ("b", 2), ("a", 3)]);
+        assert_eq!(via_extend, via_insert);
+    }
 
     #[test]
     fn eq() {
