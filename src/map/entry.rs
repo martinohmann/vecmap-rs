@@ -181,6 +181,31 @@ impl<'a, K, V> Entry<'a, K, V> {
             Entry::Vacant(entry) => entry.insert(V::default()),
         }
     }
+
+    /// Sets the value of the entry, and returns an `OccupiedEntry`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    ///
+    /// let mut map: VecMap<&str, String> = VecMap::new();
+    /// let entry = map.entry("poneyland").insert_entry("hoho".to_string());
+    ///
+    /// assert_eq!(entry.key(), &"poneyland");
+    /// ```
+    pub fn insert_entry(self, value: V) -> OccupiedEntry<'a, K, V>
+    where
+        K: Clone,
+    {
+        match self {
+            Entry::Occupied(mut entry) => {
+                entry.insert(value);
+                entry
+            }
+            Entry::Vacant(entry) => entry.insert_entry(value),
+        }
+    }
 }
 
 /// A view into an occupied entry in a `VecMap`. It is part of the [`Entry`] enum.
@@ -538,5 +563,34 @@ impl<'a, K, V> VacantEntry<'a, K, V> {
     pub fn insert(self, value: V) -> &'a mut V {
         let index = self.map.push(self.key, value);
         &mut self.map[index]
+    }
+
+    /// Sets the value of the entry with the `VacantEntry`'s key,
+    /// and returns an `OccupiedEntry`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vecmap::VecMap;
+    /// use vecmap::map::Entry;
+    ///
+    /// let mut map: VecMap<&str, u32> = VecMap::new();
+    ///
+    /// if let Entry::Vacant(o) = map.entry("poneyland") {
+    ///     o.insert_entry(37);
+    /// }
+    /// assert_eq!(map["poneyland"], 37);
+    /// ```
+    pub fn insert_entry(self, value: V) -> OccupiedEntry<'a, K, V>
+    where
+        K: Clone,
+    {
+        let index = self.map.push(self.key.clone(), value);
+
+        OccupiedEntry {
+            map: self.map,
+            key: self.key,
+            index,
+        }
     }
 }
