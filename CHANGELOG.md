@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.1](https://github.com/martinohmann/vecmap-rs/compare/v0.3.0...v0.3.1) - 2026-10-29
+
+### Fixed
+
+- allow insert_at(len) when the key already exists ([#81](https://github.com/martinohmann/vecmap-rs/pull/81))
+
 ## [0.3.0](https://github.com/martinohmann/vecmap-rs/compare/v0.2.5...v0.3.0) - 2026-10-26
 
 ### Added
