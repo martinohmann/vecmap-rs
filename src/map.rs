@@ -1237,8 +1237,8 @@ where
     /// elements after it to the right.
     ///
     /// If an equivalent key already exists in the map: the key is removed from the map and the new
-    /// key-value pair is inserted at `index`. The old index and its value are returned inside
-    /// `Some((usize, _))`.
+    /// key-value pair is inserted at `index`, or at the end if `index == len`. The old index and
+    /// its value are returned inside `Some((usize, _))`.
     ///
     /// If no equivalent key existed in the map: the new key-value pair is
     /// inserted at position `index` and `None` is returned.

@@ -205,6 +205,24 @@ mod test {
     }
 
     #[test]
+    fn insert_at_existing_key() {
+        let mut map = VecMap::from([("a", 1), ("b", 2), ("c", 3)]);
+        assert_eq!(map.insert_at(3, "a", 4), Some((0, 1)));
+        assert_eq!(map.as_slice(), &[("b", 2), ("c", 3), ("a", 4)]);
+        assert_eq!(map.insert_at(3, "a", 5), Some((2, 4)));
+        assert_eq!(map.as_slice(), &[("b", 2), ("c", 3), ("a", 5)]);
+        assert_eq!(map.insert_at(1, "a", 6), Some((2, 5)));
+        assert_eq!(map.as_slice(), &[("b", 2), ("a", 6), ("c", 3)]);
+    }
+
+    #[test]
+    #[should_panic(expected = "should be <= len")]
+    fn insert_at_existing_key_out_of_bounds() {
+        let mut map = VecMap::from([("a", 1), ("b", 2)]);
+        map.insert_at(3, "a", 3);
+    }
+
+    #[test]
     fn eq() {
         assert_ne!(VecMap::from([("a", 1)]), VecMap::from([]));
         assert_ne!(VecMap::from([("a", 1)]), VecMap::from([("b", 2)]));
