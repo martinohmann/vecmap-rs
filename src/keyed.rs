@@ -1303,7 +1303,8 @@ where
     /// Insert a value at position `index` within the set, shifting all elements after it to the right.
     ///
     /// If an equivalent key already exists in the set: the key is removed from the old position and the new
-    /// value is inserted at `index`. The old index and its value are returned inside `Some((usize, V))`.
+    /// value is inserted at `index`, or at the end if `index == len`. The old index and its value are
+    /// returned inside `Some((usize, V))`.
     ///
     /// If no equivalent key existed in the set: the new value is inserted at position `index` and `None` is returned.
     ///
@@ -1331,6 +1332,13 @@ where
     pub fn insert_at(&mut self, index: usize, value: V) -> Option<(usize, V)> {
         let key = value.key();
         if let Some(old_index) = self.get_index_of(key) {
+            let len = self.len();
+            assert!(
+                index <= len,
+                "insertion index (is {index}) should be <= len (is {len})"
+            );
+            // Moving an existing value to `len` places it last.
+            let index = index.min(len - 1);
             let old_value = if old_index == index {
                 mem::replace(&mut self.base[index], value)
             } else {
