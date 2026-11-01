@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2](https://github.com/martinohmann/vecmap-rs/compare/v0.3.1...v0.3.2) - 2026-11-01
+
+### Other
+
+- *(deps)* update marcoieni/release-plz-action digest to f67a7e7 ([#83](https://github.com/martinohmann/vecmap-rs/pull/83))
+
 ## [0.3.1](https://github.com/martinohmann/vecmap-rs/compare/v0.3.0...v0.3.1) - 2026-10-29
 
 ### Fixed
